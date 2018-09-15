@@ -25,8 +25,33 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
+<div id="playerboard">
+    <div id="pnorth">
+      <div class="tableau tableau_N">
+        <div class="tableauname" style="color:#{COLOR_N}">
+          <h3>Who Are You?</h3>
+          </div>
+        <div class="doorcard1" id="doorcard_{PID_N}">
+        </div>
+      </div>
+    <div>
 
-Are you a Lady or a Tiger?
+    <div class="display whiteblock">
+        <div class="cluecard" id="cluecarddisplay">
+        </div>
+    </div>
+
+    <div id="psouth">
+      <div class="tableau tableau_S">
+        <div class="tableauname" style="color:#{COLOR_S}">
+          <h3>Who am I?</h3>
+        </div>
+        <div class="doorcard2" id="doorcard_{PID_S}">
+        </div>
+      </div>
+    <div>
+
+</div>
 
 
 <script type="text/javascript">

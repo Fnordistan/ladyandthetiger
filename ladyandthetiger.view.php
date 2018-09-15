@@ -2,7 +2,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * LadyAndTheTiger implementation : © <Your name here> <Your email address here>
+ * LadyAndTheTiger implementation : © David Edelstein david.edelstein@gmail.com>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -37,9 +37,32 @@
         $players = $this->game->loadPlayersBasicInfos();
         $players_nbr = count( $players );
 
-        /*********** Place your code below:  ************/
+        $template = self::getGameName() . "_" . self::getGameName();
+        
+        // Set PCOLOR to the current player color
+        // Set OCOLOR to other play
+        global $g_user;
+        $cplayer = $g_user->get_id();
+        $is_spectator = !array_key_exists($cplayer, $players);
+        
+        foreach ( $players as $player_id => $info ) {
+          $player_color = $players [$player_id] ['player_color'];
+          /** Current player is to the South, other player is North */
+          if ($is_spectator) { // may be not set if spectator
+              $this->tpl ['COLOR_S'] = 'ffffff';        
+              $this->tpl ['COLOR_N'] = '000000';
+          } else  if ($player_id == $cplayer) {
+              $this->tpl ['COLOR_S'] = $player_color;        
+              $this->tpl ['PID_S'] = $player_id;        
+          } else {
+              $this->tpl ['COLOR_N'] = $player_color;        
+              $this->tpl ['PID_N'] = $player_id;        
+          }
+        }
+        // this will make our My Hand text translatable
+        $this->tpl['MY_HAND'] = self::_("My hand");
 
-
+        // Display a specific number / string
         /*
         
         // Examples: set the value of some element defined in your tpl file like this: {MY_VARIABLE_ELEMENT}

@@ -65,6 +65,57 @@
     }
 */
 
+#playerboard {
+    position: relative;
+}
 
+.display {
+    position: relative;
+    left: 20px;
+    width: 1300px;
+    height: 339px;
+}
 
+.ptableauname {
+    font-weight: bold;
+}
 
+.tableau {
+    position: relative;
+    text-align: center;
+    width: 235px;
+    height: 420px;
+    left: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/** North will be other player */
+.tableau_N {
+    top: 0px;
+}
+/** South will be current player */
+.tableau_S {
+    bottom: 0px;
+}
+
+.doorcard1 {
+    margin-top: 5px;
+    width: 233px;
+    height: 400px;
+    background-image: url('img/tigerred.jpg'); /* temp hack to see it */
+}
+
+.doorcard2 {
+    margin-top: 5px;
+    width: 233px;
+    height: 400px;
+    background-image: url('img/ladyblue.jpg'); /* temp hack to see it */
+}
+
+.cluecard {
+    margin-top: 5px;
+    width: 977px;
+    height: 339px;
+    background-image: url('img/ladytigers.jpg'); /* temp hack to see it */
+}
