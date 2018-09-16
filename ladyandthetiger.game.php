@@ -137,10 +137,10 @@ class LadyAndTheTiger extends Table
         $result['players'] = self::getCollectionFromDb( $sql );
 		
         // Cards in player hand      
-//        $result['hand'] = $this->cards->getCardsInLocation( 'hand', $player_id );
+        $result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
   
         // Cards played on the table
-//        $result['cardsontable'] = $this->cards->getCardsInLocation( 'cardsontable' );
+        $result['cardsontable'] = $this->cards->getCardsInLocation( 'cardsontable' );
   
         return $result;
     }
@@ -223,21 +223,20 @@ class LadyAndTheTiger extends Table
 			self::setGameStateValue('collector', $guesser);
 		}
 		// reshuffle the Clue and Door cards
-//		$this->cards->moveAllCardsInLocation(null, 'deck');
-//		$this->cards->shuffle('deck');
-//		$this->cards->moveAllCardsInLocation(null, 'doordeck');
-//		$this->cards->shuffle('doordeck');
+		$this->cards->moveAllCardsInLocation(null, 'deck');
+		$this->cards->shuffle('deck');
+		$this->cards->moveAllCardsInLocation(null, 'doordeck');
+		$this->cards->shuffle('doordeck');
 		
- //       $players = self::loadPlayersBasicInfos();
-//        foreach( $players as $player_id => $player )
-//        {
-//            $door = $this->cards->pickCard( 'doordeck', $player_id );
+        $players = self::loadPlayersBasicInfos();
+        foreach( $players as $player_id => $player ) {
+            $door = $this->cards->pickCard( 'doordeck', $player_id );
             
-            // Notify player about his cards
-//            self::notifyPlayer( $player_id, 'newHand', '', array( 
-//                'cards' => $door
-//            ) );
-//        }
+            // Notify player of his Role
+            self::notifyPlayer( $player_id, 'newRole', "", array( 
+                'role' => $door
+            ) );
+        }
 		
         $this->gamestate->nextState( "" );
 	}

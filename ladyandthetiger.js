@@ -18,7 +18,8 @@
 define([
     "dojo","dojo/_base/declare",
     "ebg/core/gamegui",
-    "ebg/counter"
+    "ebg/counter",
+    "ebg/stock"
 ],
 function (dojo, declare) {
     return declare("bgagame.ladyandthetiger", ebg.core.gamegui, {
@@ -26,9 +27,11 @@ function (dojo, declare) {
             console.log('ladyandthetiger constructor');
               
             // Here, you can init the global variables of your user interface
-            // Example:
-            // this.myGlobalValue = 0;
-
+            this.playerHand = null;
+            this.cardwidth = 229;
+            this.cardheight = 400;
+            // five images in doorcard sprite
+            this.playerHand.image_items_per_row = 5;
         },
         
         /*
@@ -56,7 +59,9 @@ function (dojo, declare) {
                 // TODO: Setting up players boards if needed
             }
             
-            // TODO: Set up your game interface here, according to "gamedatas"
+            // Player hand
+            this.playerHand = new ebg.stock();
+            this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
             
  
             // Setup game notifications to handle (see "setupNotifications" method below)
@@ -149,66 +154,6 @@ function (dojo, declare) {
         },        
 
         ///////////////////////////////////////////////////
-        //// Utility methods
-        
-        /*
-        
-            Here, you can defines some utility methods that you can use everywhere in your javascript
-            script.
-        
-        */
-
-
-        ///////////////////////////////////////////////////
-        //// Player's action
-        
-        /*
-        
-            Here, you are defining methods to handle player's action (ex: results of mouse click on 
-            game objects).
-            
-            Most of the time, these methods:
-            _ check the action is possible at this game state.
-            _ make a call to the game server
-        
-        */
-        
-        /* Example:
-        
-        onMyMethodToCall1: function( evt )
-        {
-            console.log( 'onMyMethodToCall1' );
-            
-            // Preventing default browser reaction
-            dojo.stopEvent( evt );
-
-            // Check that this action is possible (see "possibleactions" in states.inc.php)
-            if( ! this.checkAction( 'myAction' ) )
-            {   return; }
-
-            this.ajaxcall( "/ladyandthetiger/ladyandthetiger/myAction.html", { 
-                                                                    lock: true, 
-                                                                    myArgument1: arg1, 
-                                                                    myArgument2: arg2,
-                                                                    ...
-                                                                 }, 
-                         this, function( result ) {
-                            
-                            // What to do after the server call if it succeeded
-                            // (most of the time: nothing)
-                            
-                         }, function( is_error) {
-
-                            // What to do after the server call in anyway (success or failure)
-                            // (most of the time: nothing)
-
-                         } );        
-        },        
-        
-        */
-
-        
-        ///////////////////////////////////////////////////
         //// Reaction to cometD notifications
 
         /*
@@ -223,11 +168,8 @@ function (dojo, declare) {
         setupNotifications: function()
         {
             console.log( 'notifications subscriptions setup' );
-            
-            // TODO: here, associate your game notifications with local methods
-            
-            // Example 1: standard notification handling
-            // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
+            // here, associate your game notifications with local methods
+            dojo.subscribe( 'newRole', this, "notif_newRole" );
             
             // Example 2: standard notification handling + tell the user interface to wait
             //            during 3 seconds after calling the method in order to let the players
@@ -237,21 +179,24 @@ function (dojo, declare) {
             // 
         },  
         
-        // TODO: from this point and below, you can write your game notifications handling methods
-        
-        /*
-        Example:
-        
-        notif_cardPlayed: function( notif )
+        // game notification handling methods
+
+        /**
+         * Called when a player is a given a new Door (role) card
+         */
+        notif_newRole: function( notif )
         {
-            console.log( 'notif_cardPlayed' );
-            console.log( notif );
-            
-            // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-            
-            // TODO: play the card in the user interface.
-        },    
+            this.playerHand.removeAll();
+            // should only ever be one Role card given!
+            if (notif.args.cards.length != 1) {
+                throw new BgaVisibleSystemException ( "received wrong number of Door cards (should be 1, received "+notif.args.cards.length+")"); 
+            }
+            var card = notif.args.cards[0];
+            var type = card.type;
+            var cardrole = card.type_arg;
+            this.playerHand.addToStockWithId( this.getCardUniqueId( type, cardrole ), card.id );
+            throw new BgaVisibleSystemException ( "My door card is " + type + " => " + cardrole); 
+        },
         
-        */
    });             
 });

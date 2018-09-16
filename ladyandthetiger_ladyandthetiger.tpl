@@ -26,15 +26,15 @@
 -->
 
 <div id="playerboard">
-    <div id="pnorth">
-      <div class="tableau tableau_N">
-        <div class="tableauname" style="color:#{COLOR_N}">
-          <h3>{ROLE_N}</h3>
-          </div>
-        <div class="doorcard1" id="doorcard_{PID_N}">
-        </div>
+  <div id="pnorth">
+    <div class="tableau tableau_N whiteblock">
+      <div class="tableauname" style="color:#{COLOR_N}">
+        <h3>{ROLE_N}</h3>
       </div>
-    <div>
+      <div id="myhand">
+      </div>
+    </div>
+  </div>
 
     <div class="display whiteblock">
         <div class="cluecard" id="cluecarddisplay">
@@ -42,7 +42,7 @@
     </div>
 
     <div id="psouth">
-      <div class="tableau tableau_S">
+      <div class="tableau tableau_S whiteblock">
         <div class="tableauname" style="color:#{COLOR_S}">
           <h3>{ROLE_S}</h3>
         </div>
