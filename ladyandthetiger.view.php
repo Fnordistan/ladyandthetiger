@@ -31,6 +31,7 @@
     function getGameName() {
         return "ladyandthetiger";
     }    
+
   	function build_page( $viewArgs )
   	{		
   	    // Get players & players number
@@ -39,24 +40,45 @@
 
         $template = self::getGameName() . "_" . self::getGameName();
         
-        // Set PCOLOR to the current player color
-        // Set OCOLOR to other play
+        // Set COLOR_S to the current player color
+        // Set COLOR_N to other play
         global $g_user;
         $cplayer = $g_user->get_id();
         $is_spectator = !array_key_exists($cplayer, $players);
-        
+        $guesser = $this->game->getGameStateValue('guesser');
+ 
         foreach ( $players as $player_id => $info ) {
           $player_color = $players [$player_id] ['player_color'];
-          /** Current player is to the South, other player is North */
+          /** Current player (i.e., "Me" - NOT Active Player!) is to the South, other player is North */
           if ($is_spectator) { // may be not set if spectator
-              $this->tpl ['COLOR_S'] = 'ffffff';        
+              $this->tpl ['COLOR_S'] = 'ffffff';
               $this->tpl ['COLOR_N'] = '000000';
-          } else  if ($player_id == $cplayer) {
-              $this->tpl ['COLOR_S'] = $player_color;        
-              $this->tpl ['PID_S'] = $player_id;        
+              // for spectators, put the Collector North and the Guesser South
+              if ($guesser == $player_id) {
+                 $this->tpl['ROLE_N'] = "Collector";
+                 $this->tpl['ROLE_S'] = "Guesser";
+              }
           } else {
-              $this->tpl ['COLOR_N'] = $player_color;        
-              $this->tpl ['PID_N'] = $player_id;        
+            // am I the guesser?
+            $is_guesser = ($guesser == $cplayer);
+            if ($player_id == $cplayer) {
+              // I am current player - put me to the South
+              $this->tpl ['COLOR_S'] = $player_color;        
+              $this->tpl ['PID_S'] = $player_id;
+              if ($is_guesser) {
+                $this->tpl['ROLE_S'] = "Guesser";
+              } else {
+                $this->tpl['ROLE_S'] = "Collector";
+              }
+            } else {
+                $this->tpl ['COLOR_N'] = $player_color;        
+                $this->tpl ['PID_N'] = $player_id;        
+                if ($is_guesser) {
+                  $this->tpl['ROLE_N'] = "Collector";
+                } else {
+                  $this->tpl['ROLE_N'] = "Guesser";
+                }
+            }
           }
         }
         // this will make our My Hand text translatable

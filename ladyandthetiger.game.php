@@ -168,53 +168,7 @@ class LadyAndTheTiger extends Table
 //////////// Utility functions
 ////////////    
 
-	/**
-	 * Switch Collector and Guesser
-	 */
-    function stAssignRoles()
-    {
-		// no one has scored, this is the first turn and we don't need to switch
-		if (self::getGameProgression() > 0) {
-			$collector = self::getGameStateValue('collector');
-			$guesser = self::getGameStateValue('guesser');
-			self::setGameStateValue('guesser', $collector);
-			self::setGameStateValue('collector', $guesser);
-		}
-		// reshuffle the Clue and Door cards
-//		$this->cards->moveAllCardsInLocation(null, 'deck');
-//		$this->cards->shuffle('deck');
-//		$this->cards->moveAllCardsInLocation(null, 'doordeck');
-//		$this->cards->shuffle('doordeck');
-		
- //       $players = self::loadPlayersBasicInfos();
-//        foreach( $players as $player_id => $player )
-//        {
-//            $door = $this->cards->pickCard( 'doordeck', $player_id );
-            
-            // Notify player about his cards
-//            self::notifyPlayer( $player_id, 'newHand', '', array( 
-//                'cards' => $door
-//            ) );
-//        }
-		
-        $this->gamestate->nextState( "" );
-	}
 
-	/**
-	 * Args passed to the STATE_PLAYER_ACTION state in states.inc.php
-	 */
-	function argGetRoles() {
-		$current_player_id = self::getCurrentPlayerId();
-		$guesser = self::getGameStateValue('guesser');
-		$result = array();
-		if ($current_player_id == $guesser) {
-			$result['actrole'] = "Guesser";
-		} else {
-			$result['actrole'] = "Collector";
-		}
-
-        return $result;
-	}
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
@@ -256,28 +210,55 @@ class LadyAndTheTiger extends Table
 //////////// Game state arguments
 ////////////
 
-    /*
-        Here, you can create methods defined as "game state arguments" (see "args" property in states.inc.php).
-        These methods function is to return some additional information that is specific to the current
-        game state.
-    */
-
-    /*
-    
-    Example for game state "MyGameState":
-    
-    function argMyGameState()
+	/**
+	 * Switch Collector and Guesser
+	 */
+    function stAssignRoles()
     {
-        // Get some values from the current game situation in database...
-    
-        // return values:
-        return array(
-            'variable1' => $value1,
-            'variable2' => $value2,
-            ...
-        );
-    }    
-    */
+		// no one has scored, this is the first turn and we don't need to switch
+		if (self::getGameProgression() > 0) {
+			$collector = self::getGameStateValue('collector');
+			$guesser = self::getGameStateValue('guesser');
+			self::setGameStateValue('guesser', $collector);
+			self::setGameStateValue('collector', $guesser);
+		}
+		// reshuffle the Clue and Door cards
+//		$this->cards->moveAllCardsInLocation(null, 'deck');
+//		$this->cards->shuffle('deck');
+//		$this->cards->moveAllCardsInLocation(null, 'doordeck');
+//		$this->cards->shuffle('doordeck');
+		
+ //       $players = self::loadPlayersBasicInfos();
+//        foreach( $players as $player_id => $player )
+//        {
+//            $door = $this->cards->pickCard( 'doordeck', $player_id );
+            
+            // Notify player about his cards
+//            self::notifyPlayer( $player_id, 'newHand', '', array( 
+//                'cards' => $door
+//            ) );
+//        }
+		
+        $this->gamestate->nextState( "" );
+	}
+
+
+	/**
+	 * Args passed to the STATE_PLAYER_ACTION state in states.inc.php
+	 */
+	function argGetRoles() {
+        $player_id = self::getActivePlayerId();
+		$guesser = self::getGameStateValue('guesser');
+		$result = array();
+		if ($player_id == $guesser) {
+			$result['actrole'] = "Guesser";
+		} else {
+			$result['actrole'] = "Collector";
+		}
+
+        return $result;
+	}
+
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions
