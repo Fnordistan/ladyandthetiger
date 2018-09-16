@@ -49,55 +49,92 @@
 
 //    !! It is not a good idea to modify this file when a game is running !!
 
+// define contants for state ids
+if (!defined('STATE_SETUP')) { // ensure this block is only invoked once, since it is included multiple times
+   define("STATE_SETUP", 1);
+   define("STATE_ASSIGN_ROLES", 2);
+   define("STATE_PLAYER_ACTION", 10);
+   define("STATE_COLLECT_CARD", 20);
+   define("STATE_DISCARD_CARD", 30);
+   define("STATE_GUESSER_ACTION", 31);
+   define("STATE_SCORE", 40);
+   define("STATE_END_GAME", 99);
+}
+ 
  
 $machinestates = array(
 
     // The initial state. Please do not modify.
-    1 => array(
+    STATE_SETUP => array(
         "name" => "gameSetup",
-        "description" => "",
+        "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
+        "transitions" => array( "" => STATE_ASSIGN_ROLES )
     ),
     
-    // Note: ID=2 => your first state
+    // Assign/Switch Roles between Collector and Guesser
+    STATE_ASSIGN_ROLES => array(
+    		"name" => "assignRoles",
+    		"description" => clienttranslate('Reassigning roles'),
+    		"descriptionmyturn" => clienttranslate('Reassigning roles'),
+    		"type" => "game",
+    		"action" => "stAssignRoles",
+         "updateGameProgression" => true,   
+    		"transitions" => array( "" => STATE_PLAYER_ACTION )
+    ),
 
-    2 => array(
-    		"name" => "playerTurn",
-    		"description" => clienttranslate('${actplayer} must play a card or pass'),
-    		"descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
+    // player must Collect or Discard, according to role
+    STATE_PLAYER_ACTION => array(
+    		"name" => "playerAction",
+    		"description" => clienttranslate('${actplayer} is the ${actrole}'),
+    		"descriptionmyturn" => clienttranslate('${you} are the ${actrole}'),
     		"type" => "activeplayer",
-    		"possibleactions" => array( "playCard", "pass" ),
-    		"transitions" => array( "playCard" => 2, "pass" => 2 )
+         "args" => "argGetRoles",
+    		"possibleactions" => array( "collectCard", "discardCard" ),
+    		"transitions" => array( "collectCard" => STATE_COLLECT_CARD, "discardCard" => STATE_DISCARD_CARD )
     ),
-    
-/*
-    Examples:
-    
-    2 => array(
-        "name" => "nextPlayer",
-        "description" => '',
-        "type" => "game",
-        "action" => "stNextPlayer",
-        "updateGameProgression" => true,   
-        "transitions" => array( "endGame" => 99, "nextPlayer" => 10 )
-    ),
-    
-    10 => array(
-        "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must play a card or pass'),
-        "descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-        "type" => "activeplayer",
-        "possibleactions" => array( "playCard", "pass" ),
-        "transitions" => array( "playCard" => 2, "pass" => 2 )
-    ), 
 
-*/    
-   
+    // When a card has been collected by the Collector
+    STATE_COLLECT_CARD => array(
+    		"name" => "collectCard",
+    		"description" => '',
+    		"type" => "game",
+    		"action" => "stCollectCard",
+    		"transitions" => array( "score" => STATE_SCORE, "nextPlayer" => STATE_PLAYER_ACTION )
+    ),
+
+    // When a card has been discarded by the Guesser
+    STATE_DISCARD_CARD => array(
+    		"name" => "discardCard",
+    		"description" => '',
+    		"type" => "game",
+    		"action" => "stDiscardCard",
+    		"transitions" => array( "guesser" => STATE_GUESSER_ACTION )
+    ),
+
+    // player must Collect or Discard, according to role
+    STATE_GUESSER_ACTION => array(
+    		"name" => "guesserAction",
+    		"description" => clienttranslate('${actplayer} may Guess, Score, or Pass'),
+    		"descriptionmyturn" => clienttranslate('${you} must Guess, Score, or Pass'),
+    		"type" => "activeplayer",
+    		"possibleactions" => array( "guess", "score", "pass" ),
+    		"transitions" => array( "pass" => STATE_PLAYER_ACTION, "zombiePass" => STATE_PLAYER_ACTION, "guess" => STATE_SCORE, "score" => STATE_SCORE )
+    ),
+
+    // When a card has been discarded by the Guesser
+    STATE_SCORE => array(
+    		"name" => "score",
+    		"description" => '',
+    		"type" => "game",
+    		"action" => "stScore",
+    		"transitions" => array( "nextRound" => STATE_ASSIGN_ROLES, "endGame" => STATE_END_GAME )
+    ),
+    
     // Final state.
     // Please do not modify.
-    99 => array(
+    STATE_END_GAME => array(
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",
