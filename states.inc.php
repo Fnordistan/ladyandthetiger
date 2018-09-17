@@ -80,7 +80,6 @@ $machinestates = array(
     		"descriptionmyturn" => clienttranslate('Reassigning roles'),
     		"type" => "game",
     		"action" => "stAssignRoles",
-         "updateGameProgression" => true,   
     		"transitions" => array( "" => STATE_PLAYER_ACTION )
     ),
 
@@ -129,6 +128,7 @@ $machinestates = array(
     		"description" => '',
     		"type" => "game",
     		"action" => "stScore",
+         "updateGameProgression" => true,   
     		"transitions" => array( "nextRound" => STATE_ASSIGN_ROLES, "endGame" => STATE_END_GAME )
     ),
     

@@ -227,38 +227,6 @@ class LadyAndTheTiger extends Table
 ////////////
 
 	/**
-	 * Switch Collector and Guesser
-	 */
-    function stAssignRoles()
-    {
-		// no one has scored, this is the first turn and we don't need to switch
-		if (self::getGameProgression() > 0) {
-			$collector = self::getGameStateValue('collector');
-			$guesser = self::getGameStateValue('guesser');
-			self::setGameStateValue('guesser', $collector);
-			self::setGameStateValue('collector', $guesser);
-		}
-		// reshuffle the Clue and Door cards
-		$this->cards->moveAllCardsInLocation(null, 'deck');
-		$this->cards->shuffle('deck');
-		$this->cards->moveAllCardsInLocation(null, 'doordeck');
-		$this->cards->shuffle('doordeck');
-		
-        $players = self::loadPlayersBasicInfos();
-        foreach( $players as $player_id => $player ) {
-            $door = $this->cards->pickCard( 'doordeck', $player_id );
-            
-            // Notify player of his Role
-            self::notifyPlayer( $player_id, 'newRole', "", array( 
-                'role' => $door
-            ) );
-        }
-		
-        $this->gamestate->nextState( "" );
-	}
-
-
-	/**
 	 * Args passed to the STATE_PLAYER_ACTION state in states.inc.php
 	 */
 	function argGetRoles() {
@@ -279,23 +247,40 @@ class LadyAndTheTiger extends Table
 //////////// Game state actions
 ////////////
 
-    /*
-        Here, you can create methods defined as "game state actions" (see "action" property in states.inc.php).
-        The action method of state X is called everytime the current game state is set to X.
-    */
-    
-    /*
-    
-    Example for game state "MyGameState":
+	/**
+	 * Give each players a new Door card.
+	 */
+    function stAssignRoles() {
+		// reshuffle the Clue and Door cards
+		$this->cards->moveAllCardsInLocation(null, 'deck');
+		$this->cards->moveAllCardsInLocation(null, 'doordeck');
+		$this->cards->shuffle('deck');
+		$this->cards->shuffle('doordeck');
+		
+        $players = self::loadPlayersBasicInfos();
+        foreach( $players as $player_id => $player ) {
+            $door = $this->cards->pickCard( 'doordeck', $player_id );
+            
+            // Notify player of his Role
+            self::notifyPlayer( $player_id, 'newRole', '', array( 
+                'cards' => $door
+            ) );
+        }
+		
+        $this->gamestate->nextState( "" );
+	}
 
-    function stMyGameState()
-    {
-        // Do some stuff ...
-        
-        // (very often) go to another gamestate
-        $this->gamestate->nextState( 'some_gamestate_transition' );
-    }    
-    */
+	/**
+	 * Happens when Scoring - switch Collector and Guesser
+	 */
+    function stScore() {
+		// switch collector and guesser
+		$collector = self::getGameStateValue('collector');
+		$guesser = self::getGameStateValue('guesser');
+		self::setGameStateValue('guesser', $collector);
+		self::setGameStateValue('collector', $guesser);
+	}
+	
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie

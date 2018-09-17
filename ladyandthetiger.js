@@ -25,13 +25,13 @@ define([
 /**
  * For Door cards (door, bl, rl, bt, rt), add these numbers to get the card
  */
-const DOORVAL = 0;
-const LADYVAL = 1;
-const TIGERVAL = 3;
-const BLUEVAL = 0;
-const REDVAL = 1;
-const REDBLUEVAL = 5;
-const LADYTIGERVAL = 6;
+//const DOORVAL = 0;
+//const LADYVAL = 1;
+//const TIGERVAL = 3;
+//const BLUEVAL = 0;
+//const REDVAL = 1;
+//const REDBLUEVAL = 5;
+//const LADYTIGERVAL = 6;
 
 function (dojo, declare) {
     return declare("bgagame.ladyandthetiger", ebg.core.gamegui, {
@@ -42,8 +42,6 @@ function (dojo, declare) {
             this.playerHand = null;
             this.cardwidth = 229;
             this.cardheight = 400;
-            // five images in doorcard sprite
-            this.playerHand.image_items_per_row = 5;
         },
         
         /*
@@ -59,8 +57,7 @@ function (dojo, declare) {
             "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
         */
         
-        setup: function( gamedatas )
-        {
+        setup: function( gamedatas ) {
             console.log( "Starting game setup" );
             
             // Setting up player boards
@@ -74,15 +71,14 @@ function (dojo, declare) {
             this.playerHand = new ebg.stock();
             this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
             this.playerHand.image_items_per_row = 7;
-            dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
-    
+            //dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
+            
             // create the door cards - they actually have values of 0 to 5
             for (var i = 0; i < 5; i++) {
               this.playerHand.addItemType( i, i, g_gamethemeurl+'img/door_cards.jpg', i );
             }
             
- 
-            // Setup game notifications to handle (see "setupNotifications" method below)
+            //// Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
 
             console.log( "Ending game setup" );
@@ -208,8 +204,8 @@ function (dojo, declare) {
             // should only ever be one Role card given!
             if (notif.args.cards.length != 1) {
                 throw new BgaVisibleSystemException ( "received wrong number of Door cards (should be 1, received "+notif.args.cards.length+")"); 
-            }
-            var card = notif.args.cards[0];
+           }
+           var card = notif.args.cards[0];
             var type = card.type;
             var cardrole = card.type_arg;
             this.playerHand.addToStockWithId( this.getCardUniqueId( type, cardrole ), card.id );
