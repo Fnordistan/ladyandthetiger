@@ -77,13 +77,16 @@ function (dojo, declare) {
               this.playerHand.addItemType( i, i, g_gamethemeurl+'img/door_cards.png', i );
             }
             
-            var door = this.gamedatas.hand[0];
-            if (door) {
-               this.playerHand.addToStockWithId( door.type_arg, door.id );
-               console.log("player has card " + this.getRoleForCard( door.type_arg ) );
-            } else {
-                console.log("no role assigned yet");
+            for (var c in this.gamedatas.hand) {
+                var door = this.gamedatas.hand[c];
+                if (door) {
+                   this.playerHand.addToStockWithId( door.type_arg, door.id );
+                   console.log("player has card " + this.getRoleForCard( door.type_arg ) + "(" + door.type_arg + ")");
+                } else {
+                    console.log("no role assigned yet");
+                }
             }
+            
 
             
             //// Setup game notifications to handle (see "setupNotifications" method below)
@@ -97,20 +100,21 @@ function (dojo, declare) {
        
         // Get the role according to a card's value
         getRoleForCard: function( value ) {
+            console.log("checking value " + value);
             switch(value) {
-                case DOORVAL:
+                case 0:
                     return "Door";
-                case LADYVAL+REDVAL:
+                case 1:
                     return "Red Lady";
-                case LADYVAL+BLUEVAL:
+                case 2:
                     return "Blue Lady";
-                case TIGERVAL+REDVAL:
+                case 3:
                     return "Red Tiger";
-                case TIGERVAL+BLUEVAL:
+                case 4:
                     return "Blue Tiger";
-                case REDBLUEVAL:
+                case 5:
                     return "Red/Blue";
-                case LADYTIGERVAL:
+                case 6:
                     return "Lady/Tiger";
             }
         },
@@ -230,6 +234,7 @@ function (dojo, declare) {
          */
         notif_newRole: function( notif )
         {
+            console.log("notifying of new role");
             this.playerHand.removeAll();
             // should only ever be one Role card given!
             if (notif.args.cards.length != 1) {
