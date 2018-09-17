@@ -112,7 +112,7 @@ class LadyAndTheTiger extends Table
 			$doorcards[] = array( 'type' => DOORCARD, 'type_arg' => $ct, 'nbr' => 1);
 			$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => $ct, 'nbr' => 3);
 		}
-		$doorcards[] = array('type' => DOORCARD, 'type_arg' => DOORVAL, 'nbr' => 1);
+		//$doorcards[] = array('type' => DOORCARD, 'type_arg' => DOORVAL, 'nbr' => 1);
 		$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => REDBLUEVAL, 'nbr' => 1);
 		$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => LADYTIGERVAL, 'nbr' => 1);
 		
@@ -263,7 +263,7 @@ class LadyAndTheTiger extends Table
             
             // Notify player of his Role
             self::notifyPlayer( $player_id, 'newRole', '', array( 
-                'cards' => $door
+                'hand' => $door
             ) );
         }
 		

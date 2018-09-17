@@ -14,6 +14,13 @@
  * In this file, you are describing the logic of your user interface, in Javascript language.
  *
  */
+const DOORVAL = 0;
+const LADYVAL = 1;
+const TIGERVAL = 3;
+const BLUEVAL = 0;
+const REDVAL = 1;
+const REDBLUEVAL = 5;
+const LADYTIGERVAL = 6;
 
 define([
     "dojo","dojo/_base/declare",
@@ -25,14 +32,6 @@ define([
 /**
  * For Door cards (door, bl, rl, bt, rt), add these numbers to get the card
  */
-//const DOORVAL = 0;
-//const LADYVAL = 1;
-//const TIGERVAL = 3;
-//const BLUEVAL = 0;
-//const REDVAL = 1;
-//const REDBLUEVAL = 5;
-//const LADYTIGERVAL = 6;
-
 function (dojo, declare) {
     return declare("bgagame.ladyandthetiger", ebg.core.gamegui, {
         constructor: function(){
@@ -75,15 +74,46 @@ function (dojo, declare) {
             
             // create the door cards - they actually have values of 0 to 5
             for (var i = 0; i < 5; i++) {
-              this.playerHand.addItemType( i, i, g_gamethemeurl+'img/door_cards.jpg', i );
+              this.playerHand.addItemType( i, i, g_gamethemeurl+'img/door_cards.png', i );
             }
+            
+            var door = this.gamedatas.hand[0];
+            if (door) {
+               this.playerHand.addToStockWithId( door.type_arg, door.id );
+               console.log("player has card " + this.getRoleForCard( door.type_arg ) );
+            } else {
+                console.log("no role assigned yet");
+            }
+
             
             //// Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
 
             console.log( "Ending game setup" );
         },
+
+        ///////////////////////////////////////////////////
+        //// Utility methods
        
+        // Get the role according to a card's value
+        getRoleForCard: function( value ) {
+            switch(value) {
+                case DOORVAL:
+                    return "Door";
+                case LADYVAL+REDVAL:
+                    return "Red Lady";
+                case LADYVAL+BLUEVAL:
+                    return "Blue Lady";
+                case TIGERVAL+REDVAL:
+                    return "Red Tiger";
+                case TIGERVAL+BLUEVAL:
+                    return "Blue Tiger";
+                case REDBLUEVAL:
+                    return "Red/Blue";
+                case LADYTIGERVAL:
+                    return "Lady/Tiger";
+            }
+        },
 
         ///////////////////////////////////////////////////
         //// Game & client states
