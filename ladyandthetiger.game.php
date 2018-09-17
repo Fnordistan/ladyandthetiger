@@ -19,6 +19,20 @@
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
+/**
+ * Add these values for the index to a card
+ */
+define('DOORVAL', 0);
+define('LADYVAL', 1);
+define('TIGERVAL', 3);
+define('BLUEVAL', 0);
+define('REDVAL', 1);
+define('REDBLUEVAL', 5);
+define('LADYTIGERVAL', 6);
+
+// type values
+define ('DOORCARD', 1);
+define('CLUECARD', 2);
 
 class LadyAndTheTiger extends Table
 {
@@ -86,19 +100,21 @@ class LadyAndTheTiger extends Table
 		$doorcards = array();
 		$cluecards = array();
 		// Door cards = type 1, Clue cards = type 2
-		// 11 red lady
-		// 12 red tiger
-		// 21 blue lady
-		// 22 blue tiger
-		// 30 red/blue
-		// 03 lady/tiger
-		$cardvals = array(11, 12, 21, 22);
+		// 0 = Door (Hidden)
+		// 1 = Blue Lady
+		// 2 = Red Lady
+		// 3 = Blue Tiger
+		// 4 = Red Tiger
+		// 5 = Red/Blue
+		// 6 = Lady/Tiger
+		$cardvals = array(BLUEVAL+LADYVAL, REDVAL+LADYVAL, BLUEVAL+TIGERVAL, REDVAL+TIGERVAL);
 		foreach ($cardvals as $ct) {
-			$doorcards[] = array( 'type' => 1, 'type_arg' => $ct, 'nbr' => 1);
-			$cluecards[] = array( 'type' => 2, 'type_arg' => $ct, 'nbr' => 3);
+			$doorcards[] = array( 'type' => DOORCARD, 'type_arg' => $ct, 'nbr' => 1);
+			$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => $ct, 'nbr' => 3);
 		}
-		$cluecards[] = array( 'type' => 2, 'type_arg' => 30, 'nbr' => 1);
-		$cluecards[] = array( 'type' => 2, 'type_arg' => 03, 'nbr' => 1);
+		$doorcards[] = array('type' => DOORCARD, 'type_arg' => DOORVAL, 'nbr' => 1);
+		$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => REDBLUEVAL, 'nbr' => 1);
+		$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => LADYTIGERVAL, 'nbr' => 1);
 		
         $this->cards->createCards( $cluecards, 'deck' );      
         $this->cards->createCards( $doorcards, 'doordeck' );      
@@ -136,7 +152,7 @@ class LadyAndTheTiger extends Table
         $sql = "SELECT player_id id, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
 		
-        // Cards in player hand      
+        // The card in the player's hand      
         $result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
   
         // Cards played on the table
