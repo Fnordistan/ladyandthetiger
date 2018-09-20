@@ -76,11 +76,11 @@
     height: 339px;
 }
 
-.ptableauname {
+.rolename {
     font-weight: bold;
 }
 
-.tableau {
+.hand {
     position: relative;
     text-align: center;
     width: 235px;
@@ -91,12 +91,22 @@
 }
 
 /** North will be other player */
-.tableau_N {
+#_N {
     top: 0px;
 }
+
 /** South will be current player */
-.tableau_S {
+#_S {
     bottom: 0px;
+}
+
+/** This should be put to the right of the Collector's Door card. */
+.tableau {
+   height: 420px;
+   display: inline-block;
+   margin-top: 10px;
+   margin-bottom: 10px;
+   border: 1px solid blue;
 }
 
 .doorcard {

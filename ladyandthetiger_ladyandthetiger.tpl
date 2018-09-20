@@ -27,12 +27,12 @@
 
 <div id="playerboard">
   <div id="pnorth">
-    <div class="tableau tableau_N whiteblock">
-      <div class="tableauname" style="color:#{COLOR_N}">
+    <div class="hand whiteblock id="_N"">
+      <div class="rolename" style="color:#{COLOR_N}">
         <h3>{ROLE_N}</h3>
       </div>
-        <div class="doorcard">
-        </div>
+      <div class="doorcard">
+      </div>
     </div>
   </div>
 
@@ -42,8 +42,8 @@
     </div>
 
     <div id="psouth">
-      <div class="tableau tableau_S whiteblock">
-        <div class="tableauname" style="color:#{COLOR_S}">
+      <div class="hand whiteblock id="_S">
+        <div class="rolename" style="color:#{COLOR_S}">
           <h3>{ROLE_S}</h3>
         </div>
       <div id="myhand">
