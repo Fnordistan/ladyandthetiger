@@ -101,9 +101,9 @@
 
 .doorcard {
     margin-top: 5px;
-    width: 233px;
+    width: 229px;
     height: 400px;
-    background-image: url('img/door.jpg'); /* temp hack to see it */
+    background-image: url('img/door_cards.png');
 }
 
 .cluecard {
