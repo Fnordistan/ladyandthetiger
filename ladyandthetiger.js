@@ -14,6 +14,10 @@
  * In this file, you are describing the logic of your user interface, in Javascript language.
  *
  */
+
+/**
+ * Values matching the constants for role values defined in ladyandthetiger.game.php.
+ */
 const DOORVAL = 0;
 const LADYVAL = 1;
 const TIGERVAL = 3;
@@ -72,16 +76,21 @@ function (dojo, declare) {
             this.playerHand.image_items_per_row = 7;
             //dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
             
-            // create the door cards - they actually have values of 0 to 5
-            for (var i = 0; i < 5; i++) {
+            console.log( "adding role cards" );
+            // add the role cards
+            for (var i = 1; i <= 4; i++) {
               this.playerHand.addItemType( i, i, g_gamethemeurl+'img/door_cards.png', i );
             }
             
+            console.log( "getting hand" );
             for (var c in this.gamedatas.hand) {
                 var door = this.gamedatas.hand[c];
                 if (door) {
+                   console.log( "door is " + door.type_arg + " card " + door.id );
                    this.playerHand.addToStockWithId( door.type_arg, door.id );
-                   console.log("player has card " + this.getRoleForCard( door.type_arg ) + "(" + door.type_arg + ")");
+                   // I do not know why it's emerging as a string, should be an int!
+                   role = this.getRoleForCard( parseInt(door.type_arg) );
+                   console.log("player has card " + role + " (" + door.type_arg + ")");
                 } else {
                     console.log("no role assigned yet");
                 }
@@ -102,19 +111,19 @@ function (dojo, declare) {
         getRoleForCard: function( value ) {
             console.log("checking value " + value);
             switch(value) {
-                case 0:
+                case DOORVAL:
                     return "Door";
-                case 1:
-                    return "Red Lady";
-                case 2:
+                case BLUEVAL+LADYVAL:
                     return "Blue Lady";
-                case 3:
-                    return "Red Tiger";
-                case 4:
+                case REDVAL+LADYVAL:
+                    return "Red Lady";
+                case BLUEVAL+TIGERVAL:
                     return "Blue Tiger";
-                case 5:
+                case REDVAL+TIGERVAL:
+                    return "Red Tiger";
+                case REDBLUEVAL:
                     return "Red/Blue";
-                case 6:
+                case LADYTIGERVAL:
                     return "Lady/Tiger";
             }
         },

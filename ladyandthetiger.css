@@ -99,11 +99,11 @@
     bottom: 0px;
 }
 
-.doorcard2 {
+.doorcard {
     margin-top: 5px;
     width: 233px;
     height: 400px;
-    background-image: url('img/ladyblue.jpg'); /* temp hack to see it */
+    background-image: url('img/door.jpg'); /* temp hack to see it */
 }
 
 .cluecard {
