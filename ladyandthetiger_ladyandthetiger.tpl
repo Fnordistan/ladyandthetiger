@@ -31,8 +31,8 @@
       <div class="tableauname" style="color:#{COLOR_N}">
         <h3>{ROLE_N}</h3>
       </div>
-      <div id="myhand">
-      </div>
+        <div class="doorcard">
+        </div>
     </div>
   </div>
 
@@ -46,8 +46,8 @@
         <div class="tableauname" style="color:#{COLOR_S}">
           <h3>{ROLE_S}</h3>
         </div>
-        <div class="doorcard2" id="doorcard_{PID_S}">
-        </div>
+      <div id="myhand">
+      </div>
       </div>
     <div>
 
