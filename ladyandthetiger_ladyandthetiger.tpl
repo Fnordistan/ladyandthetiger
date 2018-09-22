@@ -25,30 +25,32 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
-<div id="playerboard">
-  <div id="pnorth">
-    <div class="hand whiteblock id="_N"">
+<div id="board">
+  <div class="playerdisplay" id="pnorth">
+    <div class="hand whiteblock">
       <div class="rolename" style="color:#{COLOR_N}">
         <h3>{ROLE_N}</h3>
       </div>
       <div class="doorcard">
       </div>
     </div>
+    <div class="tableau whiteblock" id="tableau_{ROLE_N}"></div>
   </div>
 
-    <div class="display whiteblock">
-        <div class="cluecard" id="cluecarddisplay">
+    <div class="whiteblock" id="display">
+        <div id="cluecarddisplay">
         </div>
     </div>
 
-    <div id="psouth">
-      <div class="hand whiteblock id="_S">
+    <div class="playerdisplay" id="psouth">
+      <div class="hand whiteblock">
         <div class="rolename" style="color:#{COLOR_S}">
           <h3>{ROLE_S}</h3>
         </div>
-      <div id="myhand">
+        <div id="myhand">
+        </div>
       </div>
-      </div>
+    <div class="tableau whiteblock" id="tableau_{ROLE_S}"></div>
     <div>
 
 </div>

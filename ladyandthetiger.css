@@ -46,69 +46,38 @@
 
 /********* You can start writing your CSS below this line: **********/
 
-
-/*
-    Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):
-
-    .white_token {
-        background-image: url('img/tokens.png');
-        background-position: 0px 0px;
-    }
-    .black_token {
-        background-image: url('img/tokens.png');
-        background-position: -20px 0px;
-    }
-    .token {
-        width: 20px;
-        height: 20px;
-        background-repeat: none;
-    }
-*/
-
-#playerboard {
-    position: relative;
-}
-
-.display {
-    position: relative;
-    left: 20px;
-    width: 1300px;
-    height: 339px;
-}
-
+/** Wrapper around "Collector/Guesser" labels */
 .rolename {
     font-weight: bold;
+    text-align: center;
 }
 
+/** This is the container for a player's crds. It holds Door/Role cards and the Collector's cards. */
+.playerdisplay {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+/** The location of the role/Door card */
 .hand {
     position: relative;
-    text-align: center;
     width: 235px;
     height: 420px;
     left: 20px;
-    margin-top: 10px;
+    margin-top: 5px;
     margin-bottom: 10px;
 }
 
-/** North will be other player */
-#_N {
-    top: 0px;
-}
-
-/** South will be current player */
-#_S {
-    bottom: 0px;
-}
-
-/** This should be put to the right of the Collector's Door card. */
 .tableau {
-   height: 420px;
-   display: inline-block;
-   margin-top: 10px;
-   margin-bottom: 10px;
-   border: 1px solid blue;
+  margin-top: 5px;
+  height: 420px;
+  width: 800px;
+  margin-left: 50px;
 }
 
+
+/** Display the Doorcard for the other player. */
 .doorcard {
     margin-top: 5px;
     width: 229px;
@@ -116,9 +85,40 @@
     background-image: url('img/door_cards.png');
 }
 
-.cluecard {
+/** The overall board */
+#board {
+    position: relative;
+}
+
+/** South will be current player */
+#psouth {
+  position:relative    
+  bottom: 0px;
+}
+
+/** North will be other player */
+#pnorth {
+  position:relative    
+  top: 0px;
+}
+
+/** container for the central display with all the cards */
+#display {
+    position: relative;
+    left: 20px;
+    width: 1300px;
+    height: 339px;
+}
+
+/** Where the clue cards are */
+#cluecarddisplay {
     margin-top: 5px;
     width: 977px;
     height: 339px;
     background-image: url('img/ladytigers.jpg'); /* temp hack to see it */
 }
+
+#tableau_Guesser {
+/**    display: none;*/
+}
+
