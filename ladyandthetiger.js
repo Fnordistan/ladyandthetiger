@@ -76,13 +76,11 @@ function (dojo, declare) {
             this.playerHand.image_items_per_row = 7;
             //dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
             
-            console.log( "adding role cards" );
             // add the role cards
             for (var i = 1; i <= 4; i++) {
               this.playerHand.addItemType( i, i, g_gamethemeurl+'img/door_cards.png', i );
             }
             
-            console.log( "getting hand" );
             for (var c in this.gamedatas.hand) {
                 var door = this.gamedatas.hand[c];
                 if (door) {
@@ -90,9 +88,6 @@ function (dojo, declare) {
                    this.playerHand.addToStockWithId( door.type_arg, door.id );
                    // I do not know why it's emerging as a string, should be an int!
                    role = this.getRoleForCard( parseInt(door.type_arg) );
-                   console.log("player has card " + role + " (" + door.type_arg + ")");
-                } else {
-                    console.log("no role assigned yet");
                 }
             }
             
@@ -109,7 +104,6 @@ function (dojo, declare) {
        
         // Get the role according to a card's value
         getRoleForCard: function( value ) {
-            console.log("checking value " + value);
             switch(value) {
                 case DOORVAL:
                     return "Door";

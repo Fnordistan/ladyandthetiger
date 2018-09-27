@@ -26,7 +26,7 @@
 -->
 
 <div id="board">
-  <div class="playerdisplay" id="pnorth">
+  <div class="display" id="pnorth">
     <div class="hand whiteblock">
       <div class="rolename" style="color:#{COLOR_N}">
         <h3>{ROLE_N}</h3>
@@ -37,12 +37,13 @@
     <div class="tableau whiteblock" id="tableau_{ROLE_N}"></div>
   </div>
 
-    <div class="whiteblock" id="display">
-        <div id="cluecarddisplay">
-        </div>
+  <div class="display" id="center">
+    <div class="hand whiteblock">
     </div>
+    <div id="cluecarddisplay"></div>
+  </div>
 
-    <div class="playerdisplay" id="psouth">
+  <div class="display" id="psouth">
       <div class="hand whiteblock">
         <div class="rolename" style="color:#{COLOR_S}">
           <h3>{ROLE_S}</h3>
@@ -51,7 +52,7 @@
         </div>
       </div>
     <div class="tableau whiteblock" id="tableau_{ROLE_S}"></div>
-    <div>
+  <div>
 
 </div>
 

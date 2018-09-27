@@ -53,10 +53,12 @@
 }
 
 /** This is the container for a player's crds. It holds Door/Role cards and the Collector's cards. */
-.playerdisplay {
+.display {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
+  border-style: solid;
+  border-width: 2px;
 }
 
 /** The location of the role/Door card */
@@ -67,13 +69,17 @@
     left: 20px;
     margin-top: 5px;
     margin-bottom: 10px;
+    border-style: dashed;
+    border-width: 1px;
 }
 
 .tableau {
   margin-top: 5px;
+  margin-left: 50px;
   height: 420px;
   width: 800px;
-  margin-left: 50px;
+  border-style: dotted;
+  border-width: 1px;
 }
 
 
@@ -87,38 +93,38 @@
 
 /** The overall board */
 #board {
-    position: relative;
+    position: static;
 }
 
 /** South will be current player */
 #psouth {
-  position:relative    
   bottom: 0px;
 }
 
 /** North will be other player */
 #pnorth {
-  position:relative    
   top: 0px;
 }
 
 /** container for the central display with all the cards */
-#display {
-    position: relative;
-    left: 20px;
-    width: 1300px;
-    height: 339px;
+#center {
+    left: 0px;
 }
 
 /** Where the clue cards are */
 #cluecarddisplay {
     margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 50px;
     width: 977px;
     height: 339px;
     background-image: url('img/ladytigers.jpg'); /* temp hack to see it */
+    border-style: dotted;
+    border-width: 1px;
+    border-color: red;
 }
 
 #tableau_Guesser {
-  display: none;
+ /** display: none;*/
 }
 
