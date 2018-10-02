@@ -39,8 +39,10 @@
 
   <div class="display" id="center">
     <div class="hand whiteblock">
+      <div class="doorcard">
+      </div>
     </div>
-    <div id="cluecarddisplay"></div>
+    <div class="tableau whiteblock" id="cluecards"></div>
   </div>
 
   <div class="display" id="psouth">

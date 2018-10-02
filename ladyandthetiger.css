@@ -112,13 +112,8 @@
 }
 
 /** Where the clue cards are */
-#cluecarddisplay {
+#cluecards {
     margin-top: 5px;
-    margin-bottom: 5px;
-    margin-left: 50px;
-    width: 977px;
-    height: 339px;
-    background-image: url('img/ladytigers.jpg'); /* temp hack to see it */
     border-style: dotted;
     border-width: 1px;
     border-color: red;

@@ -18,13 +18,13 @@
 /**
  * Values matching the constants for role values defined in ladyandthetiger.game.php.
  */
-const DOORVAL = 0;
-const LADYVAL = 1;
-const TIGERVAL = 3;
-const BLUEVAL = 0;
-const REDVAL = 1;
-const REDBLUEVAL = 5;
-const LADYTIGERVAL = 6;
+const DOOR = 0;
+const LADY = 1;
+const TIGER = 3;
+const BLUE = 0;
+const RED = 1;
+const REDBLUE = 5;
+const LADYTIGER = 6;
 
 define([
     "dojo","dojo/_base/declare",
@@ -67,7 +67,6 @@ function (dojo, declare) {
             for( var player_id in gamedatas.players )
             {
                 var player = gamedatas.players[player_id];
-                // TODO: Setting up players boards if needed
             }
             
             // Player hand
@@ -75,6 +74,7 @@ function (dojo, declare) {
             this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
             this.playerHand.image_items_per_row = 7;
             //dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
+            
             
             // add the role cards
             for (var i = 1; i <= 4; i++) {
@@ -84,15 +84,14 @@ function (dojo, declare) {
             for (var c in this.gamedatas.hand) {
                 var door = this.gamedatas.hand[c];
                 if (door) {
-                   console.log( "door is " + door.type_arg + " card " + door.id );
                    this.playerHand.addToStockWithId( door.type_arg, door.id );
                    // I do not know why it's emerging as a string, should be an int!
                    role = this.getRoleForCard( parseInt(door.type_arg) );
+                   console.log("role is " + role);
                 }
             }
-            
+            console.log(this.gamedatas);
 
-            
             //// Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
 
@@ -105,19 +104,19 @@ function (dojo, declare) {
         // Get the role according to a card's value
         getRoleForCard: function( value ) {
             switch(value) {
-                case DOORVAL:
+                case DOOR:
                     return "Door";
-                case BLUEVAL+LADYVAL:
+                case BLUE+LADY:
                     return "Blue Lady";
-                case REDVAL+LADYVAL:
+                case RED+LADY:
                     return "Red Lady";
-                case BLUEVAL+TIGERVAL:
+                case BLUE+TIGER:
                     return "Blue Tiger";
-                case REDVAL+TIGERVAL:
+                case RED+TIGER:
                     return "Red Tiger";
-                case REDBLUEVAL:
+                case REDBLUE:
                     return "Red/Blue";
-                case LADYTIGERVAL:
+                case LADYTIGER:
                     return "Lady/Tiger";
             }
         },
@@ -220,14 +219,7 @@ function (dojo, declare) {
         {
             console.log( 'notifications subscriptions setup' );
             // here, associate your game notifications with local methods
-            dojo.subscribe( 'newRole', this, "notif_newRole" );
-            
-            // Example 2: standard notification handling + tell the user interface to wait
-            //            during 3 seconds after calling the method in order to let the players
-            //            see what is happening in the game.
-            // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-            // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
-            // 
+            dojo.subscribe( 'newRole', this, 'notif_newRole' );
         },  
         
         // game notification handling methods
@@ -235,8 +227,7 @@ function (dojo, declare) {
         /**
          * Called when a player is a given a new Door (role) card
          */
-        notif_newRole: function( notif )
-        {
+        notif_newRole: function( notif ) {
             console.log("notifying of new role");
             this.playerHand.removeAll();
             // should only ever be one Role card given!

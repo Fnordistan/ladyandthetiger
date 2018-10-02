@@ -22,13 +22,13 @@ require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 /**
  * Add these values for the index to a card
  */
-define('DOORVAL', 0);
-define('LADYVAL', 1);
-define('TIGERVAL', 3);
-define('BLUEVAL', 0);
-define('REDVAL', 1);
-define('REDBLUEVAL', 5);
-define('LADYTIGERVAL', 6);
+define('DOOR', 0);
+define('LADY', 1);
+define('TIGER', 3);
+define('BLUE', 0);
+define('RED', 1);
+define('REDBLUE', 5);
+define('LADYTIGER', 6);
 
 // type values
 define ('DOORCARD', 1);
@@ -52,7 +52,9 @@ class LadyAndTheTiger extends Table
         ) );        
         $this->cards = self::getNew( "module.common.deck" );
         $this->cards->init( "card" );
-
+        $this->rolecards = self::getNew( "module.common.deck" );
+        $this->rolecards->init( "rolecard" );
+		
 	}
 	
     protected function getGameName( )
@@ -107,17 +109,17 @@ class LadyAndTheTiger extends Table
 		// 4 = Red Tiger
 		// 5 = Red/Blue
 		// 6 = Lady/Tiger
-		$cardvals = array(BLUEVAL+LADYVAL, REDVAL+LADYVAL, BLUEVAL+TIGERVAL, REDVAL+TIGERVAL);
+		$cardvals = array(BLUE+LADY, RED+LADY, BLUE+TIGER, RED+TIGER);
 		foreach ($cardvals as $ct) {
 			$doorcards[] = array( 'type' => DOORCARD, 'type_arg' => $ct, 'nbr' => 1);
 			$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => $ct, 'nbr' => 3);
 		}
-		//$doorcards[] = array('type' => DOORCARD, 'type_arg' => DOORVAL, 'nbr' => 1);
-		$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => REDBLUEVAL, 'nbr' => 1);
-		$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => LADYTIGERVAL, 'nbr' => 1);
+		//$doorcards[] = array('type' => DOORCARD, 'type_arg' => DOOR, 'nbr' => 1);
+		$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => REDBLUE, 'nbr' => 1);
+		$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => LADYTIGER, 'nbr' => 1);
 		
         $this->cards->createCards( $cluecards, 'deck' );      
-        $this->cards->createCards( $doorcards, 'doordeck' );      
+        $this->rolecards->createCards( $doorcards, 'roledeck' );      
 
 		$player_id = $this->activeNextPlayer();
 		$last = self::getPlayerBefore( $player_id );
@@ -152,11 +154,11 @@ class LadyAndTheTiger extends Table
         $sql = "SELECT player_id id, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
 		
-        // The card in the player's hand      
-        $result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
+        // The player's role card
+        $result['hand'] = $this->rolecards->getCardsInLocation( 'hand', $current_player_id );
   
         // Cards played on the table
-        $result['cardsontable'] = $this->cards->getCardsInLocation( 'cardsontable' );
+        $result['cardsontable'] = $this->cards->getCardsInLocation( 'cluecarddisplay' );
   
         return $result;
     }
@@ -251,22 +253,24 @@ class LadyAndTheTiger extends Table
 	 * Give each players a new Door card.
 	 */
     function stAssignRoles() {
+		self::debug("assigning roles");
 		// reshuffle the Clue and Door cards
 		$this->cards->moveAllCardsInLocation(null, 'deck');
-		$this->cards->moveAllCardsInLocation(null, 'doordeck');
+		$this->rolecards->moveAllCardsInLocation(null, 'roledeck');
 		$this->cards->shuffle('deck');
-		$this->cards->shuffle('doordeck');
-		
+		$this->rolecards->shuffle('roledeck');
+
         $players = self::loadPlayersBasicInfos();
         foreach( $players as $player_id => $player ) {
-            $door = $this->cards->pickCard( 'doordeck', $player_id );
-            
+            $door = $this->rolecards->pickCard( 'roledeck', $player_id );
             // Notify player of his Role
             self::notifyPlayer( $player_id, 'newRole', '', array( 
                 'hand' => $door
             ) );
         }
 		
+		$cards = $this->cards->pickCardsForLocation(4, 'deck', 'cluecarddisplay');
+
         $this->gamestate->nextState( "" );
 	}
 
