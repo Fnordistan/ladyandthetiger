@@ -43,6 +43,7 @@ function (dojo, declare) {
               
             // Here, you can init the global variables of your user interface
             this.playerHand = null;
+            this.clueCards = null;
             this.cardwidth = 229;
             this.cardheight = 400;
         },
@@ -74,23 +75,37 @@ function (dojo, declare) {
             this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
             this.playerHand.image_items_per_row = 7;
             //dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
-            
+            // the clue cards tableau
+            this.clueCards = new ebg.stock();
+            this.clueCards.create(this, $('cluecards'), this.cardwidth, this.cardheight);
+            this.clueCards.setSelectionMode(1);
+            this.clueCards.image_items_per_row = 7;
             
             // add the role cards
             for (var i = 1; i <= 4; i++) {
               this.playerHand.addItemType( i, i, g_gamethemeurl+'img/door_cards.png', i );
             }
-            
+            // and the clue cards
+            for (var j = 1; j <= 6; j++) {
+               this.clueCards.addItemType(j, j, g_gamethemeurl+'img/door_cards.png', j );
+            }
+
             for (var c in this.gamedatas.hand) {
                 var door = this.gamedatas.hand[c];
                 if (door) {
                    this.playerHand.addToStockWithId( door.type_arg, door.id );
                    // I do not know why it's emerging as a string, should be an int!
                    role = this.getRoleForCard( parseInt(door.type_arg) );
-                   console.log("role is " + role);
+                   console.log(c + " role is " + role);
                 }
             }
             console.log(this.gamedatas);
+            
+            for (var cc in this.gamedatas.cardsontable) {
+               var ccard = this.gamedatas.cardsontable[cc];
+               console.log(cc + " card on table: " + this.getRoleForCard(parseInt(ccard.type_arg)));
+               this.clueCards.addToStockWithId(ccard.type_arg, ccard.id);
+            }
 
             //// Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
