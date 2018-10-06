@@ -73,13 +73,15 @@ function (dojo, declare) {
             // Player hand
             this.playerHand = new ebg.stock();
             this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
+            // can't select your role card
+            this.playerHand.setSelectionMode(0);
             this.playerHand.image_items_per_row = 7;
-            //dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
             // the clue cards tableau
             this.clueCards = new ebg.stock();
             this.clueCards.create(this, $('cluecards'), this.cardwidth, this.cardheight);
             this.clueCards.setSelectionMode(1);
             this.clueCards.image_items_per_row = 7;
+            dojo.connect( this.clueCards, 'onChangeSelection', this, 'onClueCardSelected' );
             
             // add the role cards
             for (var i = 1; i <= 4; i++) {
@@ -138,6 +140,11 @@ function (dojo, declare) {
 
         ///////////////////////////////////////////////////
         //// Game & client states
+        
+        // when clicking a clue  card
+        onClueCardSelected: function( control_name ) {
+           console.log("selected from " + control_name); 
+        },
         
         // onEnteringState: this method is called each time we are entering into a new game state.
         //                  You can use this method to perform some user interface changes at this moment.
