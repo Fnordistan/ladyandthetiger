@@ -76,12 +76,14 @@ function (dojo, declare) {
             // can't select your role card
             this.playerHand.setSelectionMode(0);
             this.playerHand.image_items_per_row = 7;
+				this.playerHand.onItemCreate = dojo.hitch( this, 'setupNewCard' );
             // the clue cards tableau
             this.clueCards = new ebg.stock();
             this.clueCards.create(this, $('cluecards'), this.cardwidth, this.cardheight);
             this.clueCards.setSelectionMode(1);
             this.clueCards.image_items_per_row = 7;
             dojo.connect( this.clueCards, 'onChangeSelection', this, 'onClueCardSelected' );
+				this.clueCards.onItemCreate = dojo.hitch( this, 'setupNewCard' );
             
             // add the role cards
             for (var i = 1; i <= 4; i++) {
@@ -94,18 +96,13 @@ function (dojo, declare) {
 
             for (var c in this.gamedatas.hand) {
                 var door = this.gamedatas.hand[c];
-                if (door) {
-                   this.playerHand.addToStockWithId( door.type_arg, door.id );
-                   // I do not know why it's emerging as a string, should be an int!
-                   role = this.getRoleForCard( parseInt(door.type_arg) );
-                   console.log(c + " role is " + role);
-                }
+                this.playerHand.addToStockWithId( door.type_arg, door.id );
             }
             console.log(this.gamedatas);
             
+            // this is what actually puts the cards in the center display
             for (var cc in this.gamedatas.cardsontable) {
                var ccard = this.gamedatas.cardsontable[cc];
-               console.log(cc + " card on table: " + this.getRoleForCard(parseInt(ccard.type_arg)));
                this.clueCards.addToStockWithId(ccard.type_arg, ccard.id);
             }
 
@@ -118,7 +115,10 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Utility methods
        
-        // Get the role according to a card's value
+        /**
+         * getRoleForCard:
+         * Get the role according to a card's value.
+        */
         getRoleForCard: function( value ) {
             switch(value) {
                 case DOOR:
@@ -138,17 +138,39 @@ function (dojo, declare) {
             }
         },
 
+        /**
+         * setupNewCard:
+         * Assign a tooltip to role cards.
+         */
+        setupNewCard: function( card_div, card_type_id, card_id ) {
+            //console.log(card_div);
+            //console.log(card_type_id);
+            //console.log(card_id);
+            cardrole = this.getRoleForCard(parseInt(card_type_id));
+            // Add a special tooltip on the card:
+            if (card_div.id.includes("myhand")) {
+               this.addTooltip(card_div.id, _("You are the " + cardrole), '');
+            } else {
+               this.addTooltip(card_div.id, '', "Add the " + cardrole + " to your collection");
+            }
+         },
+        
         ///////////////////////////////////////////////////
         //// Game & client states
         
-        // when clicking a clue  card
+        /**
+         * onClueCardSelected:
+         * hooked to selection of a clue card.
+         */
         onClueCardSelected: function( control_name ) {
            console.log("selected from " + control_name); 
         },
         
-        // onEnteringState: this method is called each time we are entering into a new game state.
-        //                  You can use this method to perform some user interface changes at this moment.
-        //
+        /**
+         * onEnteringState:
+         * This method is called each time we are entering into a new game state.
+         *  You can use this method to perform some user interface changes at this moment.
+         */
         onEnteringState: function( stateName, args )
         {
             console.log( 'Entering state: '+stateName );
@@ -172,9 +194,10 @@ function (dojo, declare) {
             }
         },
 
-        // onLeavingState: this method is called each time we are leaving a game state.
-        //                 You can use this method to perform some user interface changes at this moment.
-        //
+        /**
+         * onLeavingState:
+         * this method is called each time we are leaving a game state.
+         */
         onLeavingState: function( stateName )
         {
             console.log( 'Leaving state: '+stateName );
@@ -191,7 +214,6 @@ function (dojo, declare) {
                 
                 break;
            */
-           
            
             case 'dummmy':
                 break;
