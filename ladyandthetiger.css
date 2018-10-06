@@ -75,9 +75,8 @@
 
 .tableau {
   margin-top: 5px;
-  margin-left: 50px;
   height: 420px;
-  width: 800px;
+  width: 1000px;
   border-style: dotted;
   border-width: 1px;
 }
@@ -89,6 +88,13 @@
     width: 229px;
     height: 400px;
     background-image: url('img/door_cards.png');
+}
+
+/** The space where my card will go. */
+#myhand {
+    margin-top: 5px;
+    width: 229px;
+    height: 400px;
 }
 
 /** The overall board */
@@ -114,12 +120,19 @@
 /** Where the clue cards are */
 #cluecards {
     margin-top: 5px;
+    left: 20px;
     border-style: dotted;
     border-width: 1px;
     border-color: red;
 }
 
-#tableau_Guesser {
+#tableau_Collector {
+  margin-left: 50px;
  /** display: none;*/
+}
+
+#tableau_Guesser {
+  margin-left: 50px;
+  display: none;
 }
 

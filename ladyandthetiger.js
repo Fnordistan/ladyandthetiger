@@ -77,19 +77,18 @@ function (dojo, declare) {
             this.playerHand.setSelectionMode(0);
             this.playerHand.image_items_per_row = 7;
 				this.playerHand.onItemCreate = dojo.hitch( this, 'setupNewCard' );
+            // add the role cards
+            for (var i = 1; i <= 4; i++) {
+              this.playerHand.addItemType( i, i, g_gamethemeurl+'img/door_cards.png', i );
+            }
             // the clue cards tableau
             this.clueCards = new ebg.stock();
             this.clueCards.create(this, $('cluecards'), this.cardwidth, this.cardheight);
             this.clueCards.setSelectionMode(1);
             this.clueCards.image_items_per_row = 7;
-            dojo.connect( this.clueCards, 'onChangeSelection', this, 'onClueCardSelected' );
 				this.clueCards.onItemCreate = dojo.hitch( this, 'setupNewCard' );
-            
-            // add the role cards
-            for (var i = 1; i <= 4; i++) {
-              this.playerHand.addItemType( i, i, g_gamethemeurl+'img/door_cards.png', i );
-            }
-            // and the clue cards
+            dojo.connect( this.clueCards, 'onChangeSelection', this, 'onClueCardSelected' );
+            // add the clue cards
             for (var j = 1; j <= 6; j++) {
                this.clueCards.addItemType(j, j, g_gamethemeurl+'img/door_cards.png', j );
             }
@@ -98,7 +97,6 @@ function (dojo, declare) {
                 var door = this.gamedatas.hand[c];
                 this.playerHand.addToStockWithId( door.type_arg, door.id );
             }
-            console.log(this.gamedatas);
             
             // this is what actually puts the cards in the center display
             for (var cc in this.gamedatas.cardsontable) {
@@ -147,13 +145,17 @@ function (dojo, declare) {
             //console.log(card_type_id);
             //console.log(card_id);
             cardrole = this.getRoleForCard(parseInt(card_type_id));
-            // Add a special tooltip on the card:
+            // Role cards get help text, clue cards get action text
             if (card_div.id.includes("myhand")) {
                this.addTooltip(card_div.id, _("You are the " + cardrole), '');
             } else {
-               this.addTooltip(card_div.id, '', "Add the " + cardrole + " to your collection");
+               this.addTooltip(card_div.id, '', "Add a " + cardrole + " to your collection");
             }
-         },
+       //// Add some custom HTML content INSIDE the Stock item:
+       //dojo.place( this.format_block( 'jstpl_my_card_content', {
+       //                         ....
+       //                    } ), card_div.id );
+       },
         
         ///////////////////////////////////////////////////
         //// Game & client states
