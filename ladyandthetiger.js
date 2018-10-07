@@ -92,7 +92,6 @@ function (dojo, declare) {
             for (var j = 1; j <= 6; j++) {
                this.clueCards.addItemType(j, j, g_gamethemeurl+'img/door_cards.png', j );
             }
-
             for (var c in this.gamedatas.hand) {
                 var door = this.gamedatas.hand[c];
                 this.playerHand.addToStockWithId( door.type_arg, door.id );

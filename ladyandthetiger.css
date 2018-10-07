@@ -83,7 +83,7 @@
 
 
 /** Display the Doorcard for the other player. */
-.doorcard {
+#doorcard {
     margin-top: 5px;
     width: 229px;
     height: 400px;

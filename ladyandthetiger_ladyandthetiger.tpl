@@ -31,7 +31,7 @@
       <div class="rolename" style="color:#{COLOR_N}">
         <h3>{ROLE_N}</h3>
       </div>
-      <div class="doorcard">
+      <div id="doorcard">
       </div>
     </div>
     <div class="tableau whiteblock" id="tableau_{ROLE_N}"></div>
@@ -59,11 +59,8 @@
 
 // Javascript HTML templates
 
-/*
-// Example:
-var jstpl_some_game_item='<div class="my_game_item" id="my_game_item_${id}"></div>';
-
-*/
+//var jstpl_cardontable = '<div class="cardontable" id="cardontable_${player_id}" style="background-position:-${x}px -${y}px">\
+                        //</div>';
 
 </script>  
 

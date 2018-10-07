@@ -270,7 +270,7 @@ class LadyAndTheTiger extends Table
         }
 		
 		$cards = $this->cards->pickCardsForLocation(4, 'deck', 'cluecarddisplay');
-
+		
         $this->gamestate->nextState( "" );
 	}
 
