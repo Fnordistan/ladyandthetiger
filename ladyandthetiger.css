@@ -46,10 +46,7 @@
 
 /********* You can start writing your CSS below this line: **********/
 
-.player_info {
-    position: relative;
-    margin-top: 5px;
-}
+/** BGA class */
 
 /** Wrapper around "Collector/Guesser" labels */
 .rolename {
@@ -57,7 +54,7 @@
     text-align: center;
 }
 
-/** This is the container for a player's cards. It holds Door/Role cards and the Collector's cards. */
+/** This is the container for a row of cards - both the player tableaus and the center display. */
 .display {
   display: flex;
   flex-direction: row;
@@ -66,8 +63,8 @@
   border-width: 2px;
 }
 
-/** The location of the role/Door card */
-.hand {
+/** Each player has one card, their secret role. */
+.hand_container {
     position: relative;
     width: 235px;
     height: 420px;
@@ -84,6 +81,10 @@
   border-width: 1px;
 }
 
+/** The overall board */
+#overall_board {
+    position: static;
+}
 
 /** Display the Doorcard for the other player. */
 #doorcard {
@@ -98,11 +99,6 @@
     margin-top: 5px;
     width: 229px;
     height: 400px;
-}
-
-/** The overall board */
-#board {
-    position: static;
 }
 
 /** South will be current player */

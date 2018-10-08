@@ -27,29 +27,29 @@
 
 <div id="board">
   <div class="display" id="pnorth">
-    <div class="hand whiteblock">
+    <div class="hand_container whiteblock">
       <div class="rolename" style="color:#{COLOR_N}">
         <h3>{ROLE_N}</h3>
       </div>
       <div id="doorcard">
       </div>
     </div>
-    <div class="tableau " id="tableau_{ROLE_N}"></div>
+    <div class="tableau whiteblock" id="tableau_{ROLE_N}"></div>
   </div>
 
   <div class="display" id="center">
-    <div class="tableau " id="cluecards"></div>
+    <div id="cluecards"></div>
   </div>
 
   <div class="display" id="psouth">
-      <div class="hand whiteblock">
+      <div class="hand_container whiteblock">
         <div class="rolename" style="color:#{COLOR_S}">
           <h3>{ROLE_S}</h3>
         </div>
         <div id="myhand">
         </div>
       </div>
-    <div class="tableau " id="tableau_{ROLE_S}"></div>
+    <div class="tableau whiteblock" id="tableau_{ROLE_S}"></div>
   <div>
 
 </div>
@@ -64,6 +64,7 @@
 // Javascript HTML templates
 var jstpl_player_panel = '\
   <div class="player_info">\
+  FOO\
   </div>';
 
 </script>  
