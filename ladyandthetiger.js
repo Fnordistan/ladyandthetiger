@@ -63,11 +63,11 @@ function (dojo, declare) {
         
         setup: function( gamedatas ) {
             console.log( "Starting game setup" );
-            
+
             // Setting up player boards
             for( var player_id in gamedatas.players )
             {
-                var player = gamedatas.players[player_id];
+                dojo.place(this.format_block('jstpl_player_panel', {'player_id':player_id}), $('player_board_' + player_id));
             }
             
             // Player hand
@@ -102,7 +102,8 @@ function (dojo, declare) {
                var ccard = this.gamedatas.cardsontable[cc];
                this.clueCards.addToStockWithId(ccard.type_arg, ccard.id);
             }
-
+            
+            
             //// Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
 

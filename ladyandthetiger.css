@@ -46,13 +46,18 @@
 
 /********* You can start writing your CSS below this line: **********/
 
+.player_info {
+    position: relative;
+    margin-top: 5px;
+}
+
 /** Wrapper around "Collector/Guesser" labels */
 .rolename {
     font-weight: bold;
     text-align: center;
 }
 
-/** This is the container for a player's crds. It holds Door/Role cards and the Collector's cards. */
+/** This is the container for a player's cards. It holds Door/Role cards and the Collector's cards. */
 .display {
   display: flex;
   flex-direction: row;
@@ -75,8 +80,6 @@
 
 .tableau {
   margin-top: 5px;
-  height: 420px;
-  width: 1000px;
   border-style: dotted;
   border-width: 1px;
 }
@@ -119,16 +122,12 @@
 
 /** Where the clue cards are */
 #cluecards {
-    margin-top: 5px;
     left: 20px;
-    border-style: dotted;
-    border-width: 1px;
     border-color: red;
 }
 
 #tableau_Collector {
   margin-left: 50px;
- /** display: none;*/
 }
 
 #tableau_Guesser {

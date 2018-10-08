@@ -34,11 +34,11 @@
       <div id="doorcard">
       </div>
     </div>
-    <div class="tableau whiteblock" id="tableau_{ROLE_N}"></div>
+    <div class="tableau " id="tableau_{ROLE_N}"></div>
   </div>
 
   <div class="display" id="center">
-    <div class="tableau whiteblock" id="cluecards"></div>
+    <div class="tableau " id="cluecards"></div>
   </div>
 
   <div class="display" id="psouth">
@@ -49,7 +49,7 @@
         <div id="myhand">
         </div>
       </div>
-    <div class="tableau whiteblock" id="tableau_{ROLE_S}"></div>
+    <div class="tableau " id="tableau_{ROLE_S}"></div>
   <div>
 
 </div>
@@ -61,6 +61,10 @@
 
 //var jstpl_cardontable = '<div class="cardontable" id="cardontable_${player_id}" style="background-position:-${x}px -${y}px">\
                         //</div>';
+// Javascript HTML templates
+var jstpl_player_panel = '\
+  <div class="player_info">\
+  </div>';
 
 </script>  
 
