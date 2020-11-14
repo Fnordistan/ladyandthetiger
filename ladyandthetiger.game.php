@@ -123,9 +123,9 @@ class LadyAndTheTiger extends Table
 
 		$player_id = $this->activeNextPlayer();
 		$last = self::getPlayerBefore( $player_id );
-        // First player is Collector, other player is Guesser
-        self::setGameStateInitialValue( 'collector', $player_id );
-        self::setGameStateInitialValue( 'guesser', $last );
+        // First player is Collector, other player is Guesser, init in reverse order since we switch...
+        self::setGameStateInitialValue( 'guesser', $player_id );
+        self::setGameStateInitialValue( 'collector', $last );
 		
 		self::debug( "setupNewGame : last is ".$last );
         /************ End of the game initialization *****/

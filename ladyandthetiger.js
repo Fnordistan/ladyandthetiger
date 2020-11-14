@@ -147,7 +147,7 @@ function (dojo, declare) {
             cardrole = this.getRoleForCard(parseInt(card_type_id));
             // Role cards get help text, clue cards get action text
             if (card_div.id.includes("myhand")) {
-               this.addTooltip(card_div.id, _("You are the " + cardrole), '');
+               this.addTooltip(card_div.id, _("You are the " + cardrole) + " dude", '');
             } else {
                this.addTooltip(card_div.id, '', "Add a " + cardrole + " to your collection");
             }
