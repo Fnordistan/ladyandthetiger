@@ -26,31 +26,25 @@
 -->
 
 <div id="board">
-  <div class="display" id="pnorth">
-    <div class="hand_container whiteblock">
-      <div class="rolename" style="color:#{COLOR_N}">
-        <h3>{ROLE_N}</h3>
-      </div>
-      <div id="doorcard">
-      </div>
+  <div id="pnorth" class="display whiteblock">
+    <div id="role_n" class="rolecard">
+        <h1 id="rolename_n" class="rolename"></h1>
     </div>
-    <div class="tableau whiteblock" id="tableau_{ROLE_N}"></div>
+    <div id="tableau_n" class="tableau whiteblock"></div>
   </div>
 
-  <div class="display" id="center">
-    <div id="cluecards"></div>
+  <div id="center" class="display">
+    <div id="cluedeck"></div>
+    <div id="cluedisplay"></div>
   </div>
 
-  <div class="display" id="psouth">
-      <div class="hand_container whiteblock">
-        <div class="rolename" style="color:#{COLOR_S}">
-          <h3>{ROLE_S}</h3>
-        </div>
-        <div id="myhand">
-        </div>
-      </div>
-    <div class="tableau whiteblock" id="tableau_{ROLE_S}"></div>
-  <div>
+  <div id="psouth" class="display whiteblock">
+    <div id="role_s" class="rolecard">
+        <h1 id="rolename_s" class="rolename"></h1>
+    </div>
+    <div id="tableau_s" class="tableau whiteblock"></div>
+  </div>
+<div>
 
 </div>
 
@@ -58,14 +52,6 @@
 <script type="text/javascript">
 
 // Javascript HTML templates
-
-//var jstpl_cardontable = '<div class="cardontable" id="cardontable_${player_id}" style="background-position:-${x}px -${y}px">\
-                        //</div>';
-// Javascript HTML templates
-var jstpl_player_panel = '\
-  <div class="player_info">\
-  FOO\
-  </div>';
 
 </script>  
 

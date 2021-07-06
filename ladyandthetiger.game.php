@@ -45,18 +45,17 @@ class LadyAndTheTiger extends Table
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
-        
-        self::initGameStateLabels( array( 
+
+        self::initGameStateLabels( array(
             "collector" => 10,
-            "guesser" => 11,
-        ) );        
+            "collector_role" => 11,
+            "guesser" => 12,
+            "guesser_role" => 13,
+        ) );
         $this->cards = self::getNew( "module.common.deck" );
-        $this->cards->init( "card" );
-        $this->rolecards = self::getNew( "module.common.deck" );
-        $this->rolecards->init( "rolecard" );
-		
+        $this->cards->init( "cards" );
 	}
-	
+
     protected function getGameName( )
     {
 		// Used for translations and stuff. Please do not modify.
@@ -72,7 +71,6 @@ class LadyAndTheTiger extends Table
     */
     protected function setupNewGame( $players, $options = array() )
     {    
-        $sql = "DELETE FROM player WHERE 1 ";
         // Set the colors of the players as Red/Blue
         $gameinfos = self::getGameinfos();
         $default_colors = $gameinfos['player_colors'];
@@ -95,11 +93,9 @@ class LadyAndTheTiger extends Table
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
-        //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'table', 'turns_number', 0 );    // Init a table statistics
 
         // Create cards
-		$doorcards = array();
 		$cluecards = array();
 		// Door cards = type 1, Clue cards = type 2
 		// 0 = Door (Hidden)
@@ -111,24 +107,21 @@ class LadyAndTheTiger extends Table
 		// 6 = Lady/Tiger
 		$cardvals = array(BLUE+LADY, RED+LADY, BLUE+TIGER, RED+TIGER);
 		foreach ($cardvals as $ct) {
-			$doorcards[] = array( 'type' => DOORCARD, 'type_arg' => $ct, 'nbr' => 1);
-			$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => $ct, 'nbr' => 3);
+			$cluecards[] = array( 'type' => $ct, 'type_arg' => 0, 'nbr' => 3);
 		}
-		//$doorcards[] = array('type' => DOORCARD, 'type_arg' => DOOR, 'nbr' => 1);
-		$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => REDBLUE, 'nbr' => 1);
-		$cluecards[] = array( 'type' => CLUECARD, 'type_arg' => LADYTIGER, 'nbr' => 1);
-		
+		$cluecards[] = array( 'type' => REDBLUE, 'type_arg' => 0, 'nbr' => 1);
+		$cluecards[] = array( 'type' => LADYTIGER, 'type_arg' => 0, 'nbr' => 1);
+
         $this->cards->createCards( $cluecards, 'deck' );      
-        $this->rolecards->createCards( $doorcards, 'roledeck' );      
 
 		$player_id = $this->activeNextPlayer();
 		$last = self::getPlayerBefore( $player_id );
         // First player is Collector, other player is Guesser, init in reverse order since we switch...
         self::setGameStateInitialValue( 'guesser', $player_id );
         self::setGameStateInitialValue( 'collector', $last );
+        self::setGameStateInitialValue( 'guesser_role', 0 );
+        self::setGameStateInitialValue( 'collector_role', 0 );
 		
-		self::debug( "setupNewGame : last is ".$last );
-        /************ End of the game initialization *****/
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -155,10 +148,11 @@ class LadyAndTheTiger extends Table
         $result['players'] = self::getCollectionFromDb( $sql );
 		
         // The player's role card
-        $result['hand'] = $this->rolecards->getCardsInLocation( 'hand', $current_player_id );
+        $result['role'] = 
   
         // Cards played on the table
-        $result['cardsontable'] = $this->cards->getCardsInLocation( 'cluecarddisplay' );
+        $result['cluecards'] = $this->cards->getCardsInLocation( 'cluecarddisplay' );
+        $result['collectorcards'] = $this->cards->getCardsInLocation( 'collectordisplay' );
   
         return $result;
     }
@@ -254,22 +248,27 @@ class LadyAndTheTiger extends Table
 	 */
     function stAssignRoles() {
 		self::debug("assigning roles");
-		// reshuffle the Clue and Door cards
+		// reshuffle the Clue cards
 		$this->cards->moveAllCardsInLocation(null, 'deck');
-		$this->rolecards->moveAllCardsInLocation(null, 'roledeck');
 		$this->cards->shuffle('deck');
-		$this->rolecards->shuffle('roledeck');
+
+        $roles = array(RED+TIGER, RED+LADY, BLUE+TIGER, BLUE+LADY);
+        shuffle($roles);
 
         $players = self::loadPlayersBasicInfos();
         foreach( $players as $player_id => $player ) {
-            $door = $this->rolecards->pickCard( 'roledeck', $player_id );
+            $role = array_pop($roles);
             // Notify player of his Role
             self::notifyPlayer( $player_id, 'newRole', '', array( 
-                'hand' => $door
+                'role' => $role
             ) );
+            if (self::getGameStateValue('collector') == $player_id) {
+                self::setGameStateValue('collector_role', $role);
+            } else {
+                self::setGameStateValue('guesser_role', $role);
+            }
         }
-		
-		$cards = $this->cards->pickCardsForLocation(4, 'deck', 'cluecarddisplay');
+		$this->cards->pickCardsForLocation(4, 'deck', 'cluecarddisplay');
 		
         $this->gamestate->nextState( "" );
 	}

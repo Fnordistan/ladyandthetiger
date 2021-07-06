@@ -64,44 +64,6 @@ function (dojo, declare) {
         setup: function( gamedatas ) {
             console.log( "Starting game setup" );
 
-            // Setting up player boards
-            for( var player_id in gamedatas.players )
-            {
-                dojo.place(this.format_block('jstpl_player_panel', {'player_id':player_id}), $('player_board_' + player_id));
-            }
-            
-            // Player hand
-            this.playerHand = new ebg.stock();
-            this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
-            // can't select your role card
-            this.playerHand.setSelectionMode(0);
-            this.playerHand.image_items_per_row = 7;
-				this.playerHand.onItemCreate = dojo.hitch( this, 'setupNewCard' );
-            // add the role cards
-            for (var i = 1; i <= 4; i++) {
-              this.playerHand.addItemType( i, i, g_gamethemeurl+'img/door_cards.png', i );
-            }
-            // the clue cards tableau
-            this.clueCards = new ebg.stock();
-            this.clueCards.create(this, $('cluecards'), this.cardwidth, this.cardheight);
-            this.clueCards.setSelectionMode(1);
-            this.clueCards.image_items_per_row = 7;
-				this.clueCards.onItemCreate = dojo.hitch( this, 'setupNewCard' );
-            dojo.connect( this.clueCards, 'onChangeSelection', this, 'onClueCardSelected' );
-            // add the clue cards
-            for (var j = 1; j <= 6; j++) {
-               this.clueCards.addItemType(j, j, g_gamethemeurl+'img/door_cards.png', j );
-            }
-            for (var c in this.gamedatas.hand) {
-                var door = this.gamedatas.hand[c];
-                this.playerHand.addToStockWithId( door.type_arg, door.id );
-            }
-            
-            // this is what actually puts the cards in the center display
-            for (var cc in this.gamedatas.cardsontable) {
-               var ccard = this.gamedatas.cardsontable[cc];
-               this.clueCards.addToStockWithId(ccard.type_arg, ccard.id);
-            }
             
             
             //// Setup game notifications to handle (see "setupNotifications" method below)
@@ -112,12 +74,13 @@ function (dojo, declare) {
 
         ///////////////////////////////////////////////////
         //// Utility methods
-       
+
         /**
-         * getRoleForCard:
-         * Get the role according to a card's value.
-        */
-        getRoleForCard: function( value ) {
+         * Get the identity according to a card's value.
+         * @param {int} value 
+         * @returns String identity value
+         */
+        getCardIdentity: function( value ) {
             switch(value) {
                 case DOOR:
                     return "Door";
@@ -144,17 +107,13 @@ function (dojo, declare) {
             //console.log(card_div);
             //console.log(card_type_id);
             //console.log(card_id);
-            cardrole = this.getRoleForCard(parseInt(card_type_id));
+            cardrole = this.getCardIdentity(parseInt(card_type_id));
             // Role cards get help text, clue cards get action text
             if (card_div.id.includes("myhand")) {
                this.addTooltip(card_div.id, _("You are the " + cardrole) + " dude", '');
             } else {
                this.addTooltip(card_div.id, '', "Add a " + cardrole + " to your collection");
             }
-       //// Add some custom HTML content INSIDE the Stock item:
-       //dojo.place( this.format_block( 'jstpl_my_card_content', {
-       //                         ....
-       //                    } ), card_div.id );
        },
         
         ///////////////////////////////////////////////////

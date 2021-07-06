@@ -63,42 +63,8 @@
   border-width: 2px;
 }
 
-/** Each player has one card, their secret role. */
-.hand_container {
-    position: relative;
-    width: 235px;
-    height: 420px;
-    left: 20px;
-    margin-top: 5px;
-    margin-bottom: 10px;
-    border-style: dashed;
-    border-width: 1px;
-}
-
 .tableau {
   margin-top: 5px;
-  border-style: dotted;
-  border-width: 1px;
-}
-
-/** The overall board */
-#overall_board {
-    position: static;
-}
-
-/** Display the Doorcard for the other player. */
-#doorcard {
-    margin-top: 5px;
-    width: 229px;
-    height: 400px;
-    background-image: url('img/door_cards.png');
-}
-
-/** The space where my card will go. */
-#myhand {
-    margin-top: 5px;
-    width: 229px;
-    height: 400px;
 }
 
 /** South will be current player */
@@ -116,18 +82,11 @@
     left: 0px;
 }
 
-/** Where the clue cards are */
-#cluecards {
-    left: 20px;
-    border-color: red;
-}
-
 #tableau_Collector {
   margin-left: 50px;
 }
 
 #tableau_Guesser {
-  margin-left: 50px;
   display: none;
 }
 
