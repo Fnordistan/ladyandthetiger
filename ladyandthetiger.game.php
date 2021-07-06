@@ -148,7 +148,7 @@ class LadyAndTheTiger extends Table
         $result['players'] = self::getCollectionFromDb( $sql );
 		
         // The player's role card
-        $result['role'] = 
+        $result['role'] = self::getGameStateValue('collector') == $current_player_id ? self::getGameStateValue('collector_role') : self::getGameStateValue('guesser_role');
   
         // Cards played on the table
         $result['cluecards'] = $this->cards->getCardsInLocation( 'cluecarddisplay' );

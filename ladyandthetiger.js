@@ -64,6 +64,10 @@ function (dojo, declare) {
         setup: function( gamedatas ) {
             console.log( "Starting game setup" );
 
+            const role = this.gamedatas.role;
+            const myrole = this.getCardIdentity(role);
+            document.getElementById('rolename_n').innerHTML = myrole;
+            
             
             
             //// Setup game notifications to handle (see "setupNotifications" method below)
@@ -81,22 +85,22 @@ function (dojo, declare) {
          * @returns String identity value
          */
         getCardIdentity: function( value ) {
-            switch(value) {
-                case DOOR:
-                    return "Door";
-                case BLUE+LADY:
-                    return "Blue Lady";
-                case RED+LADY:
-                    return "Red Lady";
-                case BLUE+TIGER:
-                    return "Blue Tiger";
-                case RED+TIGER:
-                    return "Red Tiger";
-                case REDBLUE:
-                    return "Red/Blue";
-                case LADYTIGER:
-                    return "Lady/Tiger";
+            if (value == DOOR) {
+                return "Door";
+            } else if (value == BLUE+LADY) {
+                return "Blue Lady";
+            } else if (value == RED+LADY) {
+                return "Red Lady";
+            } else if (value == BLUE+TIGER) {
+                return "Blue Tiger";
+            } else if (value == RED+TIGER) {
+                return "Red Tiger";
+            } else if (value == REDBLUE) {
+                return "Red/Blue";
+            } else if (value == LADYTIGER) {
+                return "Lady/Tiger";
             }
+            throw new Error("Invalid card identity: " + value);
         },
 
         /**
