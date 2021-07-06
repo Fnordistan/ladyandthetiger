@@ -44,10 +44,7 @@
     </div>
     <div id="tableau_s" class="tableau whiteblock"></div>
   </div>
-<div>
-
 </div>
-
 
 <script type="text/javascript">
 
