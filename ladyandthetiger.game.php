@@ -144,12 +144,17 @@ class LadyAndTheTiger extends Table
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_color color FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
 		
-        // The player's role card
-        $result['role'] = self::getGameStateValue('collector') == $current_player_id ? self::getGameStateValue('collector_role') : self::getGameStateValue('guesser_role');
-  
+        if (self::getGameStateValue('collector') == $current_player_id) {
+            $result['role'] = 'Collector';
+            $result['identity'] = self::getGameStateValue('collector_role');
+        } else {
+            $result['role'] = 'Guesser';
+            $result['identity'] = self::getGameStateValue('guesser_role');
+        }
+
         // Cards played on the table
         $result['cluecards'] = $this->cards->getCardsInLocation( 'cluecarddisplay' );
         $result['collectorcards'] = $this->cards->getCardsInLocation( 'collectordisplay' );

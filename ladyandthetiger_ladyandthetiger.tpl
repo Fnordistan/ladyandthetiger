@@ -25,24 +25,24 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
-<div id="board">
-  <div id="pnorth" class="display whiteblock">
-    <div id="role_n" class="rolecard">
-        <h1 id="rolename_n" class="rolename"></h1>
-    </div>
-    <div id="tableau_n" class="tableau whiteblock"></div>
+<div id="ladytigerboard">
+  <div id="pnorth" class="ladytiger_display whiteblock">
+      <h1 id="rolename_n" class="ladytiger_rolename"></h1>
+      <div id="role_n" class="ladytiger_rolecard">
+      </div
+    <div id="tableau_n" class="ladytiger_tableau whiteblock"></div>
   </div>
 
-  <div id="center" class="display">
+  <div id="center" class="ladytiger_display">
     <div id="cluedeck"></div>
     <div id="cluedisplay"></div>
   </div>
 
-  <div id="psouth" class="display whiteblock">
-    <div id="role_s" class="rolecard">
-        <h1 id="rolename_s" class="rolename"></h1>
-    </div>
-    <div id="tableau_s" class="tableau whiteblock"></div>
+  <div id="psouth" class="ladytiger_display whiteblock">
+      <h1 id="rolename_s" class="ladytiger_rolename"></h1>
+      <div id="role_s" class="ladytiger_rolecard">
+      </div>
+    <div id="tableau_s" class="ladytiger_tableau whiteblock"></div>
   </div>
 </div>
 

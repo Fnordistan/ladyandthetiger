@@ -44,8 +44,8 @@ function (dojo, declare) {
             // Here, you can init the global variables of your user interface
             this.playerHand = null;
             this.clueCards = null;
-            this.cardwidth = 229;
-            this.cardheight = 400;
+            this.rolecardwidth = 218;
+            this.rolecardheight = 360;
         },
         
         /*
@@ -64,16 +64,52 @@ function (dojo, declare) {
         setup: function( gamedatas ) {
             console.log( "Starting game setup" );
 
-            const role = this.gamedatas.role;
-            const myrole = this.getCardIdentity(role);
-            document.getElementById('rolename_n').innerHTML = myrole;
-            
-            
-            
+            this.setupMyRole();
+            this.setupOtherPlayer();
             //// Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
 
             console.log( "Ending game setup" );
+        },
+
+        /**
+         * This player's role card.
+         */
+        setupMyRole: function() {
+            const myrole = this.gamedatas.role;
+            const players = this.gamedatas.players;
+            const mycolor = players[this.player_id]['color'];
+
+            const role_n = document.getElementById('rolename_n');
+            role_n.innerHTML = myrole;
+            role_n.style['color'] = '#'+mycolor;
+
+            const myrolecard = document.getElementById('role_n');
+            const identity = this.gamedatas.identity;
+            const myidentity = this.getCardIdentity(identity);
+            myrolecard.classList.add('ladytiger_'+myidentity);
+        },
+
+        /**
+         * Other player's role card.
+         */
+        setupOtherPlayer: function() {
+            const hisrole = this.gamedatas.role == 'Collector' ? 'Guesser' : 'Collector';
+            const players = this.gamedatas.players;
+            var hiscolor = '';
+            for (var p in players) {
+                if (p != this.player_id) {
+                    hiscolor = players[p]['color'];
+                    break;
+                }
+            }
+
+            const role_s = document.getElementById('rolename_s');
+            role_s.innerHTML = hisrole;
+            role_s.style['color'] = '#'+hiscolor;
+
+            const hisrolecard = document.getElementById('role_s');
+            hisrolecard.classList.add('ladytiger_door');
         },
 
         ///////////////////////////////////////////////////
@@ -86,19 +122,15 @@ function (dojo, declare) {
          */
         getCardIdentity: function( value ) {
             if (value == DOOR) {
-                return "Door";
+                return "door";
             } else if (value == BLUE+LADY) {
-                return "Blue Lady";
+                return "bluelady";
             } else if (value == RED+LADY) {
-                return "Red Lady";
+                return "redlady";
             } else if (value == BLUE+TIGER) {
-                return "Blue Tiger";
+                return "bluetiger";
             } else if (value == RED+TIGER) {
-                return "Red Tiger";
-            } else if (value == REDBLUE) {
-                return "Red/Blue";
-            } else if (value == LADYTIGER) {
-                return "Lady/Tiger";
+                return "redtiger";
             }
             throw new Error("Invalid card identity: " + value);
         },

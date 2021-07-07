@@ -49,38 +49,65 @@
 /** BGA class */
 
 /** Wrapper around "Collector/Guesser" labels */
-.rolename {
+.ladytiger_rolename {
     font-weight: bold;
     text-align: center;
 }
 
 /** This is the container for a row of cards - both the player tableaus and the center display. */
-.display {
+.ladytiger_display {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  border-style: solid;
-  border-width: 2px;
 }
 
-.tableau {
+.ladytiger_tableau {
   margin-top: 5px;
 }
 
-/** South will be current player */
-#psouth {
-  bottom: 0px;
+.ladytiger_rolecard {
+  background-size: 872px 720px;
+  background-image: url(img/door_sprites.png);
+  background-repeat: no-repeat;
+  width: 218px;
+  height: 360px;
+  margin: 5px;
 }
+
+.ladytiger_bluetiger {
+  background-position: 0px 0px;
+}
+
+.ladytiger_redlady {
+  background-position: -218px 0px;
+}
+
+.ladytiger_redtiger {
+  background-position: -436px 0px;
+}
+
+.ladytiger_bluelady {
+  background-position: -654px 0px;
+}
+
+.ladytiger_door {
+  background-position: 0px -360px;
+}
+
+/** South will be current player */
+/* #psouth {
+  bottom: 0px;
+} */
 
 /** North will be other player */
-#pnorth {
+/* #pnorth {
   top: 0px;
-}
+} */
 
 /** container for the central display with all the cards */
-#center {
+/* #center {
     left: 0px;
-}
+} */
 
 #tableau_Collector {
   margin-left: 50px;
