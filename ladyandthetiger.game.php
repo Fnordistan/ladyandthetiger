@@ -230,17 +230,11 @@ class LadyAndTheTiger extends Table
 	/**
 	 * Args passed to the STATE_PLAYER_ACTION state in states.inc.php
 	 */
-	function argGetRoles() {
+	function argGetRole() {
         $player_id = self::getActivePlayerId();
 		$guesser = self::getGameStateValue('guesser');
-		$result = array();
-		if ($player_id == $guesser) {
-			$result['actrole'] = "Guesser";
-		} else {
-			$result['actrole'] = "Collector";
-		}
-
-        return $result;
+		$role = ($player_id == $guesser) ? self::_("Guesser") :  self::_("Collector");
+        return array( 'role' => $role);
 	}
 
 

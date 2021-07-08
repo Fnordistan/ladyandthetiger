@@ -64,8 +64,7 @@ function (dojo, declare) {
         setup: function( gamedatas ) {
             console.log( "Starting game setup" );
 
-            this.setupMyRole();
-            this.setupOtherPlayer();
+            this.setupRoleCards();
             //// Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
 
@@ -75,41 +74,37 @@ function (dojo, declare) {
         /**
          * This player's role card.
          */
-        setupMyRole: function() {
+         setupRoleCards: function() {
             const myrole = this.gamedatas.role;
+            const hisrole = myrole == 'Collector' ? 'Guesser' : 'Collector';
             const players = this.gamedatas.players;
             const mycolor = players[this.player_id]['color'];
+            const hiscolor = mycolor == 'ff0000' ? '0000ff' : 'ff0000';
 
             const role_n = document.getElementById('rolename_n');
             role_n.innerHTML = myrole;
             role_n.style['color'] = '#'+mycolor;
 
-            const myrolecard = document.getElementById('role_n');
-            const identity = this.gamedatas.identity;
-            const myidentity = this.getCardIdentity(identity);
-            myrolecard.classList.add('ladytiger_'+myidentity);
-        },
-
-        /**
-         * Other player's role card.
-         */
-        setupOtherPlayer: function() {
-            const hisrole = this.gamedatas.role == 'Collector' ? 'Guesser' : 'Collector';
-            const players = this.gamedatas.players;
-            var hiscolor = '';
-            for (var p in players) {
-                if (p != this.player_id) {
-                    hiscolor = players[p]['color'];
-                    break;
-                }
-            }
-
             const role_s = document.getElementById('rolename_s');
             role_s.innerHTML = hisrole;
             role_s.style['color'] = '#'+hiscolor;
 
+            const myrolecard = document.getElementById('role_n');
+            const identity = this.gamedatas.identity;
+            const myidentity = this.getCardIdentity(identity);
+            myrolecard.classList.add('ltdr_'+myidentity);
+
             const hisrolecard = document.getElementById('role_s');
-            hisrolecard.classList.add('ladytiger_door');
+            hisrolecard.classList.add('ltdr_door');
+
+            const guesser_t = (myrole == 'Guesser') ? 'tableau_n' : 'tableau_s';
+            const guesser_tableau = document.getElementById(guesser_t);
+            guesser_tableau.style['display'] = 'none';
+
+            const guesser_d = (myrole == 'Guesser') ? 'pnorth' : 'psouth';
+            const guesser_display = document.getElementById(guesser_d);
+            guesser_display.style['width'] = 'fit-content';
+
         },
 
         ///////////////////////////////////////////////////

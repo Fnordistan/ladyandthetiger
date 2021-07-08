@@ -85,9 +85,10 @@ $machinestates = array(
     // player must Collect or Discard, according to role
     STATE_COLLECTOR => array(
     	"name" => "collectorAction",
-    	"description" => clienttranslate('${actplayer} must choose a card from the display'),
-    	"descriptionmyturn" => clienttranslate('${you} must choose a card from the display'),
+    	"description" => clienttranslate('${actplayer} (${role}) must choose a card from the display'),
+    	"descriptionmyturn" => clienttranslate('${you} (${role}) must choose a card from the display'),
     	"type" => "activeplayer",
+        "args" => "argGetRole",
     	"possibleactions" => array( "collectCard" ),
     	"transitions" => array( "endContest" => STATE_END_CONTEST, "nextPlayer" => STATE_GUESSER )
     ),

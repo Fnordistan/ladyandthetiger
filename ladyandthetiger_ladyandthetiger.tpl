@@ -25,25 +25,32 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
+
+
+
 <div id="ladytigerboard">
-  <div id="pnorth" class="ladytiger_display whiteblock">
-      <h1 id="rolename_n" class="ladytiger_rolename"></h1>
-      <div id="role_n" class="ladytiger_rolecard">
-      </div
-    <div id="tableau_n" class="ladytiger_tableau whiteblock"></div>
+
+  <div id="pnorth" class="ltdr_display whiteblock">
+    <div id="role_north" class="ltdr_rolecontainer">
+      <h1 id="rolename_n" class="ltdr_rolename"></h1>
+      <div id="role_n" class="ltdr_rolecard"></div>
+    </div>
+    <div id="tableau_n" class="ltdr_tableau"></div>
   </div>
 
-  <div id="center" class="ladytiger_display">
+  <div id="center" class="ltdr_display">
     <div id="cluedeck"></div>
     <div id="cluedisplay"></div>
   </div>
 
-  <div id="psouth" class="ladytiger_display whiteblock">
-      <h1 id="rolename_s" class="ladytiger_rolename"></h1>
-      <div id="role_s" class="ladytiger_rolecard">
-      </div>
-    <div id="tableau_s" class="ladytiger_tableau whiteblock"></div>
+  <div id="psouth" class="ltdr_display whiteblock">
+    <div id="role_south" class="ltdr_rolecontainer">
+      <h1 id="rolename_s" class="ltdr_rolename"></h1>
+      <div id="role_s" class="ltdr_rolecard"></div>
+    </div>
+    <div id="tableau_s" class="ltdr_tableau"></div>
   </div>
+ 
 </div>
 
 <script type="text/javascript">

@@ -49,23 +49,29 @@
 /** BGA class */
 
 /** Wrapper around "Collector/Guesser" labels */
-.ladytiger_rolename {
+.ltdr_rolename {
     font-weight: bold;
     text-align: center;
 }
 
 /** This is the container for a row of cards - both the player tableaus and the center display. */
-.ladytiger_display {
+.ltdr_display {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
+  min-height: 370px;
 }
 
-.ladytiger_tableau {
+.ltdr_tableau {
   margin-top: 5px;
 }
 
-.ladytiger_rolecard {
+.ltdr_rolecontainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.ltdr_rolecard {
   background-size: 872px 720px;
   background-image: url(img/door_sprites.png);
   background-repeat: no-repeat;
@@ -74,46 +80,27 @@
   margin: 5px;
 }
 
-.ladytiger_bluetiger {
+.ltdr_bluetiger {
   background-position: 0px 0px;
 }
 
-.ladytiger_redlady {
+.ltdr_redlady {
   background-position: -218px 0px;
 }
 
-.ladytiger_redtiger {
+.ltdr_redtiger {
   background-position: -436px 0px;
 }
 
-.ladytiger_bluelady {
+.ltdr_bluelady {
   background-position: -654px 0px;
 }
 
-.ladytiger_door {
+.ltdr_door {
   background-position: 0px -360px;
 }
 
-/** South will be current player */
-/* #psouth {
-  bottom: 0px;
-} */
-
-/** North will be other player */
-/* #pnorth {
-  top: 0px;
-} */
-
-/** container for the central display with all the cards */
-/* #center {
-    left: 0px;
-} */
-
-#tableau_Collector {
-  margin-left: 50px;
+#ladytigerboard {
+  display: flex;
+  flex-direction: column;
 }
-
-#tableau_Guesser {
-  display: none;
-}
-
