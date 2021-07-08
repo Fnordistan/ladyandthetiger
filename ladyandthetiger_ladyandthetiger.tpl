@@ -38,7 +38,7 @@
     <div id="tableau_n" class="ltdr_tableau"></div>
   </div>
 
-  <div id="center" class="ltdr_display">
+  <div id="center" class="ltdr_display whiteblock">
     <div id="cluedeck"></div>
     <div id="cluedisplay"></div>
   </div>

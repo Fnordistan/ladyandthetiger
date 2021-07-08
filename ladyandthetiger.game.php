@@ -107,7 +107,9 @@ class LadyAndTheTiger extends Table
 		// 6 = Lady/Tiger
 		$cardvals = array(BLUE+LADY, RED+LADY, BLUE+TIGER, RED+TIGER);
 		foreach ($cardvals as $ct) {
-			$cluecards[] = array( 'type' => $ct, 'type_arg' => 0, 'nbr' => 3);
+            for ($i = 1; $i <= 3; $i++) {
+                $cluecards[] = array( 'type' => $ct, 'type_arg' => $i, 'nbr' => 1);
+            }
 		}
 		$cluecards[] = array( 'type' => REDBLUE, 'type_arg' => 0, 'nbr' => 1);
 		$cluecards[] = array( 'type' => LADYTIGER, 'type_arg' => 0, 'nbr' => 1);
@@ -158,6 +160,7 @@ class LadyAndTheTiger extends Table
         // Cards played on the table
         $result['cluecards'] = $this->cards->getCardsInLocation( 'cluecarddisplay' );
         $result['collectorcards'] = $this->cards->getCardsInLocation( 'collectordisplay' );
+        $result['decksize'] = $this->cards->countCardInLocation('deck');
   
         return $result;
     }

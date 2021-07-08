@@ -65,6 +65,8 @@ function (dojo, declare) {
             console.log( "Starting game setup" );
 
             this.setupRoleCards();
+
+            this.setupClueDisplay();
             //// Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
 
@@ -106,6 +108,15 @@ function (dojo, declare) {
             guesser_display.style['width'] = 'fit-content';
 
         },
+
+        setupClueDisplay: function() {
+            const decksize = parseInt(this.gamedatas.decksize);
+            for (let i = 0; i < decksize; i++) {
+                const offset = 5+(2*i)+"px";
+                const cardback = `<div class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset};"></div>`;
+                dojo.place(cardback, 'cluedeck', i);
+            }
+    },
 
         ///////////////////////////////////////////////////
         //// Utility methods

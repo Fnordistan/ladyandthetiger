@@ -100,6 +100,20 @@
   background-position: 0px -360px;
 }
 
+.ltdr_cluecard {
+  background-size: 1308px 1095px;
+  background-image: url(img/card_sprites.png);
+  background-repeat: no-repeat;
+  width: 218px;
+  height: 365px;
+  margin: 5px;
+}
+
+.ltdr_cardback {
+  background-position: 0 -730px;
+}
+
+
 #ladytigerboard {
   display: flex;
   flex-direction: column;
