@@ -26,7 +26,7 @@ const RED = 1;
 const REDBLUE = 5;
 const LADYTIGER = 6;
 
-const CARD_SPRITES = 'img/card_sprites.jpg';
+const CARD_SPRITES = 'img/card_sprites.png';
 
 
 define([
@@ -79,7 +79,8 @@ function (dojo, declare) {
         },
 
         /**
-         * This player's role card.
+         * Set up Collector and Guesser boards and Role cards.
+         * Make both Doors for Spectator.
          */
          setupRoleCards: function() {
             const collector = this.gamedatas.collector;
@@ -122,6 +123,9 @@ function (dojo, declare) {
             guesser_display.style['width'] = 'fit-content';
         },
 
+        /**
+         * Set up the clue display.
+         */
         setupClueDisplay: function() {
             const decksize = parseInt(this.gamedatas.decksize);
             for (let i = 0; i < decksize; i++) {
@@ -129,26 +133,33 @@ function (dojo, declare) {
                 const cardback = `<div class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset};"></div>`;
                 dojo.place(cardback, 'cluedeck', i);
             }
-            var cluecards = new ebg.stock();
-            cluecards.create(this, $('cluedisplay'), this.cluecardwidth, this.cluecardheight );
-            cluecards.setSelectionMode(1);
-            cluecards.image_items_per_row = 3;
-            // cluecards.onItemCreate = dojo.hitch(this, this.setUpClueCard);
-            // cluecards.autowidth = true;
+            var cluedeck = new ebg.stock();
+            cluedeck.create(this, $('cluedisplay'), this.cluecardwidth, this.cluecardheight );
+            cluedeck.setSelectionMode(1);
+            cluedeck.image_items_per_row = 3;
+            // cluedeck.onItemCreate = dojo.hitch(this, this.setUpClueCard);
+            cluedeck.autowidth = true;
             for (let i = 1; i <= 3; i++) {
                 const redtiger = this.getUniqueTypeForCard(RED+TIGER, i)
-                cluecards.addItemType( redtiger, 0, g_gamethemeurl+CARD_SPRITES, redtiger );
+                cluedeck.addItemType( redtiger, 0, g_gamethemeurl+CARD_SPRITES, redtiger );
                 const bluetiger = this.getUniqueTypeForCard(BLUE+TIGER, i)
-                cluecards.addItemType( bluetiger, 0, g_gamethemeurl+CARD_SPRITES, bluetiger );
+                cluedeck.addItemType( bluetiger, 0, g_gamethemeurl+CARD_SPRITES, bluetiger );
                 const redlady = this.getUniqueTypeForCard(RED+LADY, i)
-                cluecards.addItemType( redlady, 0, g_gamethemeurl+CARD_SPRITES, redlady );
+                cluedeck.addItemType( redlady, 0, g_gamethemeurl+CARD_SPRITES, redlady );
                 const bluelady = this.getUniqueTypeForCard(BLUE+LADY, i)
-                cluecards.addItemType( bluelady, 0, g_gamethemeurl+CARD_SPRITES, bluelady );
+                cluedeck.addItemType( bluelady, 0, g_gamethemeurl+CARD_SPRITES, bluelady );
             }
             const redblue = this.getUniqueTypeForCard(REDBLUE);
-            cluecards.addItemType( redblue, 0, g_gamethemeurl+CARD_SPRITES, redblue );
+            cluedeck.addItemType( redblue, 0, g_gamethemeurl+CARD_SPRITES, redblue );
             const ladytiger = this.getUniqueTypeForCard(LADYTIGER);
-            cluecards.addItemType( ladytiger, 0, g_gamethemeurl+CARD_SPRITES, ladytiger );
+            cluedeck.addItemType( ladytiger, 0, g_gamethemeurl+CARD_SPRITES, ladytiger );
+            // now add the ones actually on display
+            const cluecards = this.gamedatas.cluecards;
+            for (const c in cluecards) {
+                const card = cluecards[c];
+                const id = this.getUniqueTypeForCard(card.type, card.type_arg);
+                cluedeck.addToStockWithId(id, card.id);
+            }
         },
 
         ///////////////////////////////////////////////////
@@ -181,19 +192,21 @@ function (dojo, declare) {
          * @returns 
          */
         getUniqueTypeForCard: function(identity, arg) {
+            const id = parseInt(identity);
+            const num = parseInt(arg);
             var r = null;
             var c = null;
-            if (identity == DOOR) {
+            if (id == DOOR) {
                 r = 3;
                 c = 1;
-            } else if (identity == REDBLUE) {
+            } else if (id == REDBLUE) {
                 r = 2;
                 c = 2;
-            } else if (identity == LADYTIGER) {
+            } else if (id == LADYTIGER) {
                 r = 2;
                 c = 1;
-            } else if (identity == RED+LADY) {
-                switch (arg) {
+            } else if (id == RED+LADY) {
+                switch (num) {
                     case 1:
                         r = 1;
                         c = 5;
@@ -207,8 +220,8 @@ function (dojo, declare) {
                         c = 4;
                         break;
                 }
-            } else if (identity == RED+TIGER) {
-                switch (arg) {
+            } else if (id == RED+TIGER) {
+                switch (num) {
                     case 1:
                         r = 1;
                         c = 6;
@@ -222,8 +235,8 @@ function (dojo, declare) {
                         c = 6;
                         break;
                 }
-            } else if (identity == BLUE+LADY) {
-                switch (arg) {
+            } else if (id == BLUE+LADY) {
+                switch (num) {
                     case 1:
                         r = 1;
                         c = 1;
@@ -237,9 +250,9 @@ function (dojo, declare) {
                         c = 3;
                         break;
                 }
-            } else if (identity == BLUE+TIGER) {
+            } else if (id == BLUE+TIGER) {
                 r = 1;
-                switch (arg) {
+                switch (num) {
                     case 1:
                         c = 2;
                         break;

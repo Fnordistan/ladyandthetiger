@@ -113,8 +113,15 @@
   background-position: 0 -730px;
 }
 
-
 #ladytigerboard {
   display: flex;
   flex-direction: column;
+}
+
+#cluedeck {
+  width: 250px;
+}
+
+#cluedisplay {
+
 }
