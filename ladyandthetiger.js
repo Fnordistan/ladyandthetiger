@@ -26,6 +26,9 @@ const RED = 1;
 const REDBLUE = 5;
 const LADYTIGER = 6;
 
+const CARD_SPRITES = 'img/card_sprites.jpg';
+
+
 define([
     "dojo","dojo/_base/declare",
     "ebg/core/gamegui",
@@ -46,6 +49,8 @@ function (dojo, declare) {
             this.clueCards = null;
             this.rolecardwidth = 218;
             this.rolecardheight = 360;
+            this.cluecardwidth = 218;
+            this.cluecardheight = 365;
         },
         
         /*
@@ -77,11 +82,16 @@ function (dojo, declare) {
          * This player's role card.
          */
          setupRoleCards: function() {
-            const myrole = this.gamedatas.role;
-            const hisrole = myrole == 'Collector' ? 'Guesser' : 'Collector';
-            const players = this.gamedatas.players;
-            const mycolor = players[this.player_id]['color'];
-            const hiscolor = mycolor == 'ff0000' ? '0000ff' : 'ff0000';
+            const collector = this.gamedatas.collector;
+            const guesser = this.gamedatas.guesser;
+            const collectorColor = this.gamedatas.players[collector]['color'];
+            const guesserColor = this.gamedatas.players[guesser]['color'];
+
+            // north is the collector by default
+            const myrole = (this.isSpectator) ? 'Collector' : (this.player_id == collector) ? 'Collector' : 'Guesser';
+            const mycolor = (myrole == 'Collector') ? collectorColor : guesserColor;
+            const hisrole = (myrole == 'Collector') ? 'Guesser' : 'Collector';
+            const hiscolor = (hisrole == 'Collector') ? collectorColor : guesserColor;
 
             const role_n = document.getElementById('rolename_n');
             role_n.innerHTML = myrole;
@@ -92,9 +102,13 @@ function (dojo, declare) {
             role_s.style['color'] = '#'+hiscolor;
 
             const myrolecard = document.getElementById('role_n');
-            const identity = this.gamedatas.identity;
-            const myidentity = this.getCardIdentity(identity);
-            myrolecard.classList.add('ltdr_'+myidentity);
+            if (!this.isSpectator) {
+                const identity = this.gamedatas.identity;
+                const myidentity = this.getCardIdentity(identity);
+                myrolecard.classList.add('ltdr_'+myidentity);
+            } else {
+                myrolecard.classList.add('ltdr_door');
+            }
 
             const hisrolecard = document.getElementById('role_s');
             hisrolecard.classList.add('ltdr_door');
@@ -106,7 +120,6 @@ function (dojo, declare) {
             const guesser_d = (myrole == 'Guesser') ? 'pnorth' : 'psouth';
             const guesser_display = document.getElementById(guesser_d);
             guesser_display.style['width'] = 'fit-content';
-
         },
 
         setupClueDisplay: function() {
@@ -116,7 +129,27 @@ function (dojo, declare) {
                 const cardback = `<div class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset};"></div>`;
                 dojo.place(cardback, 'cluedeck', i);
             }
-    },
+            var cluecards = new ebg.stock();
+            cluecards.create(this, $('cluedisplay'), this.cluecardwidth, this.cluecardheight );
+            cluecards.setSelectionMode(1);
+            cluecards.image_items_per_row = 3;
+            // cluecards.onItemCreate = dojo.hitch(this, this.setUpClueCard);
+            // cluecards.autowidth = true;
+            for (let i = 1; i <= 3; i++) {
+                const redtiger = this.getUniqueTypeForCard(RED+TIGER, i)
+                cluecards.addItemType( redtiger, 0, g_gamethemeurl+CARD_SPRITES, redtiger );
+                const bluetiger = this.getUniqueTypeForCard(BLUE+TIGER, i)
+                cluecards.addItemType( bluetiger, 0, g_gamethemeurl+CARD_SPRITES, bluetiger );
+                const redlady = this.getUniqueTypeForCard(RED+LADY, i)
+                cluecards.addItemType( redlady, 0, g_gamethemeurl+CARD_SPRITES, redlady );
+                const bluelady = this.getUniqueTypeForCard(BLUE+LADY, i)
+                cluecards.addItemType( bluelady, 0, g_gamethemeurl+CARD_SPRITES, bluelady );
+            }
+            const redblue = this.getUniqueTypeForCard(REDBLUE);
+            cluecards.addItemType( redblue, 0, g_gamethemeurl+CARD_SPRITES, redblue );
+            const ladytiger = this.getUniqueTypeForCard(LADYTIGER);
+            cluecards.addItemType( ladytiger, 0, g_gamethemeurl+CARD_SPRITES, ladytiger );
+        },
 
         ///////////////////////////////////////////////////
         //// Utility methods
@@ -142,10 +175,91 @@ function (dojo, declare) {
         },
 
         /**
-         * setupNewCard:
+         * Get the unique card (from sprites array) corresponding to identity and arg
+         * @param {int} identity
+         * @param {int} arg (optional)
+         * @returns 
+         */
+        getUniqueTypeForCard: function(identity, arg) {
+            var r = null;
+            var c = null;
+            if (identity == DOOR) {
+                r = 3;
+                c = 1;
+            } else if (identity == REDBLUE) {
+                r = 2;
+                c = 2;
+            } else if (identity == LADYTIGER) {
+                r = 2;
+                c = 1;
+            } else if (identity == RED+LADY) {
+                switch (arg) {
+                    case 1:
+                        r = 1;
+                        c = 5;
+                        break;
+                    case 2:
+                        r = 2;
+                        c = 3;
+                        break;
+                    case 3:
+                        r = 2;
+                        c = 4;
+                        break;
+                }
+            } else if (identity == RED+TIGER) {
+                switch (arg) {
+                    case 1:
+                        r = 1;
+                        c = 6;
+                        break;
+                    case 2:
+                        r = 2;
+                        c = 5;
+                        break;
+                    case 3:
+                        r = 2;
+                        c = 6;
+                        break;
+                }
+            } else if (identity == BLUE+LADY) {
+                switch (arg) {
+                    case 1:
+                        r = 1;
+                        c = 1;
+                        break;
+                    case 2:
+                        r = 3;
+                        c = 2;
+                        break;
+                    case 3:
+                        r = 3;
+                        c = 3;
+                        break;
+                }
+            } else if (identity == BLUE+TIGER) {
+                r = 1;
+                switch (arg) {
+                    case 1:
+                        c = 2;
+                        break;
+                    case 2:
+                        c = 3;
+                        break;
+                    case 3:
+                        c = 4;
+                        break;
+                }
+            }
+
+            return ((r-1)*6) + (c-1);
+        },
+
+        /**
+         * setupRoleCard:
          * Assign a tooltip to role cards.
          */
-        setupNewCard: function( card_div, card_type_id, card_id ) {
+        setupRoleCard: function( card_div, card_type_id, card_id ) {
             //console.log(card_div);
             //console.log(card_type_id);
             //console.log(card_id);
