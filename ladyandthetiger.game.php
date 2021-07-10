@@ -107,7 +107,7 @@ class LadyAndTheTiger extends Table
 		// 6 = Lady/Tiger
 		$cardvals = array(BLUE+LADY, RED+LADY, BLUE+TIGER, RED+TIGER);
 		foreach ($cardvals as $ct) {
-            for ($i = 1; $i <= 3; $i++) {
+            for ($i = 0; $i < 3; $i++) {
                 $cluecards[] = array( 'type' => $ct, 'type_arg' => $i, 'nbr' => 1);
             }
 		}

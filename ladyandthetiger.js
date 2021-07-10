@@ -28,6 +28,17 @@ const LADYTIGER = 6;
 
 const CARD_SPRITES = 'img/card_sprites.png';
 
+/** Correspond to type/type_arg and card positions */
+const CLUE_CARDS = [
+    /** DOOR */         [12],
+    /** BLUE+LADY */    [0, 13, 14],
+    /** RED+LADY */     [4, 8, 9],
+    /** BLUE+TIGER */   [1, 2, 3],
+    /** RED+TIGER */    [5, 10, 11],
+    /** REDBLUE */      [7],
+    /** LADYTIGER */    [6]
+];
+
 
 define([
     "dojo","dojo/_base/declare",
@@ -130,35 +141,36 @@ function (dojo, declare) {
             const decksize = parseInt(this.gamedatas.decksize);
             for (let i = 0; i < decksize; i++) {
                 const offset = 5+(2*i)+"px";
-                const cardback = `<div class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset};"></div>`;
+                const cardback = `<div class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset} 0 0 ${offset};"></div>`;
                 dojo.place(cardback, 'cluedeck', i);
             }
             var cluedeck = new ebg.stock();
             cluedeck.create(this, $('cluedisplay'), this.cluecardwidth, this.cluecardheight );
-            cluedeck.setSelectionMode(1);
-            cluedeck.image_items_per_row = 3;
-            // cluedeck.onItemCreate = dojo.hitch(this, this.setUpClueCard);
+            const sel = this.isCurrentPlayerActive() ? 1 : 0;
+            cluedeck.setSelectionMode(sel);
+            cluedeck.image_items_per_row = 6;
+            cluedeck.onItemCreate = dojo.hitch(this, this.setUpClueCard);
             cluedeck.autowidth = true;
             for (let i = 1; i <= 3; i++) {
-                const redtiger = this.getUniqueTypeForCard(RED+TIGER, i)
-                cluedeck.addItemType( redtiger, 0, g_gamethemeurl+CARD_SPRITES, redtiger );
-                const bluetiger = this.getUniqueTypeForCard(BLUE+TIGER, i)
-                cluedeck.addItemType( bluetiger, 0, g_gamethemeurl+CARD_SPRITES, bluetiger );
-                const redlady = this.getUniqueTypeForCard(RED+LADY, i)
-                cluedeck.addItemType( redlady, 0, g_gamethemeurl+CARD_SPRITES, redlady );
-                const bluelady = this.getUniqueTypeForCard(BLUE+LADY, i)
-                cluedeck.addItemType( bluelady, 0, g_gamethemeurl+CARD_SPRITES, bluelady );
+                cluedeck.addItemType( CLUE_CARDS[RED+TIGER][i], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[RED+TIGER][i] );
+                cluedeck.addItemType( CLUE_CARDS[BLUE+TIGER][i], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[BLUE+TIGER][i] );
+                cluedeck.addItemType( CLUE_CARDS[RED+LADY][i], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[RED+LADY][i] );
+                cluedeck.addItemType( CLUE_CARDS[BLUE+LADY][i], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[BLUE+LADY][i] );
             }
-            const redblue = this.getUniqueTypeForCard(REDBLUE);
-            cluedeck.addItemType( redblue, 0, g_gamethemeurl+CARD_SPRITES, redblue );
-            const ladytiger = this.getUniqueTypeForCard(LADYTIGER);
-            cluedeck.addItemType( ladytiger, 0, g_gamethemeurl+CARD_SPRITES, ladytiger );
+            cluedeck.addItemType( CLUE_CARDS[REDBLUE][0], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[REDBLUE][0] );
+            cluedeck.addItemType( CLUE_CARDS[LADYTIGER][0], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[LADYTIGER][0] );
             // now add the ones actually on display
             const cluecards = this.gamedatas.cluecards;
+
             for (const c in cluecards) {
                 const card = cluecards[c];
-                const id = this.getUniqueTypeForCard(card.type, card.type_arg);
-                cluedeck.addToStockWithId(id, card.id);
+                const id = CLUE_CARDS[card.type][card.type_arg];
+                cluedeck.addToStockWithId(id, id);
+                if (this.isCurrentPlayerActive()) {
+                    $('cluedisplay_item_'+id).addEventListener('click', () => {
+                        this.onClueCardSelected(id);
+                    });
+                }
             }
         },
 
@@ -186,86 +198,27 @@ function (dojo, declare) {
         },
 
         /**
-         * Get the unique card (from sprites array) corresponding to identity and arg
-         * @param {int} identity
-         * @param {int} arg (optional)
-         * @returns 
+         * Given a card type, get the name string.
+         * @param {int} type 
+         * @returns name of card
          */
-        getUniqueTypeForCard: function(identity, arg) {
-            const id = parseInt(identity);
-            const num = parseInt(arg);
-            var r = null;
-            var c = null;
-            if (id == DOOR) {
-                r = 3;
-                c = 1;
-            } else if (id == REDBLUE) {
-                r = 2;
-                c = 2;
-            } else if (id == LADYTIGER) {
-                r = 2;
-                c = 1;
-            } else if (id == RED+LADY) {
-                switch (num) {
-                    case 1:
-                        r = 1;
-                        c = 5;
-                        break;
-                    case 2:
-                        r = 2;
-                        c = 3;
-                        break;
-                    case 3:
-                        r = 2;
-                        c = 4;
-                        break;
-                }
-            } else if (id == RED+TIGER) {
-                switch (num) {
-                    case 1:
-                        r = 1;
-                        c = 6;
-                        break;
-                    case 2:
-                        r = 2;
-                        c = 5;
-                        break;
-                    case 3:
-                        r = 2;
-                        c = 6;
-                        break;
-                }
-            } else if (id == BLUE+LADY) {
-                switch (num) {
-                    case 1:
-                        r = 1;
-                        c = 1;
-                        break;
-                    case 2:
-                        r = 3;
-                        c = 2;
-                        break;
-                    case 3:
-                        r = 3;
-                        c = 3;
-                        break;
-                }
-            } else if (id == BLUE+TIGER) {
-                r = 1;
-                switch (num) {
-                    case 1:
-                        c = 2;
-                        break;
-                    case 2:
-                        c = 3;
-                        break;
-                    case 3:
-                        c = 4;
-                        break;
-                }
+        getLabelById: function( type ) {
+            if (type == 12) {
+                return "Door";
+            } else if (type == 6) {
+                return "Lady+Tiger";
+            } else if (type == 7) {
+                return "Red+Blue";
+            } else if (CLUE_CARDS[RED+TIGER].includes(type)) {
+                return "Red Tiger";
+            } else if (CLUE_CARDS[BLUE+TIGER].includes(type)) {
+                return "Blue Tiger";
+            } else if (CLUE_CARDS[RED+LADY].includes(type)) {
+                return "Red Lady";
+            } else if (CLUE_CARDS[BLUE+LADY].includes(type)) {
+                return "Blue Lady";
             }
-
-            return ((r-1)*6) + (c-1);
+            throw new Error("Unexpected card type: " + type);
         },
 
         /**
@@ -284,6 +237,10 @@ function (dojo, declare) {
                this.addTooltip(card_div.id, '', "Add a " + cardrole + " to your collection");
             }
        },
+
+       setUpClueCard: function( card_div, card_type_id, card_id ) {
+            this.addTooltip(card_div.id, '', this.getLabelById(parseInt(card_type_id)));
+       },
         
         ///////////////////////////////////////////////////
         //// Game & client states
@@ -292,8 +249,12 @@ function (dojo, declare) {
          * onClueCardSelected:
          * hooked to selection of a clue card.
          */
-        onClueCardSelected: function( control_name ) {
-           console.log("selected from " + control_name); 
+        onClueCardSelected: function( id ) {
+            if (this.checkAction("collectCard", true)) {
+                console.log("Collect "+ this.getLabelById(id));
+            } else if (this.checkAction("discardCard", true)) {
+                console.log("Discard "+ this.getLabelById(id));
+            }
         },
         
         /**

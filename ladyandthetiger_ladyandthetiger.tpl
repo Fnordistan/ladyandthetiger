@@ -41,6 +41,7 @@
   <div id="center" class="ltdr_display whiteblock">
     <div id="cluedeck"></div>
     <div id="cluedisplay"></div>
+    <div id="cluediscard"></div>
   </div>
 
   <div id="psouth" class="ltdr_display whiteblock">
