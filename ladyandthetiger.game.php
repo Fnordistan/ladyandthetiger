@@ -30,10 +30,6 @@ define('RED', 1);
 define('REDBLUE', 5);
 define('LADYTIGER', 6);
 
-// type values
-define ('DOORCARD', 1);
-define('CLUECARD', 2);
-
 class LadyAndTheTiger extends Table
 {
 	function __construct( )
@@ -159,8 +155,8 @@ class LadyAndTheTiger extends Table
         }
 
         // Cards played on the table
-        $result['cluecards'] = $this->cards->getCardsInLocation( 'cluecarddisplay' );
-        $result['collectorcards'] = $this->cards->getCardsInLocation( 'collectordisplay' );
+        $result['cluecards'] = $this->cards->getCardsInLocation( 'cluecards' );
+        $result['collectorcards'] = $this->cards->getCardsInLocation( 'collectorcards' );
         $result['decksize'] = $this->cards->countCardInLocation('deck');
   
         return $result;
@@ -189,44 +185,40 @@ class LadyAndTheTiger extends Table
 //////////// Utility functions
 ////////////    
 
-
+    /**
+     * Given a card id, return the string representing its type.
+     */
+    function getCardIdentity($id) {
+        $type = self::getUniqueValueFromDB("SELECT card_type FROM cards WHERE card_id=$id");
+        return $this->identity[$type];
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
 //////////// 
 
-    /*
-        Each time a player is doing some game action, one of the methods below is called.
-        (note: each method below must match an input method in ladyandthetiger.action.php)
+    /** 
+     * Collector selected a card
     */
+    function collectCard( $type, $arg ) {
+        self::checkAction( 'collectCard' );
+        self::debug("getting $type/$arg in cluecards");
 
-    /*
-    
-    Example:
+        $id = self::getUniqueValueFromDB("SELECT card_id FROM cards WHERE card_type=$type AND card_type_arg=$arg AND card_location='cluecards'");
+        if ($id == null) {
+            throw new BgaUserException("That card is not in the display!");
+        }
+        self::debug("card id $id");
+        $this->cards->moveCard($id, 'collector');
 
-    function playCard( $card_id )
-    {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' ); 
-        
-        $player_id = self::getActivePlayerId();
-        
-        // Add your game logic to play a card there 
-        ...
-        
-        // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-            'player_id' => $player_id,
+        self::notifyAllPlayers('cardCollected', clienttranslate('${player_name} adds ${card_type} to their collection'), array(
             'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ) );
-          
-    }
-    
-    */
+            'card_type' => $this->getCardIdentity($id)
+        ));
 
-    
+    }
+
+   
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
 ////////////
@@ -271,7 +263,7 @@ class LadyAndTheTiger extends Table
                 self::setGameStateValue('guesser_role', $role);
             }
         }
-		$this->cards->pickCardsForLocation(4, 'deck', 'cluecarddisplay');
+		$this->cards->pickCardsForLocation(4, 'deck', 'cluecards');
 		
         $this->gamestate->nextState( "" );
 	}

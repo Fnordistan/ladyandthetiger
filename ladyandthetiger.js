@@ -29,7 +29,7 @@ const LADYTIGER = 6;
 const CARD_SPRITES = 'img/card_sprites.png';
 
 /** Correspond to type/type_arg and card positions */
-const CLUE_CARDS = [
+const CARD_TYPE_TO_POS = [
     /** DOOR */         [12],
     /** BLUE+LADY */    [0, 13, 14],
     /** RED+LADY */     [4, 8, 9],
@@ -151,24 +151,24 @@ function (dojo, declare) {
             cluedeck.image_items_per_row = 6;
             cluedeck.onItemCreate = dojo.hitch(this, this.setUpClueCard);
             cluedeck.autowidth = true;
-            for (let i = 1; i <= 3; i++) {
-                cluedeck.addItemType( CLUE_CARDS[RED+TIGER][i], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[RED+TIGER][i] );
-                cluedeck.addItemType( CLUE_CARDS[BLUE+TIGER][i], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[BLUE+TIGER][i] );
-                cluedeck.addItemType( CLUE_CARDS[RED+LADY][i], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[RED+LADY][i] );
-                cluedeck.addItemType( CLUE_CARDS[BLUE+LADY][i], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[BLUE+LADY][i] );
+            for (let i = 0; i < 3; i++) {
+                cluedeck.addItemType( CARD_TYPE_TO_POS[RED+TIGER][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[RED+TIGER][i] );
+                cluedeck.addItemType( CARD_TYPE_TO_POS[BLUE+TIGER][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[BLUE+TIGER][i] );
+                cluedeck.addItemType( CARD_TYPE_TO_POS[RED+LADY][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[RED+LADY][i] );
+                cluedeck.addItemType( CARD_TYPE_TO_POS[BLUE+LADY][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[BLUE+LADY][i] );
             }
-            cluedeck.addItemType( CLUE_CARDS[REDBLUE][0], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[REDBLUE][0] );
-            cluedeck.addItemType( CLUE_CARDS[LADYTIGER][0], 0, g_gamethemeurl+CARD_SPRITES, CLUE_CARDS[LADYTIGER][0] );
+            cluedeck.addItemType( CARD_TYPE_TO_POS[REDBLUE][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[REDBLUE][0] );
+            cluedeck.addItemType( CARD_TYPE_TO_POS[LADYTIGER][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[LADYTIGER][0] );
             // now add the ones actually on display
             const cluecards = this.gamedatas.cluecards;
 
             for (const c in cluecards) {
                 const card = cluecards[c];
-                const id = CLUE_CARDS[card.type][card.type_arg];
-                cluedeck.addToStockWithId(id, id);
+                const pos = CARD_TYPE_TO_POS[card.type][card.type_arg];
+                cluedeck.addToStockWithId(pos, pos);
                 if (this.isCurrentPlayerActive()) {
-                    $('cluedisplay_item_'+id).addEventListener('click', () => {
-                        this.onClueCardSelected(id);
+                    $('cluedisplay_item_'+pos).addEventListener('click', () => {
+                        this.onClueCardSelected(card.type, card.type_arg);
                     });
                 }
             }
@@ -198,27 +198,27 @@ function (dojo, declare) {
         },
 
         /**
-         * Given a card type, get the name string.
-         * @param {int} type 
+         * Given a card id, get the name string.
+         * @param {int} id 
          * @returns name of card
          */
-        getLabelById: function( type ) {
-            if (type == 12) {
+        getLabelById: function( id ) {
+            if (id == 12) {
                 return "Door";
-            } else if (type == 6) {
+            } else if (id == 6) {
                 return "Lady+Tiger";
-            } else if (type == 7) {
+            } else if (id == 7) {
                 return "Red+Blue";
-            } else if (CLUE_CARDS[RED+TIGER].includes(type)) {
+            } else if (CARD_TYPE_TO_POS[RED+TIGER].includes(id)) {
                 return "Red Tiger";
-            } else if (CLUE_CARDS[BLUE+TIGER].includes(type)) {
+            } else if (CARD_TYPE_TO_POS[BLUE+TIGER].includes(id)) {
                 return "Blue Tiger";
-            } else if (CLUE_CARDS[RED+LADY].includes(type)) {
+            } else if (CARD_TYPE_TO_POS[RED+LADY].includes(id)) {
                 return "Red Lady";
-            } else if (CLUE_CARDS[BLUE+LADY].includes(type)) {
+            } else if (CARD_TYPE_TO_POS[BLUE+LADY].includes(id)) {
                 return "Blue Lady";
             }
-            throw new Error("Unexpected card type: " + type);
+            throw new Error("Unexpected card type: " + id);
         },
 
         /**
@@ -226,9 +226,6 @@ function (dojo, declare) {
          * Assign a tooltip to role cards.
          */
         setupRoleCard: function( card_div, card_type_id, card_id ) {
-            //console.log(card_div);
-            //console.log(card_type_id);
-            //console.log(card_id);
             cardrole = this.getCardIdentity(parseInt(card_type_id));
             // Role cards get help text, clue cards get action text
             if (card_div.id.includes("myhand")) {
@@ -236,26 +233,51 @@ function (dojo, declare) {
             } else {
                this.addTooltip(card_div.id, '', "Add a " + cardrole + " to your collection");
             }
-       },
+        },
 
-       setUpClueCard: function( card_div, card_type_id, card_id ) {
+        setUpClueCard: function( card_div, card_type_id, card_id ) {
             this.addTooltip(card_div.id, '', this.getLabelById(parseInt(card_type_id)));
-       },
-        
+        },
+
         ///////////////////////////////////////////////////
-        //// Game & client states
-        
+        //// Event actions
+
         /**
          * onClueCardSelected:
-         * hooked to selection of a clue card.
+         * Hooked to selection of a clue card.
+         * @param {int} type 
+         * @param {int} arg 
          */
-        onClueCardSelected: function( id ) {
+         onClueCardSelected: function( type, arg ) {
             if (this.checkAction("collectCard", true)) {
-                console.log("Collect "+ this.getLabelById(id));
+                this.collectCard(type, arg);
             } else if (this.checkAction("discardCard", true)) {
                 console.log("Discard "+ this.getLabelById(id));
             }
         },
+
+        
+        ///////////////////////////////////////////////////
+        //// Ajax calls
+
+        /**
+         * Action to collect a card.
+         * @param {int} type 
+         * @param {int} arg 
+         */
+        collectCard: function(type, arg) {
+            if (this.checkAction("collectCard", true)) {
+                this.ajaxcall( "/ladyandthetiger/ladyandthetiger/collect.html", { 
+                    card_type: type,
+                    card_arg: arg,
+                    lock: true 
+                }, this, function( result ) {  }, function( is_error) { } );
+            }
+        },
+
+        ///////////////////////////////////////////////////
+        //// Game & client states
+        
         
         /**
          * onEnteringState:

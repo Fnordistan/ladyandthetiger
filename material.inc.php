@@ -20,18 +20,12 @@
  */
 
 
-/*
-
-Example:
-
-$this->card_types = array(
-    1 => array( "card_name" => ...,
-                ...
-              )
+$this->identity = array(
+  0 => 'Door',
+  1 => 'Blue Lady',
+  2 => 'Red Lady',
+  3 => 'Blue Tiger',
+  4 => 'Red Tiger',
+  5 => 'Red+Blue',
+  6 => 'Lady+Tiger',
 );
-
-*/
-
-
-
-
