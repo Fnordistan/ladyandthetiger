@@ -155,8 +155,8 @@ class LadyAndTheTiger extends Table
         }
 
         // Cards played on the table
-        $result['cluecards'] = $this->cards->getCardsInLocation( 'cluecards' );
-        $result['collectorcards'] = $this->cards->getCardsInLocation( 'collectorcards' );
+        $result['cluecards'] = $this->cards->getCardsInLocation( 'cluedisplay' );
+        $result['collectorcards'] = $this->cards->getCardsInLocation( 'collector' );
         $result['decksize'] = $this->cards->countCardInLocation('deck');
   
         return $result;
@@ -202,18 +202,18 @@ class LadyAndTheTiger extends Table
     */
     function collectCard( $type, $arg ) {
         self::checkAction( 'collectCard' );
-        self::debug("getting $type/$arg in cluecards");
 
-        $id = self::getUniqueValueFromDB("SELECT card_id FROM cards WHERE card_type=$type AND card_type_arg=$arg AND card_location='cluecards'");
+        $id = self::getUniqueValueFromDB("SELECT card_id FROM cards WHERE card_type=$type AND card_type_arg=$arg AND card_location='cluedisplay'");
         if ($id == null) {
             throw new BgaUserException("That card is not in the display!");
         }
-        self::debug("card id $id");
         $this->cards->moveCard($id, 'collector');
 
         self::notifyAllPlayers('cardCollected', clienttranslate('${player_name} adds ${card_type} to their collection'), array(
             'player_name' => self::getActivePlayerName(),
-            'card_type' => $this->getCardIdentity($id)
+            'card_type' => $this->getCardIdentity($id),
+            'type' => $type,
+            'arg' => $arg
         ));
 
     }
@@ -263,7 +263,7 @@ class LadyAndTheTiger extends Table
                 self::setGameStateValue('guesser_role', $role);
             }
         }
-		$this->cards->pickCardsForLocation(4, 'deck', 'cluecards');
+		$this->cards->pickCardsForLocation(4, 'deck', 'cluedisplay');
 		
         $this->gamestate->nextState( "" );
 	}

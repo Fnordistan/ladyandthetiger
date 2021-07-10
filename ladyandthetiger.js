@@ -80,10 +80,10 @@ function (dojo, declare) {
         setup: function( gamedatas ) {
             console.log( "Starting game setup" );
 
-            this.setupRoleCards();
+            this.setupPlayerTableaus();
 
             this.setupClueDisplay();
-            //// Setup game notifications to handle (see "setupNotifications" method below)
+
             this.setupNotifications();
 
             console.log( "Ending game setup" );
@@ -93,7 +93,7 @@ function (dojo, declare) {
          * Set up Collector and Guesser boards and Role cards.
          * Make both Doors for Spectator.
          */
-         setupRoleCards: function() {
+         setupPlayerTableaus: function() {
             const collector = this.gamedatas.collector;
             const guesser = this.gamedatas.guesser;
             const collectorColor = this.gamedatas.players[collector]['color'];
@@ -132,6 +132,9 @@ function (dojo, declare) {
             const guesser_d = (myrole == 'Guesser') ? 'pnorth' : 'psouth';
             const guesser_display = document.getElementById(guesser_d);
             guesser_display.style['width'] = 'fit-content';
+
+            const collector_t = (myrole == 'Collector') ? 'tableau_n' : 'tableau_s';
+            this.setupCollectorDisplay(collector_t);
         },
 
         /**
@@ -144,28 +147,16 @@ function (dojo, declare) {
                 const cardback = `<div class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset} 0 0 ${offset};"></div>`;
                 dojo.place(cardback, 'cluedeck', i);
             }
-            var cluedeck = new ebg.stock();
-            cluedeck.create(this, $('cluedisplay'), this.cluecardwidth, this.cluecardheight );
+
             const sel = this.isCurrentPlayerActive() ? 1 : 0;
-            cluedeck.setSelectionMode(sel);
-            cluedeck.image_items_per_row = 6;
-            cluedeck.onItemCreate = dojo.hitch(this, this.setUpClueCard);
-            cluedeck.autowidth = true;
-            for (let i = 0; i < 3; i++) {
-                cluedeck.addItemType( CARD_TYPE_TO_POS[RED+TIGER][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[RED+TIGER][i] );
-                cluedeck.addItemType( CARD_TYPE_TO_POS[BLUE+TIGER][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[BLUE+TIGER][i] );
-                cluedeck.addItemType( CARD_TYPE_TO_POS[RED+LADY][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[RED+LADY][i] );
-                cluedeck.addItemType( CARD_TYPE_TO_POS[BLUE+LADY][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[BLUE+LADY][i] );
-            }
-            cluedeck.addItemType( CARD_TYPE_TO_POS[REDBLUE][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[REDBLUE][0] );
-            cluedeck.addItemType( CARD_TYPE_TO_POS[LADYTIGER][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[LADYTIGER][0] );
+            this.cluedeck = this.createClueStock('cluedisplay', sel);
             // now add the ones actually on display
             const cluecards = this.gamedatas.cluecards;
 
             for (const c in cluecards) {
                 const card = cluecards[c];
                 const pos = CARD_TYPE_TO_POS[card.type][card.type_arg];
-                cluedeck.addToStockWithId(pos, pos);
+                this.cluedeck.addToStockWithId(pos, pos);
                 if (this.isCurrentPlayerActive()) {
                     $('cluedisplay_item_'+pos).addEventListener('click', () => {
                         this.onClueCardSelected(card.type, card.type_arg);
@@ -173,6 +164,46 @@ function (dojo, declare) {
                 }
             }
         },
+
+        /**
+         * Given id of collector tableau, set up the collector cards.
+         * @param {string} collector_id
+         */
+         setupCollectorDisplay: function(collector_id) {
+            this.collection = this.createClueStock(collector_id, 0);
+
+            // now add the ones actually on display
+            const collectorcards = this.gamedatas.collectorcards;
+            for (const c in collectorcards) {
+                const card = collectorcards[c];
+                const pos = CARD_TYPE_TO_POS[card.type][card.type_arg];
+                this.collection.addToStockWithId(pos, pos);
+            }
+        },
+
+        /**
+         * Create a Stock item with clue cards.
+         * @param {string} id 
+         * @param {int} sel 
+         * @returns Stock item
+         */
+        createClueStock: function(id, sel) {
+            var pile = new ebg.stock();
+            pile.create(this, $(id), this.cluecardwidth, this.cluecardheight );
+            pile.setSelectionMode(sel);
+            pile.image_items_per_row = 6;
+            pile.onItemCreate = dojo.hitch(this, this.setUpClueCard);
+            pile.autowidth = true;
+            for (let i = 0; i < 3; i++) {
+                for (let type of [RED+TIGER, BLUE+TIGER, RED+LADY, BLUE+LADY]) {
+                    pile.addItemType( CARD_TYPE_TO_POS[type][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[type][i] );
+                }
+            }
+            pile.addItemType( CARD_TYPE_TO_POS[REDBLUE][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[REDBLUE][0] );
+            pile.addItemType( CARD_TYPE_TO_POS[LADYTIGER][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[LADYTIGER][0] );
+            return pile;
+        },
+
 
         ///////////////////////////////////////////////////
         //// Utility methods
@@ -377,6 +408,7 @@ function (dojo, declare) {
             console.log( 'notifications subscriptions setup' );
             // here, associate your game notifications with local methods
             dojo.subscribe( 'newRole', this, 'notif_newRole' );
+            dojo.subscribe( 'cardCollected', this, 'notif_cardCollected' );
         },  
         
         // game notification handling methods
@@ -385,18 +417,21 @@ function (dojo, declare) {
          * Called when a player is a given a new Door (role) card
          */
         notif_newRole: function( notif ) {
-            console.log("notifying of new role");
-            this.playerHand.removeAll();
-            // should only ever be one Role card given!
-            if (notif.args.cards.length != 1) {
-                throw new BgaVisibleSystemException ( "received wrong number of Door cards (should be 1, received "+notif.args.cards.length+")"); 
-           }
-           var card = notif.args.cards[0];
-            var type = card.type;
-            var cardrole = card.type_arg;
-            this.playerHand.addToStockWithId( this.getCardUniqueId( type, cardrole ), card.id );
-            throw new BgaVisibleSystemException ( "My door card is " + type + " => " + cardrole); 
         },
+
+        /**
+         * 
+         * @param {Object} notif 
+         */
+        notif_cardCollected: function(notif) {
+            const type = parseInt(notif.args.type);
+            const arg = parseInt(notif.args.arg);
+            const id = CARD_TYPE_TO_POS[type][arg];
+
+            this.cluedeck.removeFromStockById(id, 'pnorth');
+            this.collection.addToStockWithId(id, id, 'cluedisplay');
+        },
+
         
    });             
 });
