@@ -295,6 +295,15 @@ function (dojo, declare) {
             }
         },
 
+        guessRole: function() {
+
+        },
+
+        matchSet: function() {
+
+        },
+
+
         
         ///////////////////////////////////////////////////
         //// Ajax calls
@@ -330,9 +339,16 @@ function (dojo, declare) {
             }
         },
 
+        passTurn: function() {
+            if (this.checkAction("pass", true)) {
+                this.ajaxcall( "/ladyandthetiger/ladyandthetiger/pass.html", { 
+                    lock: true 
+                }, this, function( result ) {  }, function( is_error) { } );
+            }
+        },
+
         ///////////////////////////////////////////////////
         //// Game & client states
-        
         
         /**
          * onEnteringState:
@@ -350,7 +366,6 @@ function (dojo, declare) {
                     const sel = this.isCurrentPlayerActive() ? 1 : 0;
                     this.cluedisplay.setSelectionMode(sel);
                     break;
-           
             case 'dummmy':
                 break;
             }
@@ -384,18 +399,11 @@ function (dojo, declare) {
             {            
                 switch( stateName )
                 {
-/*               
-                 Example:
- 
-                 case 'myGameState':
-                    
-                    // Add 3 action buttons in the action status bar:
-                    
-                    this.addActionButton( 'button_1_id', _('Button 1 label'), 'onMyMethodToCall1' ); 
-                    this.addActionButton( 'button_2_id', _('Button 2 label'), 'onMyMethodToCall2' ); 
-                    this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
-                    break;
-*/
+                    case 'guesserAction':
+                        this.addActionButton('guess_btn', _("Guess"), 'guessRole');
+                        this.addActionButton('match_btn', _("Match Set"), 'matchSet');
+                        this.addActionButton('pass_btn', _("Pass"), 'passTurn');
+                        break;
                 }
             }
         },        

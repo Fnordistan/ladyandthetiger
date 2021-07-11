@@ -61,4 +61,13 @@ class action_ladyandthetiger extends APP_GameAction
       self::ajaxResponse();
   }
 
+  /**
+   * Collector passes
+   */
+  public function pass() {
+    self::setAjaxMode();
+    $this->game->pass();
+    self::ajaxResponse();
+}
+
 }

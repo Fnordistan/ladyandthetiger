@@ -232,13 +232,11 @@ class LadyAndTheTiger extends Table
             $traits = array(BLUE, TIGER);
         }
 
-        self::dump("looking for $role traits ($identity)", $traits);
         foreach ($traits as $trait) {
             $ct = 0;
             foreach ($collection as $c) {
                 $type = $c['type'];
                 $istype = $this->isType($type, $trait);
-                self::dump("$type is $trait?", $istype);
                 if ($this->isType($type, $trait)) {
                     $ct++;
                 }
@@ -329,6 +327,18 @@ class LadyAndTheTiger extends Table
         } else {
             $this->gamestate->nextState("guesser");
         }
+    }
+
+    /**
+     * Collector passed.
+     */
+    function pass() {
+        self::checkAction( 'pass' );
+        self::notifyAllPlayers('passed', clienttranslate('${player_name} passes'), array(
+            'player_name' => self::getActivePlayerName(),
+        ));
+
+        $this->gamestate->nextState("nextPlayer");
     }
    
 //////////////////////////////////////////////////////////////////////////////
