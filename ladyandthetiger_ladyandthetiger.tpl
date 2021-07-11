@@ -30,7 +30,7 @@
 
 <div id="ladytigerboard">
 
-  <div id="pnorth" class="ltdr_display whiteblock">
+  <div id="player_north" class="ltdr_display whiteblock">
     <div id="role_north" class="ltdr_rolecontainer">
       <h1 id="rolename_n" class="ltdr_rolename"></h1>
       <div id="role_n" class="ltdr_rolecard"></div>
@@ -38,13 +38,19 @@
     <div id="tableau_n" class="ltdr_tableau"></div>
   </div>
 
-  <div id="center" class="ltdr_display whiteblock">
-    <div id="cluedeck"></div>
+  <div id="center_display" class="ltdr_display whiteblock">
+    <div id="deckcontainer">
+      <h1 id="deckcount">10</h1>
+      <div id="cluedeck"></div>
+    </div>
     <div id="cluedisplay"></div>
-    <div id="cluediscard"></div>
+    <div id="discardcontainer">
+      <h1>Discard Pile</h1>
+      <div id="cluediscard"></div>
+    </div>
   </div>
 
-  <div id="psouth" class="ltdr_display whiteblock">
+  <div id="player_south" class="ltdr_display whiteblock">
     <div id="role_south" class="ltdr_rolecontainer">
       <h1 id="rolename_s" class="ltdr_rolename"></h1>
       <div id="role_s" class="ltdr_rolecard"></div>

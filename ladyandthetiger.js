@@ -83,6 +83,7 @@ function (dojo, declare) {
             this.setupPlayerTableaus();
 
             this.setupClueDisplay();
+            this.setupDiscard();
 
             this.setupNotifications();
 
@@ -129,7 +130,7 @@ function (dojo, declare) {
             const guesser_tableau = document.getElementById(guesser_t);
             guesser_tableau.style['display'] = 'none';
 
-            const guesser_d = (myrole == 'Guesser') ? 'pnorth' : 'psouth';
+            const guesser_d = (myrole == 'Guesser') ? 'player_north' : 'player_south';
             const guesser_display = document.getElementById(guesser_d);
             guesser_display.style['width'] = 'fit-content';
 
@@ -160,6 +161,22 @@ function (dojo, declare) {
                 $('cluedisplay_item_'+pos).addEventListener('click', () => {
                     this.onClueCardSelected(card.type, card.type_arg);
                 });
+            }
+        },
+
+        /**
+         * Set up the discard deck.
+         */
+        setupDiscard: function() {
+            const discards = this.gamedatas.discards;
+            let i = 0;
+            for (const d in discards) {
+                const card = discards[d];
+                const pos = CARD_TYPE_TO_POS[card.type][card.type_arg];
+                const offset = 5+(2*i)+"px";
+                const discard = `<div class="ltdr_cluecard" style="position: absolute; margin: ${offset} 0 0 ${offset};"></div>`;
+                dojo.place(discard, 'cluediscard', i);
+                i++;
             }
         },
 

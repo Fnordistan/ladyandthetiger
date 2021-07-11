@@ -44,9 +44,12 @@
 
 @import url(../../../css/csslayer.css); /* Note: you must not use any @import directive other than this one */
 
-/********* You can start writing your CSS below this line: **********/
-
-/** BGA class */
+@font-face {
+  font-family: 'Comic Neue', cursive;
+  src: local('Comic Neue'), url('https://fonts.googleapis.com/css2?family=Comic+Neue');
+  font-style: normal;
+  font-weight: 400;
+}
 
 /** Wrapper around "Collector/Guesser" labels */
 .ltdr_rolename {
@@ -63,10 +66,11 @@
 }
 
 .ltdr_tableau {
-  margin-top: 5px;
+  top: 40px;
 }
 
 .ltdr_rolecontainer {
+  font-family: cursive;
   display: flex;
   flex-direction: column;
 }
@@ -118,12 +122,31 @@
   flex-direction: column;
 }
 
+#center_display {
+  min-height: 420px;
+}
+
+#center_display h1 {
+  font-family: cursive;
+  align-self: center;
+}
+
+#deckcontainer {
+  display: flex;
+  flex-direction: column;
+}
+
 #cluedeck {
   min-width: 250px;
 }
 
 #cluedisplay {
+  top: 40px;
+}
 
+#discardcontainer {
+  display: flex;
+  flex-direction: column;
 }
 
 #cluediscard {

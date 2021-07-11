@@ -153,6 +153,7 @@ class LadyAndTheTiger extends Table
         // Cards played on the table
         $result['cluecards'] = $this->cards->getCardsInLocation( 'cluedisplay' );
         $result['collectorcards'] = $this->cards->getCardsInLocation( 'collector' );
+        $result['discards'] = $this->cards->getCardsInLocation( 'discard' );
         $result['decksize'] = $this->cards->countCardInLocation('deck');
   
         return $result;
