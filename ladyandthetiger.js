@@ -399,6 +399,10 @@ function (dojo, declare) {
             {            
                 switch( stateName )
                 {
+                    case 'guesserDiscard':
+                        this.addActionButton('guess_btn', _("Guess"), 'guessRole');
+                        this.addActionButton('match_btn', _("Match Set"), 'matchSet');
+                        break;
                     case 'guesserAction':
                         this.addActionButton('guess_btn', _("Guess"), 'guessRole');
                         this.addActionButton('match_btn', _("Match Set"), 'matchSet');
