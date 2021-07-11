@@ -53,6 +53,7 @@
 if (!defined('STATE_SETUP')) { // ensure this block is only invoked once, since it is included multiple times
    define("STATE_SETUP", 1);
    define("STATE_ASSIGN_ROLES", 2);
+   define("STATE_NEXT_PLAYER", 9);
    define("STATE_COLLECTOR", 10);
    define("STATE_GUESSER", 20);
    define("STATE_GUESSER_ACTION", 21);
@@ -90,7 +91,15 @@ $machinestates = array(
     	"type" => "activeplayer",
         "args" => "argGetRole",
     	"possibleactions" => array( "collectCard" ),
-    	"transitions" => array( "endContest" => STATE_END_CONTEST, "nextPlayer" => STATE_GUESSER )
+    	"transitions" => array( "endContest" => STATE_END_CONTEST, "nextPlayer" => STATE_NEXT_PLAYER )
+    ),
+
+    STATE_NEXT_PLAYER => array(
+    	"name" => "switchPlayer",
+    	"description" => "",
+    	"type" => "game",
+    	"action" => "stNextPlayer",
+    	"transitions" => array( "collector" => STATE_COLLECTOR, "guesser" => STATE_GUESSER )
     ),
 
     // player must Collect or Discard, according to role
@@ -100,7 +109,7 @@ $machinestates = array(
     	"descriptionmyturn" => clienttranslate('${you} must discard one card from the display'),
     	"type" => "activeplayer",
     	"possibleactions" => array( "discardCard" ),
-    	"transitions" => array( "" => STATE_GUESSER_ACTION )
+    	"transitions" => array( "endContest" => STATE_END_CONTEST, "guesser" => STATE_GUESSER_ACTION )
     ),
 
     // player must Collect or Discard, according to role
@@ -110,7 +119,7 @@ $machinestates = array(
     	"descriptionmyturn" => clienttranslate('${you} must choose an action'),
     	"type" => "activeplayer",
     	"possibleactions" => array( "guess", "match", "pass" ),
-    	"transitions" => array( "nextPlayer" => STATE_COLLECTOR, "endContest" => STATE_END_CONTEST )
+    	"transitions" => array( "endContest" => STATE_END_CONTEST, "nextPlayer" => STATE_NEXT_PLAYER )
     ),
 
     STATE_END_CONTEST => array(

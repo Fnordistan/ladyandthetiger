@@ -149,19 +149,17 @@ function (dojo, declare) {
             }
 
             const sel = this.isCurrentPlayerActive() ? 1 : 0;
-            this.cluedeck = this.createClueStock('cluedisplay', sel);
+            this.cluedisplay = this.createClueStock('cluedisplay', sel);
             // now add the ones actually on display
             const cluecards = this.gamedatas.cluecards;
 
             for (const c in cluecards) {
                 const card = cluecards[c];
                 const pos = CARD_TYPE_TO_POS[card.type][card.type_arg];
-                this.cluedeck.addToStockWithId(pos, pos);
-                if (this.isCurrentPlayerActive()) {
-                    $('cluedisplay_item_'+pos).addEventListener('click', () => {
-                        this.onClueCardSelected(card.type, card.type_arg);
-                    });
-                }
+                this.cluedisplay.addToStockWithId(pos, pos);
+                $('cluedisplay_item_'+pos).addEventListener('click', () => {
+                    this.onClueCardSelected(card.type, card.type_arg);
+                });
             }
         },
 
@@ -270,6 +268,16 @@ function (dojo, declare) {
             this.addTooltip(card_div.id, '', this.getLabelById(parseInt(card_type_id)));
         },
 
+        /**
+         * Get HTML id of Collector's tableau
+         */
+        getCollectorTableau: function() {
+            const collector = this.gamedatas.collector;
+            const id = (this.isSpectator) ? 'tableau_n' : (this.player_id == collector) ? 'tableau_n' : 'tableau_s';
+            return id;
+        },
+
+
         ///////////////////////////////////////////////////
         //// Event actions
 
@@ -283,7 +291,7 @@ function (dojo, declare) {
             if (this.checkAction("collectCard", true)) {
                 this.collectCard(type, arg);
             } else if (this.checkAction("discardCard", true)) {
-                console.log("Discard "+ this.getLabelById(id));
+                this.discardCard(type, arg);
             }
         },
 
@@ -306,6 +314,22 @@ function (dojo, declare) {
             }
         },
 
+        /**
+         * Action to discard a card.
+         * @param {int} type 
+         * @param {int} arg 
+         */
+         discardCard: function(type, arg) {
+            console.log('discarding card');
+            if (this.checkAction("discardCard", true)) {
+                this.ajaxcall( "/ladyandthetiger/ladyandthetiger/discard.html", { 
+                    card_type: type,
+                    card_arg: arg,
+                    lock: true 
+                }, this, function( result ) {  }, function( is_error) { } );
+            }
+        },
+
         ///////////////////////////////////////////////////
         //// Game & client states
         
@@ -321,17 +345,11 @@ function (dojo, declare) {
             
             switch( stateName )
             {
-            
-            /* Example:
-            
-            case 'myGameState':
-            
-                // Show some HTML block at this game state
-                dojo.style( 'my_html_block_id', 'display', 'block' );
-                
-                break;
-           */
-           
+                case 'collectorAction':
+                case 'guesserDiscard':
+                    const sel = this.isCurrentPlayerActive() ? 1 : 0;
+                    this.cluedisplay.setSelectionMode(sel);
+                    break;
            
             case 'dummmy':
                 break;
@@ -345,23 +363,14 @@ function (dojo, declare) {
         onLeavingState: function( stateName )
         {
             console.log( 'Leaving state: '+stateName );
-            
             switch( stateName )
             {
+                case 'collectorAction':
+                case 'guesserDiscard':
+                        this.cluedisplay.setSelectionMode(0);
+                        break;
+            }
             
-            /* Example:
-            
-            case 'myGameState':
-            
-                // Hide the HTML block we are displaying only during this game state
-                dojo.style( 'my_html_block_id', 'display', 'none' );
-                
-                break;
-           */
-           
-            case 'dummmy':
-                break;
-            }               
         }, 
 
         // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -409,6 +418,9 @@ function (dojo, declare) {
             // here, associate your game notifications with local methods
             dojo.subscribe( 'newRole', this, 'notif_newRole' );
             dojo.subscribe( 'cardCollected', this, 'notif_cardCollected' );
+            dojo.subscribe( 'cardDiscarded', this, 'notif_cardDiscarded' );
+            dojo.subscribe( 'newClueCard', this, 'notif_newClue' );
+            dojo.subscribe( 'setCollected', this, 'notif_setCollected' );
         },  
         
         // game notification handling methods
@@ -428,10 +440,37 @@ function (dojo, declare) {
             const arg = parseInt(notif.args.arg);
             const id = CARD_TYPE_TO_POS[type][arg];
 
-            this.cluedeck.removeFromStockById(id, 'pnorth');
+            this.cluedisplay.removeFromStockById(id, this.getCollectorTableau());
             this.collection.addToStockWithId(id, id, 'cluedisplay');
         },
 
+        notif_cardDiscarded: function(notif) {
+            const type = parseInt(notif.args.type);
+            const arg = parseInt(notif.args.arg);
+            const id = CARD_TYPE_TO_POS[type][arg];
+            this.cluedisplay.removeFromStockById(id, cluediscard);
+        },
+
+        notif_newClue: function(notif) {
+            const type = parseInt(notif.args.type);
+            const arg = parseInt(notif.args.arg);
+            const id = CARD_TYPE_TO_POS[type][arg];
+            const size = parseInt(notif.args.decksize);
+            this.cluedisplay.addToStockWithId(id, id, 'cluedeck');
+
+            $('cluedisplay_item_'+id).addEventListener('click', () => {
+                this.onClueCardSelected(type, arg);
+            });
+
+            if (size != 0) {
+                const cluedeck = document.getElementById('cluedeck');
+                cluedeck.removeChild(cluedeck.lastElementChild);
+            }
+        },
+
+        notif_setCollected: function(notif) {
+
+        },
         
    });             
 });

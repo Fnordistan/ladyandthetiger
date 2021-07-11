@@ -50,4 +50,15 @@ class action_ladyandthetiger extends APP_GameAction
         self::ajaxResponse();
     }
 
+    /**
+     * Guesser chose a card to discard.
+     */
+  	public function discard() {
+      self::setAjaxMode();
+      $type = self::getArg("card_type", AT_posint, true);
+      $arg = self::getArg("card_arg", AT_posint, true);
+      $this->game->discardCard($type, $arg);
+      self::ajaxResponse();
+  }
+
 }

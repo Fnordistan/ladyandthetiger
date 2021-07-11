@@ -114,15 +114,11 @@ class LadyAndTheTiger extends Table
 
 		$player_id = $this->activeNextPlayer();
 		$last = self::getPlayerBefore( $player_id );
-        // First player is Collector, other player is Guesser, init in reverse order since we switch...
+        // First player is Collector, other player is Guesser, init in reverse order since stAssignRoles will activate again and switch
         self::setGameStateInitialValue( 'guesser', $player_id );
         self::setGameStateInitialValue( 'collector', $last );
         self::setGameStateInitialValue( 'guesser_role', 0 );
         self::setGameStateInitialValue( 'collector_role', 0 );
-		
-
-        // Activate first player (which is in general a good idea :) )
-        $this->activeNextPlayer();
     }
 
     /*
@@ -193,6 +189,83 @@ class LadyAndTheTiger extends Table
         return $this->identity[$type];
     }
 
+    /**
+     * Test whether a card type is one of a trait (RED, BLUE, LADY, or TIGER).
+     */
+    function isType($type, $trait) {
+        $trait = array();
+        switch ($trait) {
+            case RED:
+                $trait = array(RED+LADY, RED+TIGER, REDBLUE);
+                break;
+            case BLUE:
+                $trait = array(BLUE+LADY, BLUE+TIGER, REDBLUE);
+                break;
+            case LADY:
+                $trait = array(RED+LADY, BLUE+LADY, LADYTIGER);
+                break;
+            case TIGER:
+                $trait = array(RED+TIGER, BLUE+TIGER, LADYTIGER);
+                break;
+        }
+        return in_array($type, $trait);
+    }
+
+    /**
+     * Return a set if the Collector's tableau has a set matching the player's role.
+     * @param bCollector true if checking for Collector, otherwise for Guesser
+     * @return a set (RED, BLUE, LADY, TIGER) or else null
+     */
+    function hasSet($bCollector) {
+        $role = $bCollector ? 'collector_role' : 'guesser_role';
+        $identity = self::getGameStateValue($role);
+        $collection = $this->cards->getCardsInLocation('collector');
+
+        $traits = array();
+        if ($identity == RED+LADY) {
+            $traits = array(RED, LADY);
+        } else if ($identity == BLUE+LADY) {
+            $traits = array(BLUE, LADY);
+        } else if ($identity == RED+TIGER) {
+            $traits = array(RED, TIGER);
+        } else if ($identity == BLUE+TIGER) {
+            $traits = array(BLUE, TIGER);
+        }
+
+        self::dump("looking for $role traits ($identity)", $traits);
+        foreach ($traits as $trait) {
+            $ct = 0;
+            foreach ($collection as $c) {
+                $type = $c['type'];
+                $istype = $this->isType($type, $trait);
+                self::dump("$type is $trait?", $istype);
+                if ($this->isType($type, $trait)) {
+                    $ct++;
+                }
+                if ($ct >= 4) {
+                    return $trait;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Add a card from the deck to the clue display.
+     * Return number of cards remaining in deck.
+     */
+    function refillClueDisplay() {
+        $card = $this->cards->pickCardForLocation('deck', 'cluedisplay');
+        $decksize = $this->cards->countCardInLocation('deck');
+        self::notifyAllPlayers('newClueCard', clienttranslate('${card_type} added to clue card display'), array(
+            'card_type' => $this->getCardIdentity($card['id']),
+            'type' => $card['type'],
+            'arg' => $card['type_arg'],
+            'decksize' => $decksize
+        ));
+        return $decksize;
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
 //////////// 
@@ -216,8 +289,47 @@ class LadyAndTheTiger extends Table
             'arg' => $arg
         ));
 
+        // does Collector have a set?
+        $traitSet = $this->hasSet(true);
+
+        if ($traitSet != null) {
+            // reveal role, flip card, score set
+            self::notifyAllPlayers('setCollected', clienttranslate('${player_name} reveals role ($role) and scores Collector\'s set of 4 ${trait} cards'), array(
+                'player_name' => self::getActivePlayerName(),
+                'role' => self::getGameStateValue('collector_role'),
+                'trait' => $traitSet
+            ));
+            $this->gamestate->nextState("endContest");
+        } else {
+            $this->refillClueDisplay();
+            $this->gamestate->nextState("nextPlayer");
+        }
     }
 
+    /**
+     * Guesser discarded a card.
+     */
+    function discardCard($type, $arg) {
+        self::checkAction( 'discardCard' );
+        $id = self::getUniqueValueFromDB("SELECT card_id FROM cards WHERE card_type=$type AND card_type_arg=$arg AND card_location='cluedisplay'");
+        if ($id == null) {
+            throw new BgaUserException("That card is not in the display!");
+        }
+        $this->cards->moveCard($id, 'discard');
+
+        self::notifyAllPlayers('cardDiscarded', clienttranslate('${player_name} discards ${card_type} from the display'), array(
+            'player_name' => self::getActivePlayerName(),
+            'card_type' => $this->getCardIdentity($id),
+            'type' => $type,
+            'arg' => $arg
+        ));
+        $size = $this->refillClueDisplay();
+        if ($size == 0) {
+            $this->gamestate->nextState("endContest");
+        } else {
+            $this->gamestate->nextState("guesser");
+        }
+    }
    
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
@@ -242,7 +354,6 @@ class LadyAndTheTiger extends Table
 	 * Give each players a new Door card.
 	 */
     function stAssignRoles() {
-		self::debug("assigning roles");
 		// reshuffle the Clue cards
 		$this->cards->moveAllCardsInLocation(null, 'deck');
 		$this->cards->shuffle('deck');
@@ -265,8 +376,23 @@ class LadyAndTheTiger extends Table
         }
 		$this->cards->pickCardsForLocation(4, 'deck', 'cluedisplay');
 		
+        // Activate Collector
+        $this->activeNextPlayer();
         $this->gamestate->nextState( "" );
 	}
+
+    /**
+     * Switch active player.
+     */
+    function stNextPlayer() {
+        $player_id = self::activeNextPlayer();
+        self::giveExtraTime( $player_id );
+
+        self::incStat(1, 'turns_number');
+        $nextState = self::getGameStateValue('collector') == $player_id ? "collector" : "guesser";
+
+        $this->gamestate->nextState($nextState);
+    }
 
 	/**
 	 * Happens when Scoring - switch Collector and Guesser
