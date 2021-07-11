@@ -143,14 +143,14 @@ function (dojo, declare) {
          */
         setupClueDisplay: function() {
             const decksize = parseInt(this.gamedatas.decksize);
+            document.getElementById('deckcount').innerHTML = 'Cards Remaining: '+ decksize;
             for (let i = 0; i < decksize; i++) {
                 const offset = 5+(2*i)+"px";
                 const cardback = `<div class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset} 0 0 ${offset};"></div>`;
                 dojo.place(cardback, 'cluedeck', i);
             }
 
-            const sel = this.isCurrentPlayerActive() ? 1 : 0;
-            this.cluedisplay = this.createClueStock('cluedisplay', sel);
+            this.cluedisplay = this.createClueStock('cluedisplay');
             // now add the ones actually on display
             const cluecards = this.gamedatas.cluecards;
 
@@ -185,7 +185,7 @@ function (dojo, declare) {
          * @param {string} collector_id
          */
          setupCollectorDisplay: function(collector_id) {
-            this.collection = this.createClueStock(collector_id, 0);
+            this.collection = this.createClueStock(collector_id);
 
             // now add the ones actually on display
             const collectorcards = this.gamedatas.collectorcards;
@@ -199,13 +199,12 @@ function (dojo, declare) {
         /**
          * Create a Stock item with clue cards.
          * @param {string} id 
-         * @param {int} sel 
          * @returns Stock item
          */
-        createClueStock: function(id, sel) {
+        createClueStock: function(id) {
             var pile = new ebg.stock();
             pile.create(this, $(id), this.cluecardwidth, this.cluecardheight );
-            pile.setSelectionMode(sel);
+            pile.setSelectionMode(0);
             pile.image_items_per_row = 6;
             pile.onItemCreate = dojo.hitch(this, this.setUpClueCard);
             pile.autowidth = true;
@@ -491,10 +490,13 @@ function (dojo, declare) {
                 this.onClueCardSelected(type, arg);
             });
 
+            const cluedeck = document.getElementById('cluedeck');
             if (size != 0) {
-                const cluedeck = document.getElementById('cluedeck');
                 cluedeck.removeChild(cluedeck.lastElementChild);
             }
+            const decksize = cluedeck.childElementCount;
+            document.getElementById('deckcount').innerHTML = 'Cards Remaining: '+ decksize;
+
         },
 
         notif_setCollected: function(notif) {

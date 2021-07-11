@@ -40,7 +40,7 @@
 
   <div id="center_display" class="ltdr_display whiteblock">
     <div id="deckcontainer">
-      <h1 id="deckcount">10</h1>
+      <h1 id="deckcount"></h1>
       <div id="cluedeck"></div>
     </div>
     <div id="cluedisplay"></div>
