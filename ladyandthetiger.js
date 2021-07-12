@@ -189,7 +189,7 @@ function (dojo, declare) {
             const discard_div = document.getElementById('cluediscard');
             const i = discard_div.childElementCount;
             const pos = CARD_TYPE_TO_POS[type][arg];
-            const offset = (2*i)+"px";
+            const offset = (4*i)+"px";
             const xoff = (pos - (Math.floor(pos/6)*6)) * -this.cluecardwidth;
             const yoff = Math.floor(pos/6) * -this.cluecardheight;
             const discard = `<div class="ltdr_cluecard" style="position: absolute; margin: ${offset} 0 0 ${offset}; background-position: ${xoff}px ${yoff}px; filter: grayscale(0.4);"></div>`;
@@ -502,16 +502,17 @@ function (dojo, declare) {
             const arg = parseInt(notif.args.arg);
             const id = CARD_TYPE_TO_POS[type][arg];
 
-            this.cluedisplay.removeFromStockById(id, this.getCollectorTableau());
             this.collection.addToStockWithId(id, id, 'cluedisplay');
+            this.cluedisplay.removeFromStockById(id);
         },
 
         notif_cardDiscarded: function(notif) {
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
             const id = CARD_TYPE_TO_POS[type][arg];
-            this.cluedisplay.removeFromStockById(id, 'cluediscard');
             this.createDiscardCard(type, arg);
+            // this.slideTemporaryObject(discard, 'cluedisplay', 'cluedisplay_item_'+pos, 'cluediscard').play();
+            this.cluedisplay.removeFromStockById(id, 'cluediscard');
         },
 
         notif_newClue: function(notif) {

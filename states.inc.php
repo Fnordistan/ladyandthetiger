@@ -105,9 +105,10 @@ $machinestates = array(
     // player discards, or optionally guesses or matches first
     STATE_GUESSER => array(
     	"name" => "guesserDiscard",
-    	"description" => clienttranslate('${actplayer} must guess, match a set, or discard a card from the display'),
-    	"descriptionmyturn" => clienttranslate('${you} must guess, match a set, or discard a card from the display'),
+    	"description" => clienttranslate('${actplayer} (${role}) must guess, match a set, or discard a card from the display'),
+    	"descriptionmyturn" => clienttranslate('${you} (${role}) must guess, match a set, or discard a card from the display'),
     	"type" => "activeplayer",
+        "args" => "argGetRole",
     	"possibleactions" => array( "discardCard", "match", "guess" ),
     	"transitions" => array( "endContest" => STATE_END_CONTEST, "guesser" => STATE_GUESSER_ACTION )
     ),
@@ -115,9 +116,10 @@ $machinestates = array(
     // player has already discarded, so guess, match, or pass
     STATE_GUESSER_ACTION => array(
     	"name" => "guesserAction",
-    	"description" => clienttranslate('${actplayer} must guess, match a set, or pass'),
-    	"descriptionmyturn" => clienttranslate('${you} must guess, match a set, or pass'),
+    	"description" => clienttranslate('${actplayer} (${role}) must guess, match a set, or pass'),
+    	"descriptionmyturn" => clienttranslate('${you} (${role}) must guess, match a set, or pass'),
     	"type" => "activeplayer",
+        "args" => "argGetRole",
     	"possibleactions" => array( "guess", "match", "pass" ),
     	"transitions" => array( "endContest" => STATE_END_CONTEST, "nextPlayer" => STATE_NEXT_PLAYER )
     ),
