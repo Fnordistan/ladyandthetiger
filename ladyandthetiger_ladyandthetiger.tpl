@@ -25,9 +25,6 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
-
-
-
 <div id="ladytigerboard">
 
   <div id="player_north" class="ltdr_display whiteblock">

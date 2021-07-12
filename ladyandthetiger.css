@@ -44,20 +44,7 @@
 
 @import url(../../../css/csslayer.css); /* Note: you must not use any @import directive other than this one */
 
-@font-face {
-  font-family: 'Comic Neue', cursive;
-  src: local('Comic Neue'), url('https://fonts.googleapis.com/css2?family=Comic+Neue');
-  font-style: normal;
-  font-weight: 400;
-}
-
-/** Wrapper around "Collector/Guesser" labels */
-.ltdr_rolename {
-    font-weight: bold;
-    text-align: center;
-}
-
-/** This is the container for a row of cards - both the player tableaus and the center display. */
+/* This is the container for a row of cards - both the player tableaus and the center display. */
 .ltdr_display {
   display: flex;
   flex-direction: row;
@@ -65,14 +52,22 @@
   min-height: 370px;
 }
 
+/* Player tableaus (Guesser's is made hidden) */
 .ltdr_tableau {
   top: 40px;
 }
 
+/* Role label and card container */
 .ltdr_rolecontainer {
   font-family: cursive;
   display: flex;
   flex-direction: column;
+}
+
+/* Wrapper around "Collector/Guesser" labels */
+.ltdr_rolename {
+  font-weight: bold;
+  text-align: center;
 }
 
 .ltdr_rolecard {
@@ -117,6 +112,10 @@
   background-position: 0 -730px;
 }
 
+/**
+* By IDs
+*/
+
 #ladytigerboard {
   display: flex;
   flex-direction: column;
@@ -147,6 +146,9 @@
 #discardcontainer {
   display: flex;
   flex-direction: column;
+  border: 4px;
+  border-style: groove;
+  border-image: linear-gradient(145deg, red, blue) 1;
 }
 
 #cluediscard {
