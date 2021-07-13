@@ -191,62 +191,62 @@ class LadyAndTheTiger extends Table
     }
 
     /**
-     * Test whether a card type is one of a trait (RED, BLUE, LADY, or TIGER).
+     * Test whether a card type is one of a trait ("RED", "BLUE", "LADY", or "TIGER").
+     * @param {int} type
+     * @param {string} trait
      */
-    function isType($type, $trait) {
-        $trait = array();
+    function cardHasTrait($type, $trait) {
+        $cards = array();
         switch ($trait) {
-            case RED:
-                $trait = array(RED+LADY, RED+TIGER, REDBLUE);
+            case "RED":
+                $cards = array(RED+LADY, RED+TIGER, REDBLUE);
                 break;
-            case BLUE:
-                $trait = array(BLUE+LADY, BLUE+TIGER, REDBLUE);
+            case "BLUE":
+                $cards = array(BLUE+LADY, BLUE+TIGER, REDBLUE);
                 break;
-            case LADY:
-                $trait = array(RED+LADY, BLUE+LADY, LADYTIGER);
+            case "LADY":
+                $cards = array(RED+LADY, BLUE+LADY, LADYTIGER);
                 break;
-            case TIGER:
-                $trait = array(RED+TIGER, BLUE+TIGER, LADYTIGER);
+            case "TIGER":
+                $cards = array(RED+TIGER, BLUE+TIGER, LADYTIGER);
                 break;
         }
-        return in_array($type, $trait);
+        return in_array($type, $cards);
     }
 
     /**
-     * Return a set if the Collector's tableau has a set matching the player's role.
-     * @param bCollector true if checking for Collector, otherwise for Guesser
-     * @return a set (RED, BLUE, LADY, TIGER) or else null
+     * Given a role value, return two-member array of its two traits.
      */
-    function hasSet($bCollector) {
-        $role = $bCollector ? 'collector_role' : 'guesser_role';
-        $identity = self::getGameStateValue($role);
-        $collection = $this->cards->getCardsInLocation('collector');
-
-        $traits = array();
-        if ($identity == RED+LADY) {
-            $traits = array(RED, LADY);
-        } else if ($identity == BLUE+LADY) {
-            $traits = array(BLUE, LADY);
-        } else if ($identity == RED+TIGER) {
-            $traits = array(RED, TIGER);
-        } else if ($identity == BLUE+TIGER) {
-            $traits = array(BLUE, TIGER);
+    function getTraitsForRole($role) {
+        if ($role == RED+LADY) {
+            return array("RED", "LADY");
+        } else if ($role == BLUE+LADY) {
+            return array("BLUE", "LADY");
+        } else if ($role == RED+TIGER) {
+            return array("RED", "TIGER");
+        } else if ($role == BLUE+TIGER) {
+            return array("BLUE", "TIGER");
         }
+        throw new BgaVisibleSystemException("Unrecognized role: $role");
+    }
 
-        foreach ($traits as $trait) {
-            $ct = 0;
+    /**
+     * Return an associative array counting all the traits in Collector's collected cards.
+     * @return associative array ("RED/BLUE/LADY/TIGER" => count)
+     */
+    function getCollectedTraits() {
+        $traits = array("RED" => 0, "BLUE" => 0, "TIGER" => 0, "LADY" => 0);
+
+        $collection = $this->cards->getCardsInLocation('collector');
+        foreach ($traits as $trait => $c) {
             foreach ($collection as $c) {
                 $type = $c['type'];
-                $istype = $this->isType($type, $trait);
-                if ($this->isType($type, $trait)) {
-                    $ct++;
-                }
-                if ($ct >= 4) {
-                    return $trait;
+                if ($this->cardHasTrait($type, $trait)) {
+                    $traits[$trait]++;
                 }
             }
         }
-        return null;
+        return $traits;
     }
 
     /**
@@ -289,14 +289,23 @@ class LadyAndTheTiger extends Table
         ));
 
         // does Collector have a set?
-        $traitSet = $this->hasSet(true);
+        $collectedtraits = $this->getCollectedTraits();
 
-        if ($traitSet != null) {
+        $collector = self::getGameStateValue('collector_role');
+        $traits = $this->getTraitsForRole($collector);
+        $traitset = null;
+        foreach ($traits as $trait) {
+            if ($collectedtraits[$trait] >= 4) {
+                $traitset = $trait;
+            }
+        }        
+
+        if ($traitset != null) {
             // reveal role, flip card, score set
             self::notifyAllPlayers('setCollected', clienttranslate('${player_name} reveals role ($role) and scores Collector\'s set of 4 ${trait} cards'), array(
                 'player_name' => self::getActivePlayerName(),
-                'role' => self::getGameStateValue('collector_role'),
-                'trait' => $traitSet
+                'role' => $this->identity[$collector],
+                'trait' => $traitset
             ));
             $this->gamestate->nextState("endContest");
         } else {
@@ -403,6 +412,13 @@ class LadyAndTheTiger extends Table
         $nextState = self::getGameStateValue('collector') == $player_id ? "collector" : "guesser";
 
         $this->gamestate->nextState($nextState);
+    }
+
+    /**
+     * Someone collected gems.
+     */
+    function stContestEnd() {
+        
     }
 
 	/**

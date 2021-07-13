@@ -29,3 +29,7 @@ $this->identity = array(
   5 => 'Red+Blue',
   6 => 'Lady+Tiger',
 );
+
+$this->trait = array(
+
+);

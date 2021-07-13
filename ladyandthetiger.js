@@ -482,6 +482,7 @@ function (dojo, declare) {
             dojo.subscribe( 'cardCollected', this, 'notif_cardCollected' );
             dojo.subscribe( 'cardDiscarded', this, 'notif_cardDiscarded' );
             dojo.subscribe( 'newClueCard', this, 'notif_newClue' );
+            this.notifqueue.setSynchronous( 'newClueCard', 3000 );
             dojo.subscribe( 'setCollected', this, 'notif_setCollected' );
         },  
         
@@ -494,32 +495,46 @@ function (dojo, declare) {
         },
 
         /**
-         * 
+         * Collector took a card, Move it from the clue display to the Collector's collection.
          * @param {Object} notif 
          */
         notif_cardCollected: function(notif) {
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
             const id = CARD_TYPE_TO_POS[type][arg];
-
-            this.collection.addToStockWithId(id, id, 'cluedisplay');
+            // stock to stock movement
             this.cluedisplay.removeFromStockById(id);
+            const wt = this.collection.count();
+            this.collection.item_type[id].weight = wt;
+            this.collection.addToStockWithId(id, id, 'cluedisplay');
         },
 
+        /**
+         * Guesser discarded a card. Move it from the clue display to the discard pile.
+         * @param {Object} notif 
+         */
         notif_cardDiscarded: function(notif) {
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
             const id = CARD_TYPE_TO_POS[type][arg];
+            // stock to non-stock movement
             this.createDiscardCard(type, arg);
-            // this.slideTemporaryObject(discard, 'cluedisplay', 'cluedisplay_item_'+pos, 'cluediscard').play();
             this.cluedisplay.removeFromStockById(id, 'cluediscard');
         },
 
+        /**
+         * Card was discarded or collected from cluedisplay. Move new card from deck to display.
+         * @param {Object} notif 
+         */
         notif_newClue: function(notif) {
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
             const id = CARD_TYPE_TO_POS[type][arg];
             const size = parseInt(notif.args.decksize);
+
+            // non-stock to stock movement
+            const wt = this.cluedisplay.count();
+            this.cluedisplay.item_type[id].weight = wt;
             this.cluedisplay.addToStockWithId(id, id, 'cluedeck');
 
             $('cluedisplay_item_'+id).addEventListener('click', () => {
@@ -538,6 +553,6 @@ function (dojo, declare) {
         notif_setCollected: function(notif) {
 
         },
-        
+
    });             
 });
