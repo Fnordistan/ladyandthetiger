@@ -303,7 +303,7 @@ class LadyAndTheTiger extends Table
         $player_id = self::getActivePlayerId();
         if ($traitset != null) {
             // reveal role, flip card, score set
-            self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role}) reveals identity (${identity_name}) and scores set of 4 ${trait} cards'), array(
+            self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role}) reveals identity (${identity_name}) and a set of four ${trait} cards and scores 6 gems.'), array(
                 'player_id' => $player_id,
                 'role' => self::_('Collector'),
                 'player_name' => self::getActivePlayerName(),

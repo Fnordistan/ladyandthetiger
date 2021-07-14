@@ -482,8 +482,9 @@ function (dojo, declare) {
             dojo.subscribe( 'cardCollected', this, 'notif_cardCollected' );
             dojo.subscribe( 'cardDiscarded', this, 'notif_cardDiscarded' );
             dojo.subscribe( 'newClueCard', this, 'notif_newClue' );
-            this.notifqueue.setSynchronous( 'newClueCard', 3000 );
+            this.notifqueue.setSynchronous( 'notif_newClue', 3000 );
             dojo.subscribe( 'setCollected', this, 'notif_setCollected' );
+            this.notifqueue.setSynchronous( 'notif_setCollected', 5000 );
         },  
         
         // game notification handling methods
@@ -572,11 +573,20 @@ function (dojo, declare) {
             } else {
                 throw new Error("Unexpected role: " + role);
             }
-
-            rolecard.classList.remove('ltdr_door');
-            rolecard.classList.add('ltdr_'+id_label);
+            this.revealRoleCard(rolecard, id_label);
             this.scoreCtrl[ player_id ].incValue( parseInt(notif.args.score) );
         },
+
+        /**
+         * Reveal a role card behind a door.
+         * @param {node} rolecard 
+         * @param {string} role 
+         */
+        revealRoleCard: function(rolecard, role) {
+            rolecard.classList.remove('ltdr_door');
+            rolecard.classList.add('ltdr_'+role);
+        },
+
 
    });             
 });
