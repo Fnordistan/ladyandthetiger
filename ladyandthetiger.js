@@ -550,8 +550,32 @@ function (dojo, declare) {
 
         },
 
+        /**
+         * Reveal a role and score for collecting a set.
+         * @param {Object} notif 
+         */
         notif_setCollected: function(notif) {
+            const COLLECTOR = _('Collector');
+            const GUESSER = _('Guesser');
 
+            const player_id = notif.args.player_id;
+            const identity = parseInt(notif.args.identity);
+            const id_label = this.getCardIdentity(identity);
+            const role = notif.args.role;
+
+            var rolecard = null;
+            const label_n = document.getElementById('rolename_n').innerHTML;
+            if (role == COLLECTOR) {
+                rolecard = label_n == COLLECTOR ? document.getElementById('role_n') : document.getElementById('role_s');
+            } else if (role == GUESSER) {
+                rolecard = label_n == GUESSER ? document.getElementById('role_n') : document.getElementById('role_s');
+            } else {
+                throw new Error("Unexpected role: " + role);
+            }
+
+            rolecard.classList.remove('ltdr_door');
+            rolecard.classList.add('ltdr_'+id_label);
+            this.scoreCtrl[ player_id ].incValue( parseInt(notif.args.score) );
         },
 
    });             

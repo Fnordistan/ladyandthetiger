@@ -300,13 +300,20 @@ class LadyAndTheTiger extends Table
             }
         }        
 
+        $player_id = self::getActivePlayerId();
         if ($traitset != null) {
             // reveal role, flip card, score set
-            self::notifyAllPlayers('setCollected', clienttranslate('${player_name} reveals role ($role) and scores Collector\'s set of 4 ${trait} cards'), array(
+            self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role}) reveals identity (${identity_name}) and scores set of 4 ${trait} cards'), array(
+                'player_id' => $player_id,
+                'role' => self::_('Collector'),
                 'player_name' => self::getActivePlayerName(),
-                'role' => $this->identity[$collector],
-                'trait' => $traitset
+                'identity' => $collector,
+                'identity_name' => $this->identity[$collector],
+                'trait' => $traitset,
+                'score' => 6
             ));
+            self::DbQuery( "UPDATE player SET player_score=player_score+6 WHERE player_id=$player_id" );
+
             $this->gamestate->nextState("endContest");
         } else {
             $this->refillClueDisplay();
@@ -418,7 +425,15 @@ class LadyAndTheTiger extends Table
      * Someone collected gems.
      */
     function stContestEnd() {
-        
+        $nextState = "newContest";
+        // check if anyone has won
+        $scores = self::getObjectListFromDB("SELECT player_score FROM player", true);
+        foreach ($scores as $score) {
+            if ($score >= 10) {
+                $nextState = "endGame";
+            }
+        }
+        $this->gamestate->nextState($nextState);
     }
 
 	/**
