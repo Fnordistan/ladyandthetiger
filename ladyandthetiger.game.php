@@ -44,9 +44,9 @@ class LadyAndTheTiger extends Table
 
         self::initGameStateLabels( array(
             "collector" => 10,
-            "collector_role" => 11,
+            "collector_identity" => 11,
             "guesser" => 12,
-            "guesser_role" => 13,
+            "guesser_identity" => 13,
         ) );
         $this->cards = self::getNew( "module.common.deck" );
         $this->cards->init( "cards" );
@@ -112,13 +112,10 @@ class LadyAndTheTiger extends Table
 
         $this->cards->createCards( $cluecards, 'deck' );      
 
-		$player_id = $this->activeNextPlayer();
-		$last = self::getPlayerBefore( $player_id );
-        // First player is Collector, other player is Guesser, init in reverse order since stAssignRoles will activate again and switch
-        self::setGameStateInitialValue( 'guesser', $player_id );
-        self::setGameStateInitialValue( 'collector', $last );
-        self::setGameStateInitialValue( 'guesser_role', 0 );
-        self::setGameStateInitialValue( 'collector_role', 0 );
+        self::setGameStateInitialValue( 'guesser', 0 );
+        self::setGameStateInitialValue( 'collector', 0 );
+        self::setGameStateInitialValue( 'guesser_identity', 0 );
+        self::setGameStateInitialValue( 'collector_identity', 0 );
     }
 
     /*
@@ -145,9 +142,9 @@ class LadyAndTheTiger extends Table
         $result['guesser'] = self::getGameStateValue('guesser');
 
         if (self::getGameStateValue('collector') == $current_player_id) {
-            $result['identity'] = self::getGameStateValue('collector_role');
+            $result['identity'] = self::getGameStateValue('collector_identity');
         } else if (self::getGameStateValue('guesser') == $current_player_id) {
-            $result['identity'] = self::getGameStateValue('guesser_role');
+            $result['identity'] = self::getGameStateValue('guesser_identity');
         }
 
         // Cards played on the table
@@ -291,7 +288,7 @@ class LadyAndTheTiger extends Table
         // does Collector have a set?
         $collectedtraits = $this->getCollectedTraits();
 
-        $collector = self::getGameStateValue('collector_role');
+        $collector = self::getGameStateValue('collector_identity');
         $traits = $this->getTraitsForRole($collector);
         $traitset = null;
         foreach ($traits as $trait) {
@@ -378,33 +375,57 @@ class LadyAndTheTiger extends Table
 ////////////
 
 	/**
-	 * Give each players a new Door card.
+	 * Set/switch roles and deal identity cards.
 	 */
-    function stAssignRoles() {
-		// reshuffle the Clue cards
+    function stNewContest() {
+        $collector = self::getGameStateValue('collector');
+        $guesser = self::getGameStateValue('guesser');
+
+        // First player is Collector, other player is Guesser, init in reverse order since stNewContest will activate again and switch
+        if ($collector == 0 && $guesser == 0) {
+            // first round
+            $collector = $this->activeNextPlayer();
+            $guesser = self::getPlayerBefore( $collector );
+            self::setGameStateValue('collector', $collector);
+            self::setGameStateValue('guesser', $guesser);
+        } else {
+            self::setGameStateValue('collector', $guesser);
+            self::setGameStateValue('guesser', $collector);
+        }
+
+        // reshuffle the Clue cards
 		$this->cards->moveAllCardsInLocation(null, 'deck');
 		$this->cards->shuffle('deck');
-
-        $roles = array(RED+TIGER, RED+LADY, BLUE+TIGER, BLUE+LADY);
-        shuffle($roles);
+		$this->cards->pickCardsForLocation(4, 'deck', 'cluedisplay');
 
         $players = self::loadPlayersBasicInfos();
+        self::notifyAllPlayers("newContest", clienttranslate('${collector_name} is Collector, ${guesser_name} is Guesser'), array(
+            'collector' => $collector,
+            'collector_name' => $players[$collector]['player_name'],
+            'guesser' => $guesser,
+            'guesser_name' => $players[$guesser]['player_name'],
+            'cluecards' => $this->cards->getCardsInLocation('cluedisplay')
+        ));
+
+        $identities = array(RED+TIGER, RED+LADY, BLUE+TIGER, BLUE+LADY);
+        shuffle($identities);
+
         foreach( $players as $player_id => $player ) {
-            $role = array_pop($roles);
-            // Notify player of his Role
-            self::notifyPlayer( $player_id, 'newRole', '', array( 
-                'role' => $role
+            $identity = array_pop($identities);
+            // Notify player of his identity
+            self::notifyPlayer( $player_id, 'newRole', clienttranslate('You are the ${identity_name}'), array( 
+                'identity' => $identity,
+                'identity_name' => $this->identity[$identity]
             ) );
             if (self::getGameStateValue('collector') == $player_id) {
-                self::setGameStateValue('collector_role', $role);
+                self::setGameStateValue('collector_identity', $identity);
             } else {
-                self::setGameStateValue('guesser_role', $role);
+                self::setGameStateValue('guesser_identity', $identity);
             }
         }
-		$this->cards->pickCardsForLocation(4, 'deck', 'cluedisplay');
 		
         // Activate Collector
-        $this->activeNextPlayer();
+        $this->gamestate->changeActivePlayer( $collector );
         $this->gamestate->nextState( "" );
 	}
 

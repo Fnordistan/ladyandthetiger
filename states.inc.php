@@ -52,7 +52,7 @@
 // define contants for state ids
 if (!defined('STATE_SETUP')) { // ensure this block is only invoked once, since it is included multiple times
    define("STATE_SETUP", 1);
-   define("STATE_ASSIGN_ROLES", 2);
+   define("STATE_NEW_CONTEST", 2);
    define("STATE_NEXT_PLAYER", 9);
    define("STATE_COLLECTOR", 10);
    define("STATE_GUESSER", 20);
@@ -70,15 +70,15 @@ $machinestates = array(
         "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => STATE_ASSIGN_ROLES )
+        "transitions" => array( "" => STATE_NEW_CONTEST )
     ),
     
     // Assign/Switch Roles between Collector and Guesser
-    STATE_ASSIGN_ROLES => array(
+    STATE_NEW_CONTEST => array(
     	"name" => "assignRoles",
     	"description" => "",
     	"type" => "game",
-    	"action" => "stAssignRoles",
+    	"action" => "stNewContest",
         "updateGameProgression" => true,   
     	"transitions" => array( "" => STATE_COLLECTOR )
     ),
@@ -129,7 +129,7 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "stContestEnd",
-    	"transitions" => array( "endGame" => STATE_END_GAME, "newContest" => STATE_ASSIGN_ROLES )
+    	"transitions" => array( "endGame" => STATE_END_GAME, "newContest" => STATE_NEW_CONTEST )
     ),
     
     // Final state.

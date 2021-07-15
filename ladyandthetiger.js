@@ -327,6 +327,15 @@ function (dojo, declare) {
 
         },
 
+        /**
+         * Reveal a role card behind a door.
+         * @param {node} rolecard 
+         * @param {string} role 
+         */
+         revealRoleCard: function(rolecard, role) {
+            rolecard.classList.remove('ltdr_door');
+            rolecard.classList.add('ltdr_'+role);
+        },
 
         ///////////////////////////////////////////////////
         //// Event actions
@@ -478,6 +487,8 @@ function (dojo, declare) {
         {
             console.log( 'notifications subscriptions setup' );
             // here, associate your game notifications with local methods
+            dojo.subscribe( 'newContest', this, 'notif_newContest' );
+            this.notifqueue.setSynchronous( 'notif_newContest', 5000 );
             dojo.subscribe( 'newRole', this, 'notif_newRole' );
             dojo.subscribe( 'cardCollected', this, 'notif_cardCollected' );
             dojo.subscribe( 'cardDiscarded', this, 'notif_cardDiscarded' );
@@ -490,9 +501,26 @@ function (dojo, declare) {
         // game notification handling methods
 
         /**
-         * Called when a player is a given a new Door (role) card
+         * Called when a player is a given a new identity card
+         * @param {Object} notif 
          */
         notif_newRole: function( notif ) {
+            const identity = parseInt(notif.args.identity);
+            const rolecard = document.getElementById('role_n');
+            rolecard.className = '';
+            const id_label = this.getCardIdentity(identity);
+            rolecard.classList.add('ltdr_rolecard', 'ltdr_'+id_label);
+        },
+
+        /**
+         * 
+         * @param {Object} notif 
+         */
+        notif_newContest: function( notif ) {
+            const otherrole = document.getElementById('role_s');
+            otherrole.className = '';
+            otherrole.classList.add('ltdr_rolecard', 'ltdr_door');
+            debugger;
         },
 
         /**
@@ -576,17 +604,6 @@ function (dojo, declare) {
             this.revealRoleCard(rolecard, id_label);
             this.scoreCtrl[ player_id ].incValue( parseInt(notif.args.score) );
         },
-
-        /**
-         * Reveal a role card behind a door.
-         * @param {node} rolecard 
-         * @param {string} role 
-         */
-        revealRoleCard: function(rolecard, role) {
-            rolecard.classList.remove('ltdr_door');
-            rolecard.classList.add('ltdr_'+role);
-        },
-
 
    });             
 });
