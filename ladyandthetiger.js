@@ -99,8 +99,10 @@ function (dojo, declare) {
             const collectorColor = this.gamedatas.players[collector]['color'];
             const guesserColor = this.gamedatas.players[guesser]['color'];
 
-            const COLLECTOR = _('Collector');
-            const GUESSER = _('Guesser');
+            const COLLECTOR = 'Collector';
+            const GUESSER = 'Guesser';
+            const CollectorTr = _('Collector');
+            const GuesserTr = _('Guesser');
 
             // north is the collector by default
             const myrole = (this.isSpectator) ? COLLECTOR : (this.player_id == collector) ? COLLECTOR : GUESSER;
@@ -121,25 +123,31 @@ function (dojo, declare) {
                 const identity = this.gamedatas.identity;
                 const myidentity = this.getCardIdentity(identity);
                 myrolecard.classList.add('ltdr_'+myidentity);
-                this.addTooltip(myrolecard.id, _('You are the ')+this.getLabelByValue(identity) +'!', '');
+                let idtooltip = _('You are the ${identity}!');
+                idtooltip = idtooltip.replace('${identity}', this.getLabelByValue(identity));
+                this.addTooltip(myrolecard.id, idtooltip, '');
             } else {
                 myrolecard.classList.add('ltdr_door');
-                this.addTooltip(myrolecard.id, COLLECTOR + _(' is behind this door'), '');
+                let roletooltip = _('${role} is behind this door');
+                roletooltip = roletooltip.replace('${role}', myrole == COLLECTOR ? GuesserTr : CollectorTr);
+                this.addTooltip(myrolecard.id, roletooltip, '');
             }
 
             const hisrolecard = document.getElementById('role_s');
             hisrolecard.classList.add('ltdr_door');
-            this.addTooltip(hisrolecard.id, hisrole + _(' is behind this door'), '');
+            let hisroletooltip = _('${role} is behind this door');
+            hisroletooltip = hisroletooltip.replace('${role}', hisrole == COLLECTOR ? CollectorTr : GuesserTr);
+            this.addTooltip(hisrolecard.id, hisroletooltip, '');
 
-            const guesser_t = (myrole == 'Guesser') ? 'tableau_n' : 'tableau_s';
+            const guesser_t = (myrole == GUESSER) ? 'tableau_n' : 'tableau_s';
             const guesser_tableau = document.getElementById(guesser_t);
             guesser_tableau.style['display'] = 'none';
 
-            const guesser_d = (myrole == 'Guesser') ? 'player_north' : 'player_south';
+            const guesser_d = (myrole == GUESSER) ? 'player_north' : 'player_south';
             const guesser_display = document.getElementById(guesser_d);
             guesser_display.style['width'] = 'fit-content';
 
-            const collector_t = (myrole == 'Collector') ? 'tableau_n' : 'tableau_s';
+            const collector_t = (myrole == COLLECTOR) ? 'tableau_n' : 'tableau_s';
             this.setupCollectorDisplay(collector_t);
         },
 
@@ -148,22 +156,24 @@ function (dojo, declare) {
          */
         setupClueDisplay: function() {
             const decksize = parseInt(this.gamedatas.decksize);
-            document.getElementById('deckcount').innerHTML = 'Cards Remaining: '+ decksize;
+            let cardsremain = _('Cards Remaining: ${decksize}');
+            cardsremain = cardsremain.replace('${decksize}', decksize);
+            document.getElementById('deckcount').innerHTML = cardsremain;
             for (let i = 0; i < decksize; i++) {
                 const offset = 5+(2*i)+"px";
                 const cardback = `<div class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset} 0 0 ${offset};"></div>`;
                 dojo.place(cardback, 'cluedeck', i);
             }
 
-            this.cluedisplay = this.createClueStock('cluedisplay');
+            this.cluedisplay = this.createCardStockRow('cluedisplay');
             // now add the ones actually on display
             const cluecards = this.gamedatas.cluecards;
 
             for (const c in cluecards) {
                 const card = cluecards[c];
-                const pos = CARD_TYPE_TO_POS[card.type][card.type_arg];
-                this.cluedisplay.addToStockWithId(pos, pos);
-                $('cluedisplay_item_'+pos).addEventListener('click', () => {
+                const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
+                this.cluedisplay.addToStockWithId(id, id);
+                $('cluedisplay_item_'+id).addEventListener('click', () => {
                     this.onClueCardSelected(card.type, card.type_arg);
                 });
             }
@@ -201,14 +211,14 @@ function (dojo, declare) {
          * @param {string} collector_id
          */
          setupCollectorDisplay: function(collector_id) {
-            this.collection = this.createClueStock(collector_id);
-
+            document.getElementById(collector_id).style['top'] = '40px';
+            this.collection = this.createCardStockRow(collector_id);
             // now add the ones actually on display
             const collectorcards = this.gamedatas.collectorcards;
             for (const c in collectorcards) {
                 const card = collectorcards[c];
-                const pos = CARD_TYPE_TO_POS[card.type][card.type_arg];
-                this.collection.addToStockWithId(pos, pos);
+                const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
+                this.collection.addToStockWithId(id, id, 'cluedisplay');
             }
         },
 
@@ -217,7 +227,7 @@ function (dojo, declare) {
          * @param {string} id 
          * @returns Stock item
          */
-        createClueStock: function(id) {
+        createCardStockRow: function(id) {
             var pile = new ebg.stock();
             pile.create(this, $(id), this.cluecardwidth, this.cluecardheight );
             pile.setSelectionMode(0);
@@ -274,6 +284,24 @@ function (dojo, declare) {
                 return _("Blue Tiger");
             } else if (value == RED+TIGER) {
                 return _("Red Tiger");
+            }
+            throw new Error("Invalid card identity: " + value);
+        },
+
+        /**
+         * Return a tuple of two traits
+         * @param {int} value 
+         * @returns two-member array
+         */
+        getAttributesByValue: function(value) {
+            if (value == BLUE+LADY) {
+                return [BLUE, LADY];
+            } else if (value == RED+LADY) {
+                return [RED, LADY];
+            } else if (value == BLUE+TIGER) {
+                return [BLUE, TIGER];
+            } else if (value == RED+TIGER) {
+                return [RED, TIGER];
             }
             throw new Error("Invalid card identity: " + value);
         },
@@ -355,10 +383,17 @@ function (dojo, declare) {
         },
 
         guessRole: function() {
+            console.log("Guess");
 
         },
 
         matchSet: function() {
+            const identity = this.gamedatas.identity;
+            const traits = this.getAttributesByValue(identity);
+            console.log("Match set with "+traits);
+            for (let t of traits) {
+                console.log("checking trait " + t);
+            }
 
         },
 

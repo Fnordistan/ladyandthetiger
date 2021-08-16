@@ -34,6 +34,7 @@
     }    
 
   	function build_page( $viewArgs ) {		
+      $this->tpl['DISCARDPILE'] = self::_("Discard Pile");
  
         /*********** Do not change anything below this line  ************/
   	}
