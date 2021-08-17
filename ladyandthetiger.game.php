@@ -262,6 +262,24 @@ class LadyAndTheTiger extends Table
         return $decksize;
     }
 
+    /**
+     * Given an identity (collector or guesser) check for collected traits in the Collector display.
+     * If one found with 4 or more, return it, otherwise return null.
+     */
+    function getMatchingCollectedTrait($identity) {
+        // does Collector have a set?
+        $collectedtraits = $this->getCollectedTraits();
+
+        $id = self::getGameStateValue($identity);
+        $traits = $this->getTraitsForRole($id);
+        foreach ($traits as $trait) {
+            if ($collectedtraits[$trait] >= 4) {
+                return $trait;
+            }
+        }
+        return null;
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
 //////////// 
@@ -285,24 +303,17 @@ class LadyAndTheTiger extends Table
             'arg' => $arg
         ));
 
-        // does Collector have a set?
-        $collectedtraits = $this->getCollectedTraits();
-
-        $collector = self::getGameStateValue('collector_identity');
-        $traits = $this->getTraitsForRole($collector);
-        $traitset = null;
-        foreach ($traits as $trait) {
-            if ($collectedtraits[$trait] >= 4) {
-                $traitset = $trait;
-            }
-        }        
-
         $player_id = self::getActivePlayerId();
+        // does Collector have a set?
+        $traitset = $this->getMatchingCollectedTrait('collector_identity');
+
         if ($traitset != null) {
+            $collector = self::getGameStateValue('collector_identity');
             // reveal role, flip card, score set
-            self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role}) reveals identity (${identity_name}) and a set of four ${trait} cards and scores 6 gems.'), array(
+            self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role_name}) reveals identity (${identity_name}) and a set of four ${trait} cards and scores ${score} gems'), array(
                 'player_id' => $player_id,
-                'role' => self::_('Collector'),
+                'role' => 'collector',
+                'role_name' => self::_('Collector'),
                 'player_name' => self::getActivePlayerName(),
                 'identity' => $collector,
                 'identity_name' => $this->identity[$collector],
@@ -341,6 +352,34 @@ class LadyAndTheTiger extends Table
         } else {
             $this->gamestate->nextState("guesser");
         }
+    }
+
+    /**
+     * Guesser chooses to match set.
+     */
+    function matchSet() {
+        self::checkAction( 'match' );
+        $traitset = $this->getMatchingCollectedTrait('guesser_identity');
+        if ($traitset == null) {
+            throw new BgaUserException(self::_("No matching set!"));
+        }
+
+        $player_id = self::getActivePlayerId();
+        $guesser = self::getGameStateValue('guesser_identity');
+        // reveal role, flip card, score set
+        self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role_name}) reveals identity (${identity_name}) and a set of four ${trait} cards and scores ${score} gems'), array(
+            'player_id' => $player_id,
+            'role' => 'guesser',
+            'role_name' => self::_('Guesser'),
+            'player_name' => self::getActivePlayerName(),
+            'identity' => $guesser,
+            'identity_name' => $this->identity[$guesser],
+            'trait' => $traitset,
+            'score' => 2
+        ));
+        self::DbQuery( "UPDATE player SET player_score=player_score+2 WHERE player_id=$player_id" );
+
+        $this->gamestate->nextState("endContest");
     }
 
     /**

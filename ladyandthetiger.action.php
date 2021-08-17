@@ -54,20 +54,29 @@ class action_ladyandthetiger extends APP_GameAction
      * Guesser chose a card to discard.
      */
   	public function discard() {
-      self::setAjaxMode();
-      $type = self::getArg("card_type", AT_posint, true);
-      $arg = self::getArg("card_arg", AT_posint, true);
-      $this->game->discardCard($type, $arg);
-      self::ajaxResponse();
-  }
+        self::setAjaxMode();
+        $type = self::getArg("card_type", AT_posint, true);
+        $arg = self::getArg("card_arg", AT_posint, true);
+        $this->game->discardCard($type, $arg);
+        self::ajaxResponse();
+    }
 
   /**
-   * Collector passes
+   * Guesser chose to match a set.
    */
-  public function pass() {
-    self::setAjaxMode();
-    $this->game->pass();
-    self::ajaxResponse();
-}
+    public function match() {
+        self::setAjaxMode();
+        $this->game->matchSet();
+        self::ajaxResponse();
+    }
+
+    /**
+     * Collector passes
+     */
+    public function pass() {
+        self::setAjaxMode();
+        $this->game->pass();
+        self::ajaxResponse();
+    }
 
 }

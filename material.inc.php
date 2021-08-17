@@ -21,15 +21,11 @@
 
 
 $this->identity = array(
-  0 => 'Door',
-  1 => 'Blue Lady',
-  2 => 'Red Lady',
-  3 => 'Blue Tiger',
-  4 => 'Red Tiger',
-  5 => 'Red+Blue',
-  6 => 'Lady+Tiger',
-);
-
-$this->trait = array(
-
+  0 => clienttranslate('Door'),
+  1 => clienttranslate('Blue Lady'),
+  2 => clienttranslate('Red Lady'),
+  3 => clienttranslate('Blue Tiger'),
+  4 => clienttranslate('Red Tiger'),
+  5 => clienttranslate('Red+Blue'),
+  6 => clienttranslate('Lady+Tiger'),
 );

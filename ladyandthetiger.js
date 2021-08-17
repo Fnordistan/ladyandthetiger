@@ -39,6 +39,11 @@ const CARD_TYPE_TO_POS = [
     /** LADYTIGER */    [6]
 ];
 
+const RED_TYPES = [4, 8, 9, 5, 10, 11, 7];
+const BLUE_TYPES = [0, 13, 14, 1, 2, 3, 7];
+const LADY_TYPES = [0, 13, 14, 4, 8, 9, 6];
+const TIGER_TYPES = [1, 2, 3, 5, 10, 11, 6];
+
 define([
     "dojo","dojo/_base/declare",
     "ebg/core/gamegui",
@@ -111,11 +116,11 @@ function (dojo, declare) {
             const hiscolor = (hisrole == COLLECTOR) ? collectorColor : guesserColor;
 
             const role_n = document.getElementById('rolename_n');
-            role_n.innerHTML = myrole;
+            role_n.innerHTML = (myrole == COLLECTOR) ? CollectorTr : GuesserTr;
             role_n.style['color'] = '#'+mycolor;
 
             const role_s = document.getElementById('rolename_s');
-            role_s.innerHTML = hisrole;
+            role_s.innerHTML = (hisrole == COLLECTOR) ? CollectorTr : GuesserTr;
             role_s.style['color'] = '#'+hiscolor;
 
             const myrolecard = document.getElementById('role_n');
@@ -289,19 +294,19 @@ function (dojo, declare) {
         },
 
         /**
-         * Return a tuple of two traits
+         * Return a tuple of two arrays of types corresponding to types.
          * @param {int} value 
          * @returns two-member array
          */
         getAttributesByValue: function(value) {
             if (value == BLUE+LADY) {
-                return [BLUE, LADY];
+                return [BLUE_TYPES, LADY_TYPES];
             } else if (value == RED+LADY) {
-                return [RED, LADY];
+                return [RED_TYPES, LADY_TYPES];
             } else if (value == BLUE+TIGER) {
-                return [BLUE, TIGER];
+                return [BLUE_TYPES, TIGER_TYPES];
             } else if (value == RED+TIGER) {
-                return [RED, TIGER];
+                return [RED_TYPES, TIGER_TYPES];
             }
             throw new Error("Invalid card identity: " + value);
         },
@@ -387,18 +392,40 @@ function (dojo, declare) {
 
         },
 
+        /**
+         * Check whether the cards in Collector's tableau match my role card.
+         * @returns true if four or more matching a trait
+         */
         matchSet: function() {
-            const identity = this.gamedatas.identity;
+            const myrolecard = document.getElementById('role_n');
+            var identity = 0;
+            if (myrolecard.classList.contains("ltdr_bluetiger")) {
+                identity = BLUE+TIGER;
+            } else if (myrolecard.classList.contains("ltdr_redtiger")) {
+                identity = RED+TIGER;
+            } else if (myrolecard.classList.contains("ltdr_bluelady")) {
+                identity = BLUE+LADY;
+            } else if (myrolecard.classList.contains("ltdr_redlady")) {
+                identity = RED+LADY;
+            }
             const traits = this.getAttributesByValue(identity);
             console.log("Match set with "+traits);
-            for (let t of traits) {
-                console.log("checking trait " + t);
+            if (this.collection.items.length >= 4) {
+                for (let t of traits) {
+                    var m = 0;
+                    for (c of this.collection.items) {
+                        if (t.includes(c.type)) {
+                            m++;
+                            if (m >= 4) {
+                                return true;
+                            }
+                        }
+                    }
+                }
             }
-
+            return false;
         },
 
-
-        
         ///////////////////////////////////////////////////
         //// Ajax calls
 
@@ -436,6 +463,17 @@ function (dojo, declare) {
         passTurn: function() {
             if (this.checkAction("pass", true)) {
                 this.ajaxcall( "/ladyandthetiger/ladyandthetiger/pass.html", { 
+                    lock: true 
+                }, this, function( result ) {  }, function( is_error) { } );
+            }
+        },
+
+        /**
+         * Action to match a set.
+         */
+        scoreMatch: function() {
+            if (this.checkAction("match", true)) {
+                this.ajaxcall( "/ladyandthetiger/ladyandthetiger/match.html", { 
                     lock: true 
                 }, this, function( result ) {  }, function( is_error) { } );
             }
@@ -494,17 +532,26 @@ function (dojo, declare) {
                 switch( stateName )
                 {
                     case 'guesserDiscard':
-                        this.addActionButton('guess_btn', _("Guess"), 'guessRole');
-                        this.addActionButton('match_btn', _("Match Set"), 'matchSet');
+                        this.addGuessMatchButtons();
                         break;
                     case 'guesserAction':
-                        this.addActionButton('guess_btn', _("Guess"), 'guessRole');
-                        this.addActionButton('match_btn', _("Match Set"), 'matchSet');
+                        this.addGuessMatchButtons();
                         this.addActionButton('pass_btn', _("Pass"), 'passTurn');
                         break;
                 }
             }
-        },        
+        },
+
+        /**
+         * Put the "Guess" and "Match Set" buttons in Guesser's title bar.
+         */
+        addGuessMatchButtons: function() {
+            this.addActionButton('guess_btn', _("Guess"), 'guessRole');
+            this.addActionButton('match_btn', _("Match Set"), 'scoreMatch');
+            if (!this.matchSet()) {
+                $('match_btn').classList.add("disabled");
+            }
+        },
 
         ///////////////////////////////////////////////////
         //// Reaction to cometD notifications
@@ -619,8 +666,8 @@ function (dojo, declare) {
          * @param {Object} notif 
          */
         notif_setCollected: function(notif) {
-            const COLLECTOR = _('Collector');
-            const GUESSER = _('Guesser');
+            const COLLECTOR = 'collector';
+            const GUESSER = 'guesser';
 
             const player_id = notif.args.player_id;
             const identity = parseInt(notif.args.identity);
