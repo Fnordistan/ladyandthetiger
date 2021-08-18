@@ -84,10 +84,19 @@ function (dojo, declare) {
         setup: function( gamedatas ) {
             console.log( "Starting game setup" );
 
-            this.setupPlayerTableaus();
+            const collector = this.gamedatas.collector;
+            const guesser = this.gamedatas.guesser;
+            this.setupPlayerTableaus(collector, guesser);
 
-            this.setupClueDisplay();
-            this.setupDiscard();
+            const identity = this.gamedatas.identity;
+            this.setupRoleCard(identity);
+
+            const decksize = parseInt(this.gamedatas.decksize);
+            const cluecards = this.gamedatas.cluecards;
+
+            this.setupClueDisplay(decksize, cluecards);
+            const discards = this.gamedatas.discards;
+            this.setupDiscard(discards);
 
             this.setupNotifications();
 
@@ -97,10 +106,10 @@ function (dojo, declare) {
         /**
          * Set up Collector and Guesser boards and Role cards.
          * Make both Doors for Spectator.
+         * @param {int} collector player_id
+         * @param {int} guesser player_id
          */
-         setupPlayerTableaus: function() {
-            const collector = this.gamedatas.collector;
-            const guesser = this.gamedatas.guesser;
+         setupPlayerTableaus: function(collector, guesser) {
             const collectorColor = this.gamedatas.players[collector]['color'];
             const guesserColor = this.gamedatas.players[guesser]['color'];
 
@@ -123,21 +132,6 @@ function (dojo, declare) {
             role_s.innerHTML = (hisrole == COLLECTOR) ? CollectorTr : GuesserTr;
             role_s.style['color'] = '#'+hiscolor;
 
-            const myrolecard = document.getElementById('role_n');
-            if (!this.isSpectator) {
-                const identity = this.gamedatas.identity;
-                const myidentity = this.getCardIdentity(identity);
-                myrolecard.classList.add('ltdr_'+myidentity);
-                let idtooltip = _('You are the ${identity}!');
-                idtooltip = idtooltip.replace('${identity}', this.getLabelByValue(identity));
-                this.addTooltip(myrolecard.id, idtooltip, '');
-            } else {
-                myrolecard.classList.add('ltdr_door');
-                let roletooltip = _('${role} is behind this door');
-                roletooltip = roletooltip.replace('${role}', myrole == COLLECTOR ? GuesserTr : CollectorTr);
-                this.addTooltip(myrolecard.id, roletooltip, '');
-            }
-
             const hisrolecard = document.getElementById('role_s');
             hisrolecard.classList.add('ltdr_door');
             let hisroletooltip = _('${role} is behind this door');
@@ -157,10 +151,31 @@ function (dojo, declare) {
         },
 
         /**
-         * Set up the clue display.
+         * Place Role card for north player.
+         * @param {int} identity 
          */
-        setupClueDisplay: function() {
-            const decksize = parseInt(this.gamedatas.decksize);
+        setupRoleCard: function(identity) {
+            const myrolecard = document.getElementById('role_n');
+            if (!this.isSpectator) {
+                const myidentity = this.getCardIdentity(identity);
+                myrolecard.classList.add('ltdr_'+myidentity);
+                let idtooltip = _('You are the ${identity}!');
+                idtooltip = idtooltip.replace('${identity}', this.getLabelByValue(identity));
+                this.addTooltip(myrolecard.id, idtooltip, '');
+            } else {
+                myrolecard.classList.add('ltdr_door');
+                let roletooltip = _('${role} is behind this door');
+                roletooltip = roletooltip.replace('${role}', CollectorTr);
+                this.addTooltip(myrolecard.id, roletooltip, '');
+            }
+        },
+
+        /**
+         * Set up the clue display.
+         * @param {int} decksize
+         * @param {Object} cluecards
+         */
+        setupClueDisplay: function(decksize, cluecards) {
             let cardsremain = _('Cards Remaining: ${decksize}');
             cardsremain = cardsremain.replace('${decksize}', decksize);
             document.getElementById('deckcount').innerHTML = cardsremain;
@@ -171,9 +186,6 @@ function (dojo, declare) {
             }
 
             this.cluedisplay = this.createCardStockRow('cluedisplay');
-            // now add the ones actually on display
-            const cluecards = this.gamedatas.cluecards;
-
             for (const c in cluecards) {
                 const card = cluecards[c];
                 const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
@@ -186,9 +198,13 @@ function (dojo, declare) {
 
         /**
          * Set up the discard deck.
+         * @param {Object} discards
          */
-        setupDiscard: function() {
-            const discards = this.gamedatas.discards;
+        setupDiscard: function(discards) {
+            const discard = document.getElementById('cluediscard');
+            while (discard.firstChild) {
+                discard.firstChild.remove();
+            }
             for (const d in discards) {
                 const card = discards[d];
                 this.createDiscardCard(card.type, card.type_arg);
@@ -409,7 +425,6 @@ function (dojo, declare) {
                 identity = RED+LADY;
             }
             const traits = this.getAttributesByValue(identity);
-            console.log("Match set with "+traits);
             if (this.collection.items.length >= 4) {
                 for (let t of traits) {
                     var m = 0;
@@ -578,6 +593,8 @@ function (dojo, declare) {
             this.notifqueue.setSynchronous( 'notif_newClue', 3000 );
             dojo.subscribe( 'setCollected', this, 'notif_setCollected' );
             this.notifqueue.setSynchronous( 'notif_setCollected', 5000 );
+            dojo.subscribe( 'deckEmpty', this, 'notif_deckEmpty' );
+            this.notifqueue.setSynchronous( 'notif_deckEmpty', 5000 );
         },  
         
         // game notification handling methods
@@ -588,21 +605,24 @@ function (dojo, declare) {
          */
         notif_newRole: function( notif ) {
             const identity = parseInt(notif.args.identity);
-            const rolecard = document.getElementById('role_n');
-            rolecard.className = '';
-            const id_label = this.getCardIdentity(identity);
-            rolecard.classList.add('ltdr_rolecard', 'ltdr_'+id_label);
+            this.setupRoleCard(identity);
         },
 
         /**
-         * 
+         * Called when new contest starts.
          * @param {Object} notif 
          */
         notif_newContest: function( notif ) {
-            const otherrole = document.getElementById('role_s');
-            otherrole.className = '';
-            otherrole.classList.add('ltdr_rolecard', 'ltdr_door');
-            debugger;
+            const collector = parseInt(notif.args.collector);
+            const guesser = parseInt(notif.args.guesser);
+            this.setupPlayerTableaus(collector, guesser);
+            const decksize = parseInt(notif.args.decksize);
+            const cluecards = notif.args.cluecards;
+            this.setupClueDisplay(decksize, cluecards);
+            // clear Collector display
+            this.collection.removeAll();
+            // clear Discard pile
+            this.setupDiscard([]);
         },
 
         /**
@@ -656,8 +676,7 @@ function (dojo, declare) {
             if (size != 0) {
                 cluedeck.removeChild(cluedeck.lastElementChild);
             }
-            const decksize = cluedeck.childElementCount;
-            document.getElementById('deckcount').innerHTML = 'Cards Remaining: '+ decksize;
+            document.getElementById('deckcount').innerHTML = 'Cards Remaining: '+ size;
 
         },
 
@@ -687,5 +706,14 @@ function (dojo, declare) {
             this.scoreCtrl[ player_id ].incValue( parseInt(notif.args.score) );
         },
 
-   });             
+        /**
+         * When deck is empty
+         * @param {Object} notif 
+         */
+        notif_deckEmpty: function(notif) {
+            const player_id = parseInt(notif.args.player_id);
+            this.scoreCtrl[ player_id ].incValue( parseInt(notif.args.score) );
+        },
+
+   });
 });
