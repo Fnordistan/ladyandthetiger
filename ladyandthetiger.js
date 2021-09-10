@@ -404,39 +404,77 @@ function (dojo, declare) {
         },
 
         guessRole: function() {
-            console.log("Guess");
+            this.guess_selection = null;
             this.guessDlg = new ebg.popindialog();
             this.guessDlg.create( 'guessDialog' );
             this.guessDlg.setTitle( _("Guess Collector's identity") );
             this.guessDlg.setMaxWidth( 720 );
             
-            // Create the HTML of my dialog. 
-            // The best practice here is to use Javascript templates
-            var html = '<div style="display: flex; flex-direction: column;">\
+            const html = '<div id="GuessDialogDiv" style="display: flex; flex-direction: column;">\
                             <div style="display: flex; flex-direction: row;">\
-                                <div class="ltdr_trait ltdr_trait_redtiger"></div>\
-                                <div class="ltdr_trait ltdr_trait_redlady"></div>\
-                                <div class="ltdr_trait ltdr_trait_red"></div>\
-                                <div class="ltdr_trait ltdr_trait_blue"></div>\
+                                <div id="guess_redtiger" class="ltdr_trait ltdr_trait_redtiger"></div>\
+                                <div id="guess_redlady" class="ltdr_trait ltdr_trait_redlady"></div>\
+                                <div id="guess_red" class="ltdr_trait ltdr_trait_red"></div>\
+                                <div id="guess_blue" class="ltdr_trait ltdr_trait_blue"></div>\
                             </div>\
                             <div style="display: flex; flex-direction: row;">\
-                                <div class="ltdr_trait ltdr_trait_bluetiger"></div>\
-                                <div class="ltdr_trait ltdr_trait_bluelady"></div>\
-                                <div class="ltdr_trait ltdr_trait_tiger"></div>\
-                                <div class="ltdr_trait ltdr_trait_lady"></div>\
+                                <div id="guess_bluetiger" class="ltdr_trait ltdr_trait_bluetiger"></div>\
+                                <div id="guess_bluelady" class="ltdr_trait ltdr_trait_bluelady"></div>\
+                                <div id="guess_tiger" class="ltdr_trait ltdr_trait_tiger"></div>\
+                                <div id="guess_lady" class="ltdr_trait ltdr_trait_lady"></div>\
+                            </div>\
+                            <div style="display: flex; flex-direction: row; justify-content: space-evenly;">\
+                                <div id="guess_button" class="ltdr_guess_btn">'+_("(Select icon)")+'</div>\
+                                <div id="guess_cancel_button" class="ltdr_guess_btn">'+_("Cancel")+'</div>\
                             </div>\
                         </div>';
             
             // Show the dialog
-            this.guessDlg.setContent( html ); // Must be set before calling show() so that the size of the content is defined before positioning the dialog
+            this.guessDlg.setContent( html );
             this.guessDlg.show();
-            
-            // Now that the dialog has been displayed, you can connect your method to some dialog elements
-            // Example, if you have an "OK" button in the HTML of your dialog:
-            // dojo.connect( $('my_ok_button'), 'onclick', this, function(evt){
-            //               evt.preventDefault();
-            //               this.myDlg.destroy();
-            //           } );
+            this.guessDlg.hideCloseIcon();
+
+            document.getElementById('GuessDialogDiv').onclick = event => {
+                this.onGuess(event);
+            };
+        
+        },
+
+        /**
+         * When an element in the guess dialog is clicked
+         * @param {Object} event 
+         */
+        onGuess: function(event) {
+            const target = event.target;
+
+            if (target.id == "guess_button") {
+                if (this.guess_selection == null) {
+                    console.log("No selection yet");
+                } else {
+                    console.log("Guessing " + this.guess_selection);
+                }
+            } else if (target.id == "guess_cancel_button") {
+                this.guess_selection = null;
+                this.guessDlg.destroy();
+            } else if (target.classList.contains("ltdr_trait")) {
+                const traits = {
+                    "redtiger" : _("Red Tiger"),
+                    "bluetiger" : _("Blue Tiger"),
+                    "redlady" : _("Red Lady"),
+                    "bluelady" : _("Blue Lady"),
+                    "red" : _("Red"),
+                    "blue" : _("Blue"),
+                    "tiger" : _("Tiger"),
+                    "lady" : _("Lady"),
+                }
+    
+                const traitid = target.id.substring("guess_".length);
+                const trait = traits[traitid];
+                var guess_txt = _("Guess ${identity}?");
+                guess_txt = guess_txt.replace('${identity}', trait);
+                document.getElementById('guess_button').innerHTML = guess_txt;
+                this.guess_selection = traitid;
+            }
         },
 
         /**
