@@ -405,7 +405,38 @@ function (dojo, declare) {
 
         guessRole: function() {
             console.log("Guess");
-
+            this.guessDlg = new ebg.popindialog();
+            this.guessDlg.create( 'guessDialog' );
+            this.guessDlg.setTitle( _("Guess Collector's identity") );
+            this.guessDlg.setMaxWidth( 720 );
+            
+            // Create the HTML of my dialog. 
+            // The best practice here is to use Javascript templates
+            var html = '<div style="display: flex; flex-direction: column;">\
+                            <div style="display: flex; flex-direction: row;">\
+                                <div class="ltdr_trait ltdr_trait_redtiger"></div>\
+                                <div class="ltdr_trait ltdr_trait_redlady"></div>\
+                                <div class="ltdr_trait ltdr_trait_red"></div>\
+                                <div class="ltdr_trait ltdr_trait_blue"></div>\
+                            </div>\
+                            <div style="display: flex; flex-direction: row;">\
+                                <div class="ltdr_trait ltdr_trait_bluetiger"></div>\
+                                <div class="ltdr_trait ltdr_trait_bluelady"></div>\
+                                <div class="ltdr_trait ltdr_trait_tiger"></div>\
+                                <div class="ltdr_trait ltdr_trait_lady"></div>\
+                            </div>\
+                        </div>';
+            
+            // Show the dialog
+            this.guessDlg.setContent( html ); // Must be set before calling show() so that the size of the content is defined before positioning the dialog
+            this.guessDlg.show();
+            
+            // Now that the dialog has been displayed, you can connect your method to some dialog elements
+            // Example, if you have an "OK" button in the HTML of your dialog:
+            // dojo.connect( $('my_ok_button'), 'onclick', this, function(evt){
+            //               evt.preventDefault();
+            //               this.myDlg.destroy();
+            //           } );
         },
 
         /**

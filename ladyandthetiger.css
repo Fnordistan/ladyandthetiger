@@ -112,6 +112,65 @@
   background-position: 0 -730px;
 }
 
+.ltdr_trait {
+  background-size: 1111px 538px;
+  background-image: url(img/guess_sprites.png);
+  background-repeat: no-repeat;
+  margin: 5px;
+}
+
+.ltdr_trait_red {
+  width: 170px;
+  height: 170px;
+  background-position: -637px -79px;
+}
+
+.ltdr_trait_blue {
+  width: 170px;
+  height: 170px;
+  background-position: -857px -79px;
+}
+
+.ltdr_trait_lady {
+  width: 170px;
+  height: 170px;
+  background-position: -857px -289px;
+}
+
+.ltdr_trait_tiger {
+  width: 170px;
+  height: 170px;
+  background-position: -637px -289px;
+}
+
+.foo {
+  flex-direction: column;
+}
+
+.ltdr_trait_redlady {
+  width: 140px;
+  height: 170px;
+  background-position: -335px -79px;
+}
+
+.ltdr_trait_bluelady {
+  width: 140px;
+  height: 170px;
+  background-position: -335px -289px;
+}
+
+.ltdr_trait_redtiger {
+  width: 170px;
+  height: 170px;
+  background-position: -105px -79px;
+}
+
+.ltdr_trait_bluetiger {
+  width: 170px;
+  height: 170px;
+  background-position: -105px -289px;
+}
+
 /**
 * By IDs
 */

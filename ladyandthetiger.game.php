@@ -447,10 +447,15 @@ class LadyAndTheTiger extends Table
             $guesser = $this->getPlayerBefore( $collector );
             self::setGameStateValue('collector', $collector);
             self::setGameStateValue('guesser', $guesser);
+            // self::debug("First Round: collector=$collector, guesser=$guesser ");
         } else {
-            self::setGameStateValue('collector', $guesser);
-            self::setGameStateValue('guesser', $collector);
+            // switch them
+            $collector = self::getGameStateValue('guesser');
+            $guesser = self::getGameStateValue('collector');
+            self::setGameStateValue('collector', $collector);
+            self::setGameStateValue('guesser', $guesser);
             $this->gamestate->changeActivePlayer($collector);
+            // self::debug("Subsequent round: collector=$collector, guesser=$guesser ");
         }
 
         // (re)shuffle the Clue cards
