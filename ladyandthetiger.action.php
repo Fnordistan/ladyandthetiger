@@ -70,6 +70,16 @@ class action_ladyandthetiger extends APP_GameAction
         self::ajaxResponse();
     }
 
+   /**
+    * Guesser chose to match a set.
+    */
+    public function guess() {
+        self::setAjaxMode();
+        $trait = self::getArg("trait", AT_alphanum, true);
+        $this->game->guessIdentity($trait);
+        self::ajaxResponse();
+    }
+
     /**
      * Collector passes
      */

@@ -224,7 +224,7 @@ class LadyAndTheTiger extends Table
         } else if ($role == BLUE+TIGER) {
             return array("BLUE", "TIGER");
         }
-        throw new BgaVisibleSystemException("Unrecognized role: $role");
+        throw new BgaVisibleSystemException("Unrecognized role: $role"); // NOI18N
     }
 
     /**
@@ -283,6 +283,45 @@ class LadyAndTheTiger extends Table
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
 //////////// 
+
+    /**
+     * Guesser guessed trait for identity
+     */
+    function guessIdentity($trait) {
+        $identity = self::getGameStateValue("collector_identity");
+
+        $match_identities = array(
+            "redlady" => array(RED+LADY),
+            "bluelady" => array(BLUE+LADY),
+            "redtiger" => array(RED+TIGER),
+            "bluetiger" => array(BLUE+TIGER),
+            "red" => array(RED+LADY, RED+TIGER),
+            "blue" => array(BLUE+LADY, BLUE+TIGER),
+            "lady" => array(RED+LADY, BLUE+LADY),
+            "tiger" => array(RED+TIGER,BLUE+TIGER),
+        );
+
+        $matches = $match_identities[$trait];
+
+        if (isset($matches)) {
+            if (in_array($identity, $matches)) {
+                $sz = count($matches);
+                $pts = array( 1 => 5, 2 => 1);
+                if (isset($pts[$sz])) {
+                    $score = $pts[$sz];
+                    throw new BgaVisibleSystemException("Identity $identity is $trait: Score $score"); // NOI18N
+                } else {
+                    throw new BgaVisibleSystemException("Invalid matches for $trait: $matches"); // NOI18N
+                }
+            } else {
+                // Wrong guess, Collector gets 4 gems
+                throw new BgaVisibleSystemException("guess $trait, identity $identity, NO MATCH"); // NOI18N
+            }
+        } else {
+            // shouldn't happen unless there has been hackery
+            throw new BgaVisibleSystemException("Unrecognized trait: $trait"); // NOI18N
+        }
+    }
 
     /** 
      * Collector selected a card
@@ -424,7 +463,7 @@ class LadyAndTheTiger extends Table
 	function argGetRole() {
         $player_id = self::getActivePlayerId();
 		$guesser = self::getGameStateValue('guesser');
-		$role = ($player_id == $guesser) ? self::_("Guesser") :  self::_("Collector");
+		$role = ($player_id == $guesser) ? clienttranslate("Guesser") :  clienttranslate("Collector");
         return array( 'role' => $role);
 	}
 

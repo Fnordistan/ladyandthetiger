@@ -428,7 +428,7 @@ function (dojo, declare) {
                                 <div id="guess_cancel_button" class="ltdr_guess_btn">'+_("Cancel")+'</div>\
                             </div>\
                         </div>';
-            
+
             // Show the dialog
             this.guessDlg.setContent( html );
             this.guessDlg.show();
@@ -448,10 +448,8 @@ function (dojo, declare) {
             const target = event.target;
 
             if (target.id == "guess_button") {
-                if (this.guess_selection == null) {
-                    console.log("No selection yet");
-                } else {
-                    console.log("Guessing " + this.guess_selection);
+                if (this.guess_selection != null) {
+                    this.guessCollector(this.guess_selection);
                 }
             } else if (target.id == "guess_cancel_button") {
                 this.guess_selection = null;
@@ -534,7 +532,6 @@ function (dojo, declare) {
          * @param {int} arg 
          */
          discardCard: function(type, arg) {
-            console.log('discarding card');
             if (this.checkAction("discardCard", true)) {
                 this.ajaxcall( "/ladyandthetiger/ladyandthetiger/discard.html", { 
                     card_type: type,
@@ -558,6 +555,19 @@ function (dojo, declare) {
         scoreMatch: function() {
             if (this.checkAction("match", true)) {
                 this.ajaxcall( "/ladyandthetiger/ladyandthetiger/match.html", { 
+                    lock: true 
+                }, this, function( result ) {  }, function( is_error) { } );
+            }
+        },
+
+        /**
+         * Action to guess Collector's Identity.
+         * @param {string} traitid
+         */
+        guessCollector: function(traitid) {
+            if (this.checkAction("guess", true)) {
+                this.ajaxcall( "/ladyandthetiger/ladyandthetiger/guess.html", {
+                    trait: traitid,
                     lock: true 
                 }, this, function( result ) {  }, function( is_error) { } );
             }
