@@ -269,6 +269,52 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Utility methods
 
+        /* @Override */
+        format_string_recursive : function(log, args) {
+            try {
+                if (log && args && !args.processed) {
+                    args.processed = true;
+                    if (args.collector_name) {
+                        args.collector_name = this.spanPlayerName(args.collector);
+                    }
+                    if (args.guesser_name) {
+                        args.guesser_name = this.spanPlayerName(args.guesser);
+                    }
+                    if (args.scorer_name) {
+                        args.scorer_name = this.spanPlayerName(args.scorer);
+                    }
+                    log = log.replace("You", this.spanYou());
+                }
+            } catch (e) {
+                console.error(log, args, "Exception thrown", e.stack);
+            }
+            return this.inherited(arguments);
+        },
+
+        /**
+         * Create span with Player's name in color.
+         * @param {int} player 
+         */
+         spanPlayerName: function(player_id) {
+            const player = this.gamedatas.players[player_id];
+            const color_bg = player.color_back ?? "";
+            const pname = "<span style=\"font-weight:bold;color:#" + player.color + ";" + color_bg + "\">" + player.name + "</span>";
+            return pname;
+        },
+
+        /**
+         * From BGA Cookbook. Return "You" in this player's color
+         */
+        spanYou : function() {
+            const color = this.gamedatas.players[this.player_id].color;
+            let color_bg = "";
+            if (this.gamedatas.players[this.player_id] && this.gamedatas.players[this.player_id].color_back) {
+                color_bg = "background-color:#" + this.gamedatas.players[this.player_id].color_back + ";";
+            }
+            const you = "<span style=\"font-weight:bold;color:#" + color + ";" + color_bg + "\">" + __("lang_mainsite", "You") + "</span>";
+            return you;
+        },
+
         /**
          * Get the identity according to a card's value.
          * @param {int} value 
@@ -449,6 +495,7 @@ function (dojo, declare) {
 
             if (target.id == "guess_button") {
                 if (this.guess_selection != null) {
+                    this.guessDlg.destroy();
                     this.guessCollector(this.guess_selection);
                 }
             } else if (target.id == "guess_cancel_button") {
@@ -568,7 +615,7 @@ function (dojo, declare) {
             if (this.checkAction("guess", true)) {
                 this.ajaxcall( "/ladyandthetiger/ladyandthetiger/guess.html", {
                     trait: traitid,
-                    lock: true 
+                    lock: true
                 }, this, function( result ) {  }, function( is_error) { } );
             }
         },
@@ -674,6 +721,10 @@ function (dojo, declare) {
             this.notifqueue.setSynchronous( 'notif_setCollected', 5000 );
             dojo.subscribe( 'deckEmpty', this, 'notif_deckEmpty' );
             this.notifqueue.setSynchronous( 'notif_deckEmpty', 5000 );
+            dojo.subscribe( 'guessed', this, 'notif_guessed' );
+            this.notifqueue.setSynchronous( 'notif_guessed', 5000 );
+            dojo.subscribe( 'guessedResult', this, 'notif_guessed' );
+            this.notifqueue.setSynchronous( 'notif_guessedResult', 5000 );
         },  
         
         // game notification handling methods
@@ -793,6 +844,24 @@ function (dojo, declare) {
             const player_id = parseInt(notif.args.player_id);
             this.scoreCtrl[ player_id ].incValue( parseInt(notif.args.score) );
         },
+
+        /**
+         * When the Guesser guessed
+         * @param {Object} notif 
+         */
+        notif_guessed: function(notif) {
+        },
+
+        /**
+         * Display the result
+         * @param {Object} notif 
+         */
+        notif_guessedResult: function(notif) {
+            const scorer_id = parseInt(notif.args.scorer);
+            const score = parseInt(notif.args.score);
+            this.scoreCtrl[scorer_id].incValue(score);
+        },
+
 
    });
 });
