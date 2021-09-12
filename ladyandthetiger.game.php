@@ -29,6 +29,8 @@ define('BLUE', 0);
 define('RED', 1);
 define('REDBLUE', 5);
 define('LADYTIGER', 6);
+define('COLLECTOR', 'collector');
+define('GUESSER', 'guesser');
 
 class LadyAndTheTiger extends Table
 {
@@ -43,9 +45,9 @@ class LadyAndTheTiger extends Table
         parent::__construct();
 
         self::initGameStateLabels( array(
-            "collector" => 10,
+            COLLECTOR => 10,
             "collector_identity" => 11,
-            "guesser" => 12,
+            GUESSER => 12,
             "guesser_identity" => 13,
         ) );
         $this->cards = self::getNew( "module.common.deck" );
@@ -65,7 +67,7 @@ class LadyAndTheTiger extends Table
         In this method, you must setup the game according to the game rules, so that
         the game is ready to be played.
     */
-    protected function setupNewGame( $players, $options = array() )
+    protected function setupNewGame( $players, $options = [] )
     {    
         // Set the colors of the players as Red/Blue
         $gameinfos = self::getGameinfos();
@@ -74,7 +76,7 @@ class LadyAndTheTiger extends Table
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
-        $values = array();
+        $values = [];
         foreach( $players as $player_id => $player )
         {
             $color = array_shift( $default_colors );
@@ -92,7 +94,7 @@ class LadyAndTheTiger extends Table
         self::initStat( 'table', 'turns_number', 0 );    // Init a table statistics
 
         // Create cards
-		$cluecards = array();
+		$cluecards = [];
 		// Door cards = type 1, Clue cards = type 2
 		// 0 = Door (Hidden)
 		// 1 = Blue Lady
@@ -101,14 +103,14 @@ class LadyAndTheTiger extends Table
 		// 4 = Red Tiger
 		// 5 = Red/Blue
 		// 6 = Lady/Tiger
-		$cardvals = array(BLUE+LADY, RED+LADY, BLUE+TIGER, RED+TIGER);
+		$cardvals = [BLUE+LADY, RED+LADY, BLUE+TIGER, RED+TIGER];
 		foreach ($cardvals as $ct) {
             for ($i = 0; $i < 3; $i++) {
-                $cluecards[] = array( 'type' => $ct, 'type_arg' => $i, 'nbr' => 1);
+                $cluecards[] = [ 'type' => $ct, 'type_arg' => $i, 'nbr' => 1];
             }
 		}
-		$cluecards[] = array( 'type' => REDBLUE, 'type_arg' => 0, 'nbr' => 1);
-		$cluecards[] = array( 'type' => LADYTIGER, 'type_arg' => 0, 'nbr' => 1);
+		$cluecards[] = [ 'type' => REDBLUE, 'type_arg' => 0, 'nbr' => 1];
+		$cluecards[] = [ 'type' => LADYTIGER, 'type_arg' => 0, 'nbr' => 1];
 
         $this->cards->createCards( $cluecards, 'deck' );      
 
@@ -129,7 +131,7 @@ class LadyAndTheTiger extends Table
     */
     protected function getAllDatas()
     {
-        $result = array();
+        $result = [];
     
         $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
     
@@ -193,19 +195,19 @@ class LadyAndTheTiger extends Table
      * @param {string} trait
      */
     function cardHasTrait($type, $trait) {
-        $cards = array();
+        $cards = [];
         switch ($trait) {
             case "RED":
-                $cards = array(RED+LADY, RED+TIGER, REDBLUE);
+                $cards = [RED+LADY, RED+TIGER, REDBLUE];
                 break;
             case "BLUE":
-                $cards = array(BLUE+LADY, BLUE+TIGER, REDBLUE);
+                $cards = [BLUE+LADY, BLUE+TIGER, REDBLUE];
                 break;
             case "LADY":
-                $cards = array(RED+LADY, BLUE+LADY, LADYTIGER);
+                $cards = [RED+LADY, BLUE+LADY, LADYTIGER];
                 break;
             case "TIGER":
-                $cards = array(RED+TIGER, BLUE+TIGER, LADYTIGER);
+                $cards = [RED+TIGER, BLUE+TIGER, LADYTIGER];
                 break;
         }
         return in_array($type, $cards);
@@ -216,13 +218,13 @@ class LadyAndTheTiger extends Table
      */
     function getTraitsForRole($role) {
         if ($role == RED+LADY) {
-            return array("RED", "LADY");
+            return ["RED", "LADY"];
         } else if ($role == BLUE+LADY) {
-            return array("BLUE", "LADY");
+            return ["BLUE", "LADY"];
         } else if ($role == RED+TIGER) {
-            return array("RED", "TIGER");
+            return ["RED", "TIGER"];
         } else if ($role == BLUE+TIGER) {
-            return array("BLUE", "TIGER");
+            return ["BLUE", "TIGER"];
         }
         throw new BgaVisibleSystemException("Unrecognized role: $role"); // NOI18N
     }
@@ -232,7 +234,7 @@ class LadyAndTheTiger extends Table
      * @return associative array ("RED/BLUE/LADY/TIGER" => count)
      */
     function getCollectedTraits() {
-        $traits = array("RED" => 0, "BLUE" => 0, "TIGER" => 0, "LADY" => 0);
+        $traits = ["RED" => 0, "BLUE" => 0, "TIGER" => 0, "LADY" => 0];
 
         $collection = $this->cards->getCardsInLocation('collector');
         foreach ($traits as $trait => $c) {
@@ -254,6 +256,7 @@ class LadyAndTheTiger extends Table
         $card = $this->cards->pickCardForLocation('deck', 'cluedisplay');
         $decksize = $this->cards->countCardInLocation('deck');
         self::notifyAllPlayers('newClueCard', clienttranslate('${card_type} added to clue card display'), array(
+            'i18n' => ['card_type'],
             'card_type' => $this->getCardIdentity($card['id']),
             'type' => $card['type'],
             'arg' => $card['type_arg'],
@@ -290,33 +293,49 @@ class LadyAndTheTiger extends Table
     function guessIdentity($trait) {
         $identity = self::getGameStateValue("collector_identity");
 
-        $match_identities = array(
-            "redlady" => array(RED+LADY),
-            "bluelady" => array(BLUE+LADY),
-            "redtiger" => array(RED+TIGER),
-            "bluetiger" => array(BLUE+TIGER),
-            "red" => array(RED+LADY, RED+TIGER),
-            "blue" => array(BLUE+LADY, BLUE+TIGER),
-            "lady" => array(RED+LADY, BLUE+LADY),
-            "tiger" => array(RED+TIGER,BLUE+TIGER),
-        );
+        $traits_to_identities = [
+            "redlady" => [RED+LADY],
+            "bluelady" => [BLUE+LADY],
+            "redtiger" => [RED+TIGER],
+            "bluetiger" => [BLUE+TIGER],
+            "red" => [RED+LADY, RED+TIGER],
+            "blue" => [BLUE+LADY, BLUE+TIGER],
+            "lady" => [RED+LADY, BLUE+LADY],
+            "tiger" => [RED+TIGER,BLUE+TIGER],
+        ];
 
-        $matches = $match_identities[$trait];
-
+        $matches = $traits_to_identities[$trait];
+        $role = clienttranslate("Guesser");
         if (isset($matches)) {
+            $gems = 0;
             if (in_array($identity, $matches)) {
                 $sz = count($matches);
-                $pts = array( 1 => 5, 2 => 1);
+                $pts = [ 1 => 5, 2 => 1];
                 if (isset($pts[$sz])) {
-                    $score = $pts[$sz];
-                    throw new BgaVisibleSystemException("Identity $identity is $trait: Score $score"); // NOI18N
+                    $gems = $pts[$sz];
                 } else {
                     throw new BgaVisibleSystemException("Invalid matches for $trait: $matches"); // NOI18N
                 }
             } else {
                 // Wrong guess, Collector gets 4 gems
-                throw new BgaVisibleSystemException("guess $trait, identity $identity, NO MATCH"); // NOI18N
+                $role = clienttranslate("Collector");
+                $gems = 4;
             }
+
+            // reveal role, flip card, score
+            self::notifyAllPlayers('guessed', clienttranslate('${player_name} (Guesser) guessed the Collector is ${trait}'), array(
+                'i18n' => ['trait'],
+                'player_name' => self::getActivePlayerName(),
+                'trait' => $this->traits[$trait],
+            ));
+            self::notifyAllPlayers('guessedResult', clienttranslate('${player_name} (Collector) is ${identity}. ${role_name} scores ${score} gems'), array(
+                'i18n' => ['identity', 'role'],
+                'player_name' => self::getActivePlayerName(),
+            ));
+            self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$player_id" );
+
+            $this->gamestate->nextState("endContest");
+
         } else {
             // shouldn't happen unless there has been hackery
             throw new BgaVisibleSystemException("Unrecognized trait: $trait"); // NOI18N
@@ -336,6 +355,7 @@ class LadyAndTheTiger extends Table
         $this->cards->moveCard($id, 'collector');
 
         self::notifyAllPlayers('cardCollected', clienttranslate('${player_name} adds ${card_type} to their collection'), array(
+            'i18n' => ['card_type'],
             'player_name' => self::getActivePlayerName(),
             'card_type' => $this->getCardIdentity($id),
             'type' => $type,
@@ -350,10 +370,10 @@ class LadyAndTheTiger extends Table
             $collector = self::getGameStateValue('collector_identity');
             $gems = 6;
             // reveal role, flip card, score set
-            self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role_name}) reveals identity (${identity_name}) and a set of four ${trait} cards and scores ${score} gems'), array(
+            self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (Collector) reveals identity (${identity_name}) and a set of four ${trait} cards and scores ${score} gems'), array(
+                'i18n' => ['identity_name', 'trait'],
                 'player_id' => $player_id,
                 'role' => 'collector',
-                'role_name' => self::_('Collector'),
                 'player_name' => self::getActivePlayerName(),
                 'identity' => $collector,
                 'identity_name' => $this->identity[$collector],
@@ -380,6 +400,7 @@ class LadyAndTheTiger extends Table
         $this->cards->moveCard($id, 'discard');
 
         self::notifyAllPlayers('cardDiscarded', clienttranslate('${player_name} discards ${card_type} from the display'), array(
+            'i18n' => ['card_type'],
             'player_name' => self::getActivePlayerName(),
             'card_type' => $this->getCardIdentity($id),
             'type' => $type,
@@ -402,10 +423,10 @@ class LadyAndTheTiger extends Table
         $guesser = self::getGameStateValue('guesser_identity');
         $gems = 2;
         // reveal role, flip card, score set
-        self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role_name}) reveals identity (${identity_name}) and a set of four ${trait} cards and scores ${score} gems'), array(
+        self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (Guesser) reveals identity (${identity_name}) and a set of four ${trait} cards and scores ${score} gems'), array(
+            'i18n' => ['identity_name', 'trait'],
             'player_id' => $player_id,
             'role' => 'guesser',
-            'role_name' => self::_('Guesser'),
             'player_name' => self::getActivePlayerName(),
             'identity' => $guesser,
             'identity_name' => $this->identity[$guesser],
@@ -440,9 +461,9 @@ class LadyAndTheTiger extends Table
             $players = self::loadPlayersBasicInfos();
             $guesser = self::getGameStateValue('guesser');
             $gems = 3;
-            self::notifyAllPlayers('deckEmpty', clienttranslate('Deck is empty; Guesser (${guesser_name}) scores ${score} gems'), array(
+            self::notifyAllPlayers('deckEmpty', clienttranslate('Deck is empty; Guesser (${player_name}) scores ${score} gems'), array(
                 'player_id' => $guesser,
-                'guesser_name' => $players[$guesser]['player_name'],
+                'player_name' => $players[$guesser]['player_name'],
                 'score' => $gems
             ));
             self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$guesser" );
@@ -464,7 +485,7 @@ class LadyAndTheTiger extends Table
         $player_id = self::getActivePlayerId();
 		$guesser = self::getGameStateValue('guesser');
 		$role = ($player_id == $guesser) ? clienttranslate("Guesser") :  clienttranslate("Collector");
-        return array( 'role' => $role);
+        return [ 'role' => $role];
 	}
 
 
@@ -512,13 +533,14 @@ class LadyAndTheTiger extends Table
             'cluecards' => $this->cards->getCardsInLocation('cluedisplay')
         ));
 
-        $identities = array(RED+TIGER, RED+LADY, BLUE+TIGER, BLUE+LADY);
+        $identities = [RED+TIGER, RED+LADY, BLUE+TIGER, BLUE+LADY];
         shuffle($identities);
 
         foreach( $players as $player_id => $player ) {
             $identity = array_pop($identities);
             // Notify player of his identity
-            self::notifyPlayer( $player_id, 'newRole', clienttranslate('You are the ${identity_name}'), array( 
+            self::notifyPlayer( $player_id, 'newRole', clienttranslate('You are the ${identity_name}'), array(
+                'i18n' => ['identity_name'],
                 'identity' => $identity,
                 'identity_name' => $this->identity[$identity]
             ) );

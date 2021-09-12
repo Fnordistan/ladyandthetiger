@@ -25,7 +25,9 @@
       <h1 id="deckcount"></h1>
       <div id="cluedeck"></div>
     </div>
-    <div id="cluedisplay"></div>
+    <div id="cluedisplay_container">
+      <div id="cluedisplay"></div>
+    </div>
     <div id="discardcontainer">
       <h1>{DISCARDPILE}</h1>
       <div id="cluediscard"></div>

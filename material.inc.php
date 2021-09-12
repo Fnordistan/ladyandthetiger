@@ -19,6 +19,10 @@
  *
  */
 
+$this->role = array(
+  'collector' => clienttranslate("Collector"),
+  'guesser' => clienttranslate("Guesser"),
+);
 
 $this->identity = array(
   0 => clienttranslate('Door'),
@@ -28,4 +32,15 @@ $this->identity = array(
   4 => clienttranslate('Red Tiger'),
   5 => clienttranslate('Red+Blue'),
   6 => clienttranslate('Lady+Tiger'),
+);
+
+$this->traits = array(
+  "redlady" => clienttranslate("Red Lady"),
+  "bluelady" => clienttranslate("Blue Lady"),
+  "redtiger" => clienttranslate("Red Tiger"),
+  "bluetiger" => clienttranslate("Blue Tiger"),
+  "red" => clienttranslate("Red"),
+  "blue" => clienttranslate("Blue"),
+  "lady" => clienttranslate("Lady"),
+  "tiger" => clienttranslate("Tiger"),
 );
