@@ -44,6 +44,9 @@ const BLUE_TYPES = [0, 13, 14, 1, 2, 3, 7];
 const LADY_TYPES = [0, 13, 14, 4, 8, 9, 6];
 const TIGER_TYPES = [1, 2, 3, 5, 10, 11, 6];
 
+const COLLECTOR = 'collector';
+const GUESSER = 'guesser';
+
 define([
     "dojo","dojo/_base/declare",
     "ebg/core/gamegui",
@@ -113,8 +116,6 @@ function (dojo, declare) {
             const collectorColor = this.gamedatas.players[collector]['color'];
             const guesserColor = this.gamedatas.players[guesser]['color'];
 
-            const COLLECTOR = 'Collector';
-            const GUESSER = 'Guesser';
             const CollectorTr = _('Collector');
             const GuesserTr = _('Guesser');
 
@@ -423,13 +424,13 @@ function (dojo, declare) {
         },
 
         /**
-         * Reveal a role card behind a door.
-         * @param {node} rolecard 
-         * @param {string} role 
+         * Reveal the role card behind a door.
+         * @param {string} role bluelady|redlady|bluetiger|redtiger
          */
-         revealRoleCard: function(rolecard, role) {
-            rolecard.classList.remove('ltdr_door');
-            rolecard.classList.add('ltdr_'+role);
+         revealDoorCard: function(role) {
+            const doorcard = document.getElementById('role_s')
+            doorcard.classList.remove('ltdr_door');
+            doorcard.classList.add('ltdr_'+role);
         },
 
         ///////////////////////////////////////////////////
@@ -724,8 +725,9 @@ function (dojo, declare) {
             dojo.subscribe( 'guessed', this, 'notif_guessed' );
             this.notifqueue.setSynchronous( 'notif_guessed', 5000 );
             dojo.subscribe( 'guessedResult', this, 'notif_guessed' );
-            this.notifqueue.setSynchronous( 'notif_guessedResult', 5000 );
-        },  
+            dojo.subscribe( 'identitiesRevealed', this, 'notif_identitiesRevealed' );
+            this.notifqueue.setSynchronous( 'notif_identitiesRevealed', 5000 );
+        },
         
         // game notification handling methods
 
@@ -811,29 +813,36 @@ function (dojo, declare) {
         },
 
         /**
-         * Reveal a role and score for collecting a set.
+         * Score for collecting a set.
          * @param {Object} notif 
          */
         notif_setCollected: function(notif) {
-            const COLLECTOR = 'collector';
-            const GUESSER = 'guesser';
-
             const player_id = notif.args.player_id;
-            const identity = parseInt(notif.args.identity);
-            const id_label = this.getCardIdentity(identity);
-            const role = notif.args.role;
-
-            var rolecard = null;
-            const label_n = document.getElementById('rolename_n').innerHTML;
-            if (role == COLLECTOR) {
-                rolecard = label_n == COLLECTOR ? document.getElementById('role_n') : document.getElementById('role_s');
-            } else if (role == GUESSER) {
-                rolecard = label_n == GUESSER ? document.getElementById('role_n') : document.getElementById('role_s');
-            } else {
-                throw new Error("Unexpected role: " + role);
-            }
-            this.revealRoleCard(rolecard, id_label);
             this.scoreCtrl[ player_id ].incValue( parseInt(notif.args.score) );
+        },
+
+        /**
+         * Reveal Door card.
+         * @param {Object} notif 
+         */
+        notif_identitiesRevealed: function(notif) {
+            const guesser_id = parseInt(notif.args.guesser);
+            const guesser_lbl = notif.args.guesser_lbl;
+            // const collector_id = parseInt(notif.args.collector);
+            const collector_lbl = notif.args.collector_lbl;
+            // which is the Door (other) player?
+            const door_role = (this.player_id == guesser_id) ? collector_lbl : guesser_lbl;
+            this.revealDoorCard(door_role);
+        },
+
+        /**
+         * When the Guesser guessed
+         * @param {Object} notif 
+         */
+         notif_guessed: function(notif) {
+            const scorer_id = notif.args.scorer;
+            const score = parseInt(notif.args.score);
+            this.scoreCtrl[scorer_id].incValue(score);
         },
 
         /**
@@ -841,27 +850,9 @@ function (dojo, declare) {
          * @param {Object} notif 
          */
         notif_deckEmpty: function(notif) {
-            const player_id = parseInt(notif.args.player_id);
+            const player_id = notif.args.player_id;
             this.scoreCtrl[ player_id ].incValue( parseInt(notif.args.score) );
         },
-
-        /**
-         * When the Guesser guessed
-         * @param {Object} notif 
-         */
-        notif_guessed: function(notif) {
-        },
-
-        /**
-         * Display the result
-         * @param {Object} notif 
-         */
-        notif_guessedResult: function(notif) {
-            const scorer_id = parseInt(notif.args.scorer);
-            const score = parseInt(notif.args.score);
-            this.scoreCtrl[scorer_id].incValue(score);
-        },
-
 
    });
 });

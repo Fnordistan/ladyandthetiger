@@ -322,37 +322,42 @@ class LadyAndTheTiger extends Table
                 $scorer = COLLECTOR;
                 $gems = 4;
             }
+            // reveal cards
+            $this->revealIdentities();
+
 
             $collector_id = self::getGameStateValue(COLLECTOR);
-            // reveal guess
-            self::notifyAllPlayers('guessed', clienttranslate('${player_name} (Guesser) guessed ${collector_name} is ${trait}'), array(
-                'i18n' => ['trait'],
-                'player_name' => self::getActivePlayerName(),
-                'trait' => $this->traits[$trait],
-                COLLECTOR => $collector_id,
-                'collector_name' => $players[$collector_id]['player_name']
-            ));
-
             $scoring_player_id = self::getGameStateValue($scorer);
 
-            // reveal role and result
-            self::notifyAllPlayers('guessedResult', clienttranslate('${player_name} (Collector) is ${identity_name}. ${scorer_name} (${scoring_role}) scores ${score} gems'), array(
-                'i18n' => ['identity_name', 'scoring_role'],
-                'player_name' => $players[$collector_id]['player_name'],
-                'identity_name' => $this->identity[$collector_identity],
+            self::notifyAllPlayers('guessed', clienttranslate('${player_name} (Guesser) guessed ${collector_name} (Collector) is ${trait}; ${scorer_name} (${scoring_role}) scores ${score} gems'), array(
+                'i18n' => ['trait', 'scoring_role'],
+                'player_name' => self::getActivePlayerName(),
+                'collector_name' => $players[$collector_id]['player_name'],
+                'trait' => $this->traits[$trait],
                 'scorer' => $scoring_player_id,
                 'scorer_name' => $players[$scoring_player_id]['player_name'],
                 'scoring_role' => $this->role[$scorer],
                 'score' => $gems
             ));
             self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$scoring_player_id" );
-
             $this->gamestate->nextState("endContest");
-
         } else {
             // shouldn't happen unless there has been hackery
             throw new BgaVisibleSystemException("Unrecognized trait: $trait"); // NOI18N
         }
+    }
+
+    /**
+     * Guesser chooses to match set.
+     */
+    function matchSet() {
+        self::checkAction( 'match' );
+        $traitset = $this->getMatchingCollectedTrait('guesser_identity');
+        if ($traitset == null) {
+            throw new BgaUserException(self::_("No matching set!"));
+        }
+
+        $this->scoreSet($this->role[GUESSER], $traitset, 2);
     }
 
     /** 
@@ -375,30 +380,63 @@ class LadyAndTheTiger extends Table
             'arg' => $arg
         ));
 
-        $player_id = self::getActivePlayerId();
         // does Collector have a set?
         $traitset = $this->getMatchingCollectedTrait('collector_identity');
 
         if ($traitset != null) {
-            $collector = self::getGameStateValue('collector_identity');
-            $gems = 6;
-            // reveal role, flip card, score set
-            self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (Collector) reveals identity (${identity_name}) and a set of four ${trait} cards and scores ${score} gems'), array(
-                'i18n' => ['identity_name', 'trait'],
-                'player_id' => $player_id,
-                'role' => COLLECTOR,
-                'player_name' => self::getActivePlayerName(),
-                'identity' => $collector,
-                'identity_name' => $this->identity[$collector],
-                'trait' => $traitset,
-                'score' => $gems
-            ));
-            self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$player_id" );
-
-            $this->gamestate->nextState("endContest");
+            $this->scoreSet($this->role[COLLECTOR], $traitset, 6);
         } else {
             $this->drawCardAction("nextPlayer");
         }
+    }
+
+    /**
+     * When either Collector acquires four matching cards or Guesser reveals a set.
+     */
+    function scoreSet($role, $trait, $gems) {
+        // reveal roles
+        $this->revealIdentities();
+        // score
+        $player_id = self::getActivePlayerId();
+        self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role}) matches four ${trait} cards and scores ${score} gems'), array(
+            'i18n' => ['role', 'trait'],
+            'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName(),
+            'role' => $role,
+            'trait' => $trait,
+            'score' => $gems
+        ));
+        self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$player_id" );
+
+        $this->gamestate->nextState("endContest");
+    }
+
+    /**
+     * Send notification to reveal both players' identities
+     */
+    function revealIdentities() {
+        $guesser = self::getGameStateValue(GUESSER);
+        $guesser_id = self::getGameStateValue('guesser_identity');
+        $guesser_identity = $this->identity[$guesser_id];
+        $collector = self::getGameStateValue(COLLECTOR);
+        $collector_id = self::getGameStateValue('collector_identity');
+        $collector_identity = $this->identity[$collector_id];
+
+        $players = self::loadPlayersBasicInfos();
+        $collector_name = $players[$collector]['player_name'];
+        $guesser_name = $players[$guesser]['player_name'];
+
+        self::notifyAllPlayers('identitiesRevealed', clienttranslate('${collector_name} (Collector) is the ${collector_identity}; ${guesser_name} (Guesser) is the ${guesser_identity}'), array(
+            'i18n' => ['collector_identity', 'guesser_identity'],
+            'guesser' => $guesser,
+            'guesser_lbl' => $guesser_id,
+            'guesser_name' => $guesser_name,
+            'guesser_identity' => $guesser_identity,
+            'collector' => $collector,
+            'collector_lbl' => $collector_id,
+            'collector_name' => $collector_name,
+            'collector_identity' => $collector_identity,
+        ));
     }
 
     /**
@@ -420,35 +458,6 @@ class LadyAndTheTiger extends Table
             'arg' => $arg
         ));
         $this->drawCardAction("guesser");
-    }
-
-    /**
-     * Guesser chooses to match set.
-     */
-    function matchSet() {
-        self::checkAction( 'match' );
-        $traitset = $this->getMatchingCollectedTrait('guesser_identity');
-        if ($traitset == null) {
-            throw new BgaUserException(self::_("No matching set!"));
-        }
-
-        $player_id = self::getActivePlayerId();
-        $guesser = self::getGameStateValue('guesser_identity');
-        $gems = 2;
-        // reveal role, flip card, score set
-        self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (Guesser) reveals identity (${identity_name}) and a set of four ${trait} cards and scores ${score} gems'), array(
-            'i18n' => ['identity_name', 'trait'],
-            'player_id' => $player_id,
-            'role' => GUESSER,
-            'player_name' => self::getActivePlayerName(),
-            'identity' => $guesser,
-            'identity_name' => $this->identity[$guesser],
-            'trait' => $traitset,
-            'score' => $gems
-        ));
-        self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$player_id" );
-
-        $this->gamestate->nextState("endContest");
     }
 
     /**
@@ -479,6 +488,7 @@ class LadyAndTheTiger extends Table
                 'player_name' => $players[$guesser]['player_name'],
                 'score' => $gems
             ));
+            $this->revealIdentities();
             self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$guesser" );
 
             $this->gamestate->nextState("endContest");
