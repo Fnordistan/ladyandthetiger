@@ -417,20 +417,15 @@ function (dojo, declare) {
             return id;
         },
 
-        getBackgroundPosition: function(pos) {
-            // const xpos = (pos-1) % 6 * this.cluecardwidth;
-            this.cluecardheight;
-
-        },
-
         /**
          * Reveal the role card behind a door.
-         * @param {string} role bluelady|redlady|bluetiger|redtiger
+         * @param {identity} int for bluelady|redlady|bluetiger|redtiger
          */
-         revealDoorCard: function(role) {
-            const doorcard = document.getElementById('role_s')
+         revealDoorCard: function(identity) {
+            const doorcard = document.getElementById('role_s');
+            const lbl = this.getCardIdentity(identity);
+            doorcard.classList.add('ltdr_'+lbl);
             doorcard.classList.remove('ltdr_door');
-            doorcard.classList.add('ltdr_'+role);
         },
 
         ///////////////////////////////////////////////////
@@ -826,13 +821,13 @@ function (dojo, declare) {
          * @param {Object} notif 
          */
         notif_identitiesRevealed: function(notif) {
-            const guesser_id = parseInt(notif.args.guesser);
-            const guesser_lbl = notif.args.guesser_lbl;
-            // const collector_id = parseInt(notif.args.collector);
-            const collector_lbl = notif.args.collector_lbl;
+            const guesser_player_id = notif.args.guesser;
+            const guesser_id = parseInt(notif.args.guesser_id);
+            // const collector_player_id = parseInt(notif.args.collector);
+            const collector_id = parseInt(notif.args.collector_id);
             // which is the Door (other) player?
-            const door_role = (this.player_id == guesser_id) ? collector_lbl : guesser_lbl;
-            this.revealDoorCard(door_role);
+            const door_id = (this.player_id == guesser_player_id) ? collector_id : guesser_id;
+            this.revealDoorCard(door_id);
         },
 
         /**

@@ -332,6 +332,7 @@ class LadyAndTheTiger extends Table
             self::notifyAllPlayers('guessed', clienttranslate('${player_name} (Guesser) guessed ${collector_name} (Collector) is ${trait}; ${scorer_name} (${scoring_role}) scores ${score} gems'), array(
                 'i18n' => ['trait', 'scoring_role'],
                 'player_name' => self::getActivePlayerName(),
+                'collector' => $collector_id,
                 'collector_name' => $players[$collector_id]['player_name'],
                 'trait' => $this->traits[$trait],
                 'scorer' => $scoring_player_id,
@@ -429,11 +430,11 @@ class LadyAndTheTiger extends Table
         self::notifyAllPlayers('identitiesRevealed', clienttranslate('${collector_name} (Collector) is the ${collector_identity}; ${guesser_name} (Guesser) is the ${guesser_identity}'), array(
             'i18n' => ['collector_identity', 'guesser_identity'],
             'guesser' => $guesser,
-            'guesser_lbl' => $guesser_id,
+            'guesser_id' => $guesser_id,
             'guesser_name' => $guesser_name,
             'guesser_identity' => $guesser_identity,
             'collector' => $collector,
-            'collector_lbl' => $collector_id,
+            'collector_id' => $collector_id,
             'collector_name' => $collector_name,
             'collector_identity' => $collector_identity,
         ));
