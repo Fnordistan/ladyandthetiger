@@ -47,6 +47,8 @@ const TIGER_TYPES = [1, 2, 3, 5, 10, 11, 6];
 const COLLECTOR = 'collector';
 const GUESSER = 'guesser';
 
+const IDENTITY_CLASSES = ['ltdr_redlady', 'ltdr_bluelady', 'ltdr_redtiger', 'ltdr_bluetiger', 'ltdr_door'];
+
 define([
     "dojo","dojo/_base/declare",
     "ebg/core/gamegui",
@@ -143,9 +145,18 @@ function (dojo, declare) {
             const guesser_tableau = document.getElementById(guesser_t);
             guesser_tableau.style['display'] = 'none';
 
-            const guesser_d = (myrole == GUESSER) ? 'player_north' : 'player_south';
-            const guesser_display = document.getElementById(guesser_d);
+            let guesser_d, collector_d;
+            if (myrole == GUESSER) {
+                guesser_d = 'player_north';
+                collector_d = 'player_south';
+            } else {
+                guesser_d = 'player_south';
+                collector_d = 'player_north';
+            }
+            let guesser_display = document.getElementById(guesser_d);
             guesser_display.style['width'] = 'fit-content';
+            let collector_display = document.getElementById(collector_d);
+            collector_display.style['width'] = '100%';
 
             const collector_t = (myrole == COLLECTOR) ? 'tableau_n' : 'tableau_s';
             this.setupCollectorDisplay(collector_t);
@@ -157,6 +168,7 @@ function (dojo, declare) {
          */
         setupRoleCard: function(identity) {
             const myrolecard = document.getElementById('role_n');
+            myrolecard.classList.remove(...IDENTITY_CLASSES);
             if (!this.isSpectator) {
                 const myidentity = this.getCardIdentity(identity);
                 myrolecard.classList.add('ltdr_'+myidentity);
@@ -424,8 +436,8 @@ function (dojo, declare) {
          revealDoorCard: function(identity) {
             const doorcard = document.getElementById('role_s');
             const lbl = this.getCardIdentity(identity);
+            doorcard.classList.remove(...IDENTITY_CLASSES);
             doorcard.classList.add('ltdr_'+lbl);
-            doorcard.classList.remove('ltdr_door');
         },
 
         ///////////////////////////////////////////////////
@@ -761,10 +773,10 @@ function (dojo, declare) {
             const arg = parseInt(notif.args.arg);
             const id = CARD_TYPE_TO_POS[type][arg];
             // stock to stock movement
-            this.cluedisplay.removeFromStockById(id);
             const wt = this.collection.count();
             this.collection.item_type[id].weight = wt;
             this.collection.addToStockWithId(id, id, 'cluedisplay');
+            this.cluedisplay.removeFromStockById(id);
         },
 
         /**

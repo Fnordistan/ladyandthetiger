@@ -50,6 +50,7 @@
   flex-direction: row;
   justify-content: flex-start;
   min-height: 370px;
+	transition: width 2s;
 }
 
 /* Player tableaus (Guesser's is made hidden) */
