@@ -207,11 +207,30 @@ function (dojo, declare) {
                 const card = cluecards[c];
                 const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
                 this.cluedisplay.addToStockWithId(id, id);
-                $('cluedisplay_item_'+id).addEventListener('click', () => {
-                    this.onClueCardSelected(card.type, card.type_arg);
-                });
+                this.decorateClueCard(id, card.type, card.type_arg);
+              
             }
         },
+
+        decorateClueCard: function(id, type, arg) {
+            $('cluedisplay_item_'+id).addEventListener('click', () => {
+                this.onClueCardSelected(type, arg);
+            });
+            $('cluedisplay_item_'+id).addEventListener('mouseenter', () => {
+                if (this.isCurrentPlayerActive()) {
+                    const thiscard = document.getElementById('cluedisplay_item_'+id);
+                    thiscard.style['transform'] = 'scale(1.05)';
+                    thiscard.style['transition'] = 'transform 0.5s';
+                }
+
+            });
+            $('cluedisplay_item_'+id).addEventListener('mouseout', () => {
+                const thiscard = document.getElementById('cluedisplay_item_'+id);
+                thiscard.style['transform'] = '';
+                thiscard.style['transition'] = '';
+            });
+        },
+
 
         /**
          * Set up the discard deck.
@@ -813,10 +832,7 @@ function (dojo, declare) {
             const wt = this.cluedisplay.count();
             this.cluedisplay.item_type[id].weight = wt;
             this.cluedisplay.addToStockWithId(id, id, 'cluedeck');
-
-            $('cluedisplay_item_'+id).addEventListener('click', () => {
-                this.onClueCardSelected(type, arg);
-            });
+            this.decorateClueCard(id, type, arg);
 
             const cluedeck = document.getElementById('cluedeck');
             if (size != 0) {
