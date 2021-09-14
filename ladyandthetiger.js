@@ -141,24 +141,28 @@ function (dojo, declare) {
             hisroletooltip = hisroletooltip.replace('${role}', hisrole == COLLECTOR ? CollectorTr : GuesserTr);
             this.addTooltip(hisrolecard.id, hisroletooltip, '');
 
-            const guesser_t = (myrole == GUESSER) ? 'tableau_n' : 'tableau_s';
+            let guesser_d, collector_d, guesser_t, collector_t;
+            if (myrole == GUESSER) {
+                guesser_d = 'player_north';
+                guesser_t = 'tableau_n';
+                collector_d = 'player_south';
+                collector_t = 'tableau_s';
+            } else {
+                guesser_d = 'player_south';
+                guesser_t = 'tableau_s';
+                collector_d = 'player_north';
+                collector_t = 'tableau_n';
+            }
+
             const guesser_tableau = document.getElementById(guesser_t);
             guesser_tableau.style['display'] = 'none';
 
-            let guesser_d, collector_d;
-            if (myrole == GUESSER) {
-                guesser_d = 'player_north';
-                collector_d = 'player_south';
-            } else {
-                guesser_d = 'player_south';
-                collector_d = 'player_north';
-            }
-            let guesser_display = document.getElementById(guesser_d);
+            const guesser_display = document.getElementById(guesser_d);
             guesser_display.style['width'] = 'fit-content';
-            let collector_display = document.getElementById(collector_d);
+
+            const collector_display = document.getElementById(collector_d);
             collector_display.style['width'] = '100%';
 
-            const collector_t = (myrole == COLLECTOR) ? 'tableau_n' : 'tableau_s';
             this.setupCollectorDisplay(collector_t);
         },
 
@@ -245,7 +249,9 @@ function (dojo, declare) {
          * @param {string} collector_id
          */
          setupCollectorDisplay: function(collector_id) {
-            document.getElementById(collector_id).style['top'] = '40px';
+            const collector_tableau = document.getElementById(collector_id);
+            collector_tableau.style['display'] = 'initial';
+            collector_tableau.style['top'] = '40px';
             this.collection = this.createCardStockRow(collector_id);
             // now add the ones actually on display
             const collectorcards = this.gamedatas.collectorcards;
@@ -752,14 +758,15 @@ function (dojo, declare) {
          * @param {Object} notif 
          */
         notif_newContest: function( notif ) {
+            // clear Collector display
+            this.collection.removeAll();
+
             const collector = parseInt(notif.args.collector);
             const guesser = parseInt(notif.args.guesser);
             this.setupPlayerTableaus(collector, guesser);
             const decksize = parseInt(notif.args.decksize);
             const cluecards = notif.args.cluecards;
             this.setupClueDisplay(decksize, cluecards);
-            // clear Collector display
-            this.collection.removeAll();
             // clear Discard pile
             this.setupDiscard([]);
         },
