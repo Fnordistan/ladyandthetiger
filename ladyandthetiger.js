@@ -206,12 +206,18 @@ function (dojo, declare) {
             for (const c in cluecards) {
                 const card = cluecards[c];
                 const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
-                this.cluedisplay.addToStockWithId(id, id);
+                this.cluedisplay.addToStockWithId(id, id, 'cluedeck');
                 this.decorateClueCard(id, card.type, card.type_arg);
               
             }
         },
 
+        /**
+         * For clue cards in cluedisplay, add Event listeners.
+         * @param {string} id 
+         * @param {int} type 
+         * @param {int} arg 
+         */
         decorateClueCard: function(id, type, arg) {
             $('cluedisplay_item_'+id).addEventListener('click', () => {
                 this.onClueCardSelected(type, arg);
@@ -222,7 +228,6 @@ function (dojo, declare) {
                     thiscard.style['transform'] = 'scale(1.05)';
                     thiscard.style['transition'] = 'transform 0.5s';
                 }
-
             });
             $('cluedisplay_item_'+id).addEventListener('mouseout', () => {
                 const thiscard = document.getElementById('cluedisplay_item_'+id);
@@ -303,8 +308,47 @@ function (dojo, declare) {
             return pile;
         },
 
+        /**
+         * At start o fnew contest. Move cards in discard pile, clue display, and collectors tableau back to dek.
+         * Animate 'dealing new cards.
+         * @param {int} decksize 
+         * @param {array} cluecards 
+         * @param {id} oldcollector player_id of collector
+         */
+        refreshClueDisplay: function(decksize, cluecards, oldcollector) {
+            // move cards from Discard pile to Deck
+            debugger;
+            const cluedeck = document.getElementById('cluedeck');
+            const discard = document.getElementById('cluediscard');
+            while (discard.lastChild) {
+                this.slideToObject(discard.lastChild, cluedeck, 250, 100);
+                discard.lastChild.remove();
+            }
 
-        ///////////////////////////////////////////////////
+            const myrole = (this.isSpectator) ? COLLECTOR : (this.player_id == oldcollector) ? COLLECTOR : GUESSER;
+            const tableau = (myrole == COLLECTOR) ? 'tableau_n' : 'tableau_s';
+            const tab_div = document.getElementById(tableau);
+            // move cards from Collector display to Deck
+            while (tab_div.firstChild) {
+                this.slideToObject(tab_div.firstChild, cluedeck, 1000, 1000);
+                tab_div.firstChild.remove();
+            }
+            // clear Collector display
+            this.collection.removeAll();
+
+            // move cards from Clue display to Deck
+            const cluedisplay = document.getElementById('cluedisplay');
+            while (cluedisplay.firstChild) {
+                this.slideToObject(cluedisplay.firstChild, cluedeck, 1000, 1000);
+                cluedisplay.firstChild.remove();
+            }
+            this.cluedisplay.removeAll();
+
+            this.setupClueDisplay(decksize, cluecards);
+
+        },
+
+         ///////////////////////////////////////////////////
         //// Utility methods
 
         /* @Override */
@@ -777,17 +821,14 @@ function (dojo, declare) {
          * @param {Object} notif 
          */
         notif_newContest: function( notif ) {
-            // clear Collector display
-            this.collection.removeAll();
-
-            const collector = parseInt(notif.args.collector);
-            const guesser = parseInt(notif.args.guesser);
-            this.setupPlayerTableaus(collector, guesser);
             const decksize = parseInt(notif.args.decksize);
             const cluecards = notif.args.cluecards;
-            this.setupClueDisplay(decksize, cluecards);
-            // clear Discard pile
-            this.setupDiscard([]);
+            const collector = parseInt(notif.args.collector);
+            const guesser = parseInt(notif.args.guesser);
+            // passing guesser because right now display is still formerly guesser
+            this.refreshClueDisplay(decksize, cluecards, guesser);
+ 
+            this.setupPlayerTableaus(collector, guesser);
         },
 
         /**
@@ -838,7 +879,9 @@ function (dojo, declare) {
             if (size != 0) {
                 cluedeck.removeChild(cluedeck.lastElementChild);
             }
-            document.getElementById('deckcount').innerHTML = 'Cards Remaining: '+ size;
+            let cardsremain = _('Cards Remaining: ${decksize}');
+            cardsremain = cardsremain.replace('${decksize}', size);
+            document.getElementById('deckcount').innerHTML = cardsremain;
 
         },
 
