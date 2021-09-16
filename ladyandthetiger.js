@@ -91,7 +91,7 @@ function (dojo, declare) {
 
             const collector = this.gamedatas.collector;
             const guesser = this.gamedatas.guesser;
-            this.setupPlayerTableaus(collector, guesser);
+            this.setupPlayerTableaus(collector, guesser, this.gamedatas.collectorcards);
 
             const identity = this.gamedatas.identity;
             this.setupRoleCard(identity);
@@ -113,8 +113,9 @@ function (dojo, declare) {
          * Make both Doors for Spectator.
          * @param {int} collector player_id
          * @param {int} guesser player_id
+         * @param {array} collectorcards
          */
-         setupPlayerTableaus: function(collector, guesser) {
+         setupPlayerTableaus: function(collector, guesser, collectorcards) {
             const collectorColor = this.gamedatas.players[collector]['color'];
             const guesserColor = this.gamedatas.players[guesser]['color'];
 
@@ -163,7 +164,7 @@ function (dojo, declare) {
             const collector_display = document.getElementById(collector_d);
             collector_display.style['width'] = '100%';
 
-            this.setupCollectorDisplay(collector_t);
+            this.setupCollectorDisplay(collector_t, collectorcards);
         },
 
         /**
@@ -198,9 +199,10 @@ function (dojo, declare) {
             document.getElementById('deckcount').innerHTML = cardsremain;
             for (let i = 0; i < decksize; i++) {
                 const offset = 5+(2*i)+"px";
-                const cardback = `<div class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset} 0 0 ${offset};"></div>`;
+                const cardback = `<div id="cluecard_${i}" class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset} 0 0 ${offset};"></div>`;
                 dojo.place(cardback, 'cluedeck', i);
             }
+            this.addTooltip('cluedeck', cardsremain, '');
 
             this.cluedisplay = this.createCardStockRow('cluedisplay');
             for (const c in cluecards) {
@@ -223,16 +225,10 @@ function (dojo, declare) {
                 this.onClueCardSelected(type, arg);
             });
             $('cluedisplay_item_'+id).addEventListener('mouseenter', () => {
-                if (this.isCurrentPlayerActive()) {
-                    const thiscard = document.getElementById('cluedisplay_item_'+id);
-                    thiscard.style['transform'] = 'scale(1.05)';
-                    thiscard.style['transition'] = 'transform 0.5s';
-                }
+                this.onClueCardHover(id, true);
             });
             $('cluedisplay_item_'+id).addEventListener('mouseout', () => {
-                const thiscard = document.getElementById('cluedisplay_item_'+id);
-                thiscard.style['transform'] = '';
-                thiscard.style['transition'] = '';
+                this.onClueCardHover(id, false);
             });
         },
 
@@ -250,12 +246,31 @@ function (dojo, declare) {
                 const card = discards[d];
                 this.createDiscardCard(card.type, card.type_arg);
             }
+            let discardtxt = _("Click to view ${num} cards in Discard deck");
+            discardtxt = discardtxt.replace('${num}', Object.keys(discards).length);
+            this.addTooltip('cluediscard', discardtxt, '');
+            var discarded = document.getElementsByClassName('ltdr_discard');
+            discard.addEventListener('click', () => {
+                var off = 0;
+                for (let d of discarded) {
+                    const offX = ((this.cluecardwidth/3)*off)+'px';
+                    const offY = ((this.cluecardheight/3)*off)+'px';
+                    d.style['transform'] = 'translate('+offX+','+offY+')';
+                    off++;
+                }
+            });
+            discard.addEventListener('mouseout', () => {
+                for (let d of discarded) {
+                    d.style['transform'] = '';
+                }
+            });
         },
 
         /**
          * Create a div with a discarded card and put it on top of discard deck.
          * @param {int} type 
          * @param {int} arg 
+         * @return {int} number of cards now in discard deck
          */
         createDiscardCard: function(type, arg) {
             const discard_div = document.getElementById('cluediscard');
@@ -264,21 +279,25 @@ function (dojo, declare) {
             const offset = (4*i)+"px";
             const xoff = (pos - (Math.floor(pos/6)*6)) * -this.cluecardwidth;
             const yoff = Math.floor(pos/6) * -this.cluecardheight;
-            const discard = `<div class="ltdr_cluecard" style="position: absolute; margin: ${offset} 0 0 ${offset}; background-position: ${xoff}px ${yoff}px; filter: grayscale(0.4);"></div>`;
+            const discard = `<div id="discard_${i}" class="ltdr_cluecard ltdr_discard" style="position: absolute; margin: ${offset} 0 0 ${offset}; background-position: ${xoff}px ${yoff}px;;"></div>`;
             dojo.place(discard, 'cluediscard', i);
+            // const id = CARD_TYPE_TO_POS[type][arg];
+            // const label = this.getLabelById(id);
+            // this.addTooltip('discard_'+i, label, '');
+            return (i+1);
         },
 
         /**
          * Given id of collector tableau, set up the collector cards.
          * @param {string} collector_id
+         * @param {array} collectorcards
          */
-         setupCollectorDisplay: function(collector_id) {
+         setupCollectorDisplay: function(collector_id, collectorcards) {
             const collector_tableau = document.getElementById(collector_id);
             collector_tableau.style['display'] = 'initial';
             collector_tableau.style['top'] = '40px';
             this.collection = this.createCardStockRow(collector_id);
             // now add the ones actually on display
-            const collectorcards = this.gamedatas.collectorcards;
             for (const c in collectorcards) {
                 const card = collectorcards[c];
                 const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
@@ -309,7 +328,7 @@ function (dojo, declare) {
         },
 
         /**
-         * At start o fnew contest. Move cards in discard pile, clue display, and collectors tableau back to dek.
+         * At start of new contest. Move cards in discard pile, clue display, and collectors tableau back to dek.
          * Animate 'dealing new cards.
          * @param {int} decksize 
          * @param {array} cluecards 
@@ -317,13 +336,13 @@ function (dojo, declare) {
          */
         refreshClueDisplay: function(decksize, cluecards, oldcollector) {
             // move cards from Discard pile to Deck
-            debugger;
             const cluedeck = document.getElementById('cluedeck');
             const discard = document.getElementById('cluediscard');
             while (discard.lastChild) {
                 this.slideToObject(discard.lastChild, cluedeck, 250, 100);
                 discard.lastChild.remove();
             }
+            this.addTooltip('cluediscard', '', '');
 
             const myrole = (this.isSpectator) ? COLLECTOR : (this.player_id == oldcollector) ? COLLECTOR : GUESSER;
             const tableau = (myrole == COLLECTOR) ? 'tableau_n' : 'tableau_s';
@@ -526,6 +545,19 @@ function (dojo, declare) {
             }
         },
 
+        /**
+         * For cluecards, hover and unhover effects.
+         * @param {string} id 
+         * @param {bool} hover 
+         */
+        onClueCardHover: function(id, hover) {
+            if (this.checkAction("collectCard", true) || this.checkAction("discardCard", true)) {
+                const thiscard = document.getElementById('cluedisplay_item_'+id);
+                thiscard.style['transform'] = hover ? 'scale(1.05)' : '';
+                thiscard.style['transition'] = 'transform 0.5s';
+            }
+        },
+
         guessRole: function() {
             this.guess_selection = null;
             this.guessDlg = new ebg.popindialog();
@@ -556,11 +588,10 @@ function (dojo, declare) {
             this.guessDlg.setContent( html );
             this.guessDlg.show();
             this.guessDlg.hideCloseIcon();
-
-            document.getElementById('GuessDialogDiv').onclick = event => {
+            const guessDlgDiv = document.getElementById('GuessDialogDiv');
+            guessDlgDiv.onclick = event => {
                 this.onGuess(event);
             };
-        
         },
 
         /**
@@ -828,7 +859,7 @@ function (dojo, declare) {
             // passing guesser because right now display is still formerly guesser
             this.refreshClueDisplay(decksize, cluecards, guesser);
  
-            this.setupPlayerTableaus(collector, guesser);
+            this.setupPlayerTableaus(collector, guesser, []);
         },
 
         /**
@@ -855,8 +886,11 @@ function (dojo, declare) {
             const arg = parseInt(notif.args.arg);
             const id = CARD_TYPE_TO_POS[type][arg];
             // stock to non-stock movement
-            this.createDiscardCard(type, arg);
+            const dnum = this.createDiscardCard(type, arg);
             this.cluedisplay.removeFromStockById(id, 'cluediscard');
+            let discardtxt = _("Click to view ${num} cards in Discard deck");
+            discardtxt = discardtxt.replace('${num}', dnum);
+            this.addTooltip('cluediscard', discardtxt, '');
         },
 
         /**
@@ -882,7 +916,7 @@ function (dojo, declare) {
             let cardsremain = _('Cards Remaining: ${decksize}');
             cardsremain = cardsremain.replace('${decksize}', size);
             document.getElementById('deckcount').innerHTML = cardsremain;
-
+            this.addTooltip('cluedeck', cardsremain, '');
         },
 
         /**

@@ -547,19 +547,10 @@ class LadyAndTheTiger extends Table
 		$this->cards->shuffle('deck');
 		$this->cards->pickCardsForLocation(4, 'deck', 'cluedisplay');
 
-        $players = self::loadPlayersBasicInfos();
-        self::notifyAllPlayers("newContest", clienttranslate('${collector_name} is Collector, ${guesser_name} is Guesser'), array(
-            COLLECTOR => $collector,
-            'collector_name' => $players[$collector]['player_name'],
-            GUESSER => $guesser,
-            'guesser_name' => $players[$guesser]['player_name'],
-            'decksize' => $this->cards->countCardInLocation('deck'),
-            'cluecards' => $this->cards->getCardsInLocation('cluedisplay')
-        ));
-
         $identities = [RED+TIGER, RED+LADY, BLUE+TIGER, BLUE+LADY];
         shuffle($identities);
 
+        $players = self::loadPlayersBasicInfos();
         foreach( $players as $player_id => $player ) {
             $identity = array_pop($identities);
             // Notify player of his identity
@@ -574,7 +565,16 @@ class LadyAndTheTiger extends Table
                 self::setGameStateValue('guesser_identity', $identity);
             }
         }
-		
+
+        self::notifyAllPlayers("newContest", clienttranslate('${collector_name} is Collector, ${guesser_name} is Guesser'), array(
+            COLLECTOR => $collector,
+            'collector_name' => $players[$collector]['player_name'],
+            GUESSER => $guesser,
+            'guesser_name' => $players[$guesser]['player_name'],
+            'decksize' => $this->cards->countCardInLocation('deck'),
+            'cluecards' => $this->cards->getCardsInLocation('cluedisplay')
+        ));
+
         $this->gamestate->nextState( "" );
 	}
 
