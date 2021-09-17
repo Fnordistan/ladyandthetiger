@@ -120,7 +120,8 @@
 }
 
 .ltdr_trait {
-  background-size: 1111px 538px;
+  --scale: 1;
+  background-size: calc(var(--scale) * 1111px) calc(var(--scale) * 538px);
   background-image: url(img/guess_sprites.png);
   background-repeat: no-repeat;
   margin: 5px;
@@ -128,56 +129,65 @@
   cursor: pointer;
 }
 
+.ltdr_traiticon {
+  --scale: 0.25;
+  display: inline-block;
+  margin: 0px 5px -5px;
+  background-size: calc(var(--scale) * 1111px) calc(var(--scale) * 538px);
+  background-image: url(img/guess_sprites.png);
+  background-repeat: no-repeat;
+}
+
 .ltdr_trait:hover {
   transform: scale(1.1);
 }
 
 .ltdr_trait_red {
-  width: 170px;
-  height: 170px;
-  background-position: -637px -79px;
+  width: calc(var(--scale) * 170px);
+  height: calc(var(--scale) * 170px);
+  background-position: calc(var(--scale) * -637px) calc(var(--scale) * -79px);
 }
 
 .ltdr_trait_blue {
-  width: 170px;
-  height: 170px;
-  background-position: -857px -79px;
+  width: calc(var(--scale) * 170px);
+  height: calc(var(--scale) * 170px);
+  background-position: calc(var(--scale) * -857px) calc(var(--scale) * -79px);
 }
 
 .ltdr_trait_lady {
-  width: 170px;
-  height: 170px;
-  background-position: -857px -289px;
+  width: calc(var(--scale) * 170px);
+  height: calc(var(--scale) * 170px);
+  background-position: calc(var(--scale) * -857px) calc(var(--scale) * -289px);
 }
 
 .ltdr_trait_tiger {
-  width: 170px;
-  height: 170px;
-  background-position: -637px -289px;
+  width: calc(var(--scale) * 170px);
+  height: calc(var(--scale) * 170px);
+  background-position: calc(var(--scale) * -637px) calc(var(--scale) * -289px);
 }
 
 .ltdr_trait_redlady {
-  width: 140px;
-  height: 170px;
-  background-position: -335px -79px;
+  width: calc(var(--scale) * 140px);
+  height: calc(var(--scale) * 170px);
+  background-position: calc(var(--scale) * -335px) calc(var(--scale) * -79px);
 }
 
 .ltdr_trait_bluelady {
-  width: 140px;
-  height: 170px;
-  background-position: -335px -289px;
+  width: calc(var(--scale) * 140px);
+  height: calc(var(--scale) * 170px);
+  background-position: calc(var(--scale) * -335px) calc(var(--scale) * -289px);
 }
 
 .ltdr_trait_redtiger {
-  width: 170px;
-  height: 170px;
-  background-position: -105px -79px;
+  width: calc(var(--scale) * 170px);
+  height: calc(var(--scale) * 170px);
+  background-position: calc(var(--scale) * -105px) calc(var(--scale) * -79px);
 }
 
 .ltdr_trait_bluetiger {
-  width: 170px;
-  height: 170px;
-  background-position: -105px -289px;
+  width: calc(var(--scale) * 170px);
+  height: calc(var(--scale) * 170px);
+  background-position: calc(var(--scale) * -105px) calc(var(--scale) * -289px);
 }
 
 .ltdr_guess_btn {
@@ -204,6 +214,21 @@
 	transition: all 0.4s ease 0s;
 }
 
+.ltdr_flip_container {
+  background-color: transparent;
+}
+
+.ltdr_flip_inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 3s;
+  transform-style: preserve-3d;
+}
+
+.ltdr_flip_container:hover .ltdr_flip_inner {
+  transform: rotateY(180deg);
+}
 /**
 * By IDs
 */

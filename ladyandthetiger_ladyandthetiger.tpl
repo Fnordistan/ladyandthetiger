@@ -15,7 +15,12 @@
   <div id="player_north" class="ltdr_display whiteblock">
     <div id="role_north" class="ltdr_rolecontainer">
       <h1 id="rolename_n" class="ltdr_rolename"></h1>
-      <div id="role_n" class="ltdr_rolecard"></div>
+      <div id="container_n" class="ltdr_flip_container">
+        <div id="inner_n" class="ltdr_flip_inner">
+          <div id="role_n" class="ltdr_rolecard"></div>
+          <div id="flip_n" class="ltdr_cardback"></div>
+        </div>
+      </div>
     </div>
     <div id="tableau_n"></div>
   </div>
@@ -37,7 +42,12 @@
   <div id="player_south" class="ltdr_display whiteblock">
     <div id="role_south" class="ltdr_rolecontainer">
       <h1 id="rolename_s" class="ltdr_rolename"></h1>
-      <div id="role_s" class="ltdr_rolecard"></div>
+      <div id="container_s" class="ltdr_flip_container">
+        <div id="inner_s" class="ltdr_flip_inner">
+          <div id="role_s" class="ltdr_rolecard"></div>
+          <div id="flip_s" class="ltdr_cardback"></div>
+        </div>
+      </div>
     </div>
     <div id="tableau_s"></div>
   </div>
@@ -47,6 +57,8 @@
 <script type="text/javascript">
 
 // Javascript HTML templates
+
+const jstpl_icon = '<div class="ltdr_traiticon ltdr_trait_${trait}"></div>';
 
 </script>  
 

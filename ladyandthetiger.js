@@ -339,7 +339,7 @@ function (dojo, declare) {
             const cluedeck = document.getElementById('cluedeck');
             const discard = document.getElementById('cluediscard');
             while (discard.lastChild) {
-                this.slideToObject(discard.lastChild, cluedeck, 250, 100);
+                this.slideToObject(discard.lastChild, cluedeck, 1000, 1000);
                 discard.lastChild.remove();
             }
             this.addTooltip('cluediscard', '', '');
@@ -383,6 +383,12 @@ function (dojo, declare) {
                     }
                     if (args.scorer_name) {
                         args.scorer_name = this.spanPlayerName(args.scorer);
+                    }
+                    if (args.icon) {
+                        args.icon = this.format_block('jstpl_icon', {trait: args.icon});
+                    }
+                    if (args.icon2) {
+                        args.icon2 = this.format_block('jstpl_icon', {trait: args.icon2});
                     }
                     log = log.replace("You", this.spanYou());
                 }
@@ -873,7 +879,7 @@ function (dojo, declare) {
             // stock to stock movement
             const wt = this.collection.count();
             this.collection.item_type[id].weight = wt;
-            this.collection.addToStockWithId(id, id, 'cluedisplay');
+            this.collection.addToStockWithId(id, id, 'cluedisplay_item_'+id);
             this.cluedisplay.removeFromStockById(id);
         },
 

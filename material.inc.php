@@ -25,13 +25,13 @@ $this->role = array(
 );
 
 $this->identity = array(
-  0 => clienttranslate('Door'),
-  1 => clienttranslate('Blue Lady'),
-  2 => clienttranslate('Red Lady'),
-  3 => clienttranslate('Blue Tiger'),
-  4 => clienttranslate('Red Tiger'),
-  5 => clienttranslate('Red+Blue'),
-  6 => clienttranslate('Lady+Tiger'),
+  0 => array('label' => 'door', 'name' => clienttranslate('Door')),
+  1 => array('label' => 'bluelady', 'name' => clienttranslate('Blue Lady')),
+  2 => array('label' => 'redlady', 'name' => clienttranslate('Red Lady')),
+  3 => array('label' => 'bluetiger', 'name' => clienttranslate('Blue Tiger')),
+  4 => array('label' => 'redtiger', 'name' => clienttranslate('Red Tiger')),
+  5 => array('label' => 'redblue', 'name' => clienttranslate('Red+Blue')),
+  6 => array('label' => 'ladytiger', 'name' => clienttranslate('Lady+Tiger')),
 );
 
 $this->traits = array(
