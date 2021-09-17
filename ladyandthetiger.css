@@ -226,7 +226,7 @@
   transform-style: preserve-3d;
 }
 
-.ltdr_flip_container:hover .ltdr_flip_inner {
+.ltdr_flip {
   transform: rotateY(180deg);
 }
 /**

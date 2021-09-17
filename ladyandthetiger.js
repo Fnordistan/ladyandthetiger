@@ -525,11 +525,25 @@ function (dojo, declare) {
 
         /**
          * Reveal the role card behind a door.
-         * @param {identity} int for bluelady|redlady|bluetiger|redtiger
+         * @param {identity_n} int for bluelady|redlady|bluetiger|redtiger
+         * @param {identity_s} int for bluelady|redlady|bluetiger|redtiger
          */
-         revealDoorCard: function(identity) {
-            const doorcard = document.getElementById('role_s');
-            const lbl = this.getCardIdentity(identity);
+         revealDoorCard: function(identity_n, identity_s) {
+            const lbl_s = this.getCardIdentity(identity_s);
+            this.flipDoor('s', lbl_s);
+
+            if (this.isSpectator) {
+                const lbl_n = this.getCardIdentity(identity_n);
+                this.flipDoor('n', lbl_n);
+            }
+        },
+
+        flipDoor: function(dir, lbl) {
+            const door_container = document.getElementById('container_'+dir);
+            const door_inner = document.getElementById('inner_'+dir);
+            door_container.classList.add('ltdr_flip');
+            door_inner.classList.add('ltdr_flip');
+            const doorcard = document.getElementById('flip_'+dir);
             doorcard.classList.remove(...IDENTITY_CLASSES);
             doorcard.classList.add('ltdr_'+lbl);
         },
@@ -748,6 +762,12 @@ function (dojo, declare) {
             
             switch( stateName )
             {
+                case 'assignRoles':
+                    // const flipped = document.getElementsByClassName("ltdr_flip");
+                    // for (let f of flipped) {
+                    //     f.classList.remove("ltdr_flip");
+                    // }
+                    break;
                 case 'collectorAction':
                 case 'guesserDiscard':
                     const sel = this.isCurrentPlayerActive() ? 1 : 0;
@@ -944,8 +964,9 @@ function (dojo, declare) {
             // const collector_player_id = parseInt(notif.args.collector);
             const collector_id = parseInt(notif.args.collector_id);
             // which is the Door (other) player?
-            const door_id = (this.player_id == guesser_player_id) ? collector_id : guesser_id;
-            this.revealDoorCard(door_id);
+            const south_id = (this.player_id == guesser_player_id) ? collector_id : guesser_id;
+            const north_id = (this.player_id == guesser_player_id) ? guesser_id : collector_id;
+            this.revealDoorCard(north_id, south_id);
         },
 
         /**
