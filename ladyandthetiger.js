@@ -246,9 +246,7 @@ function (dojo, declare) {
                 const card = discards[d];
                 this.createDiscardCard(card.type, card.type_arg);
             }
-            let discardtxt = _("Click to view ${num} cards in Discard deck");
-            discardtxt = discardtxt.replace('${num}', Object.keys(discards).length);
-            this.addTooltip('cluediscard', discardtxt, '');
+            this.decorateDiscardPile(Object.keys(discards).length);
             var discarded = document.getElementsByClassName('ltdr_discard');
             discard.addEventListener('click', () => {
                 var off = 0;
@@ -264,6 +262,18 @@ function (dojo, declare) {
                     d.style['transform'] = '';
                 }
             });
+        },
+
+        /**
+         * Add tooltip text to discard pile.
+         * @param {int} num 
+         */
+        decorateDiscardPile: function(num) {
+            if (num != 0) {
+                let discardtxt = _("Click to view ${num} cards in Discard deck");
+                discardtxt = discardtxt.replace('${num}', num);
+                this.addTooltip('cluediscard', discardtxt, '');
+            }
         },
 
         /**
@@ -364,7 +374,6 @@ function (dojo, declare) {
             this.cluedisplay.removeAll();
 
             this.setupClueDisplay(decksize, cluecards);
-
         },
 
          ///////////////////////////////////////////////////
@@ -390,6 +399,23 @@ function (dojo, declare) {
                     if (args.icon2) {
                         args.icon2 = this.format_block('jstpl_icon', {trait: args.icon2});
                     }
+                    if (args.collector_identity) {
+                        args.collector_identity = this.spanRedBlue(args.collector_identity, args.collector_id);
+                    }
+                    if (args.guesser_identity) {
+                        args.guesser_identity = this.spanRedBlue(args.guesser_identity, args.guesser_id);
+                    }
+                    if (args.identity_name) {
+                        args.identity_name = this.spanRedBlue(args.identity_name, args.identity);
+                    }
+                    if (args.card_type) {
+                        const id = parseInt(args.type);
+                        if (RED_TYPES.includes(id)) {
+                            args.card_type = this.spanRedBlue(args.card_type, 2);
+                        } else if (BLUE_TYPES.includes(id)) {
+                            args.card_type = this.spanRedBlue(args.card_type, 1);
+                        }
+                    }
                     log = log.replace("You", this.spanYou());
                 }
             } catch (e) {
@@ -412,7 +438,7 @@ function (dojo, declare) {
         /**
          * From BGA Cookbook. Return "You" in this player's color
          */
-        spanYou : function() {
+        spanYou: function() {
             const color = this.gamedatas.players[this.player_id].color;
             let color_bg = "";
             if (this.gamedatas.players[this.player_id] && this.gamedatas.players[this.player_id].color_back) {
@@ -420,6 +446,24 @@ function (dojo, declare) {
             }
             const you = "<span style=\"font-weight:bold;color:#" + color + ";" + color_bg + "\">" + __("lang_mainsite", "You") + "</span>";
             return you;
+        },
+
+        /**
+         * Put red or blue ids in red/blue span.
+         * @param {string} text 
+         * @param {int} id 
+         * @returns formatted span
+         */
+        spanRedBlue: function(text, id) {
+            if (id == 1 || id == 3) {
+                //blue
+                return this.format_block('jstpl_color_text', {color: 'blue', text: text});
+            } else if (id == 2 || id == 4) {
+                // red
+                return this.format_block('jstpl_color_text', {color: 'red', text: text});
+            } else {
+                return text;
+            }
         },
 
         /**
@@ -538,14 +582,17 @@ function (dojo, declare) {
             }
         },
 
+        /**
+         * Flip the door over.
+         * @param {string} dir n|s
+         * @param {string} lbl identity
+         */
         flipDoor: function(dir, lbl) {
-            const door_container = document.getElementById('container_'+dir);
+            const cardback = document.getElementById('flip_'+dir);
+            cardback.classList.add('ltdr_'+lbl);
+
             const door_inner = document.getElementById('inner_'+dir);
-            door_container.classList.add('ltdr_flip');
-            door_inner.classList.add('ltdr_flip');
-            const doorcard = document.getElementById('flip_'+dir);
-            doorcard.classList.remove(...IDENTITY_CLASSES);
-            doorcard.classList.add('ltdr_'+lbl);
+            door_inner.style['transform'] = 'rotateY(180deg)';
         },
 
         ///////////////////////////////////////////////////
@@ -763,11 +810,17 @@ function (dojo, declare) {
             switch( stateName )
             {
                 case 'assignRoles':
-                    // const flipped = document.getElementsByClassName("ltdr_flip");
-                    // for (let f of flipped) {
-                    //     f.classList.remove("ltdr_flip");
-                    // }
-                    break;
+                    const door_south = document.getElementById('inner_s');
+                    door_south.style['transform'] = '';
+                    const cardback_s = document.getElementById('flip_s');
+                    cardback_s.classList.remove(...IDENTITY_CLASSES);
+                    if (this.isSpectator) {
+                        const door_north = document.getElementById('inner_n');
+                        door_north.style['transform'] = '';
+                        const cardback_n = document.getElementById('flip_n');
+                        cardback_n.classList.remove(...IDENTITY_CLASSES);
+                    }
+                break;
                 case 'collectorAction':
                 case 'guesserDiscard':
                     const sel = this.isCurrentPlayerActive() ? 1 : 0;
@@ -845,21 +898,21 @@ function (dojo, declare) {
             console.log( 'notifications subscriptions setup' );
             // here, associate your game notifications with local methods
             dojo.subscribe( 'newContest', this, 'notif_newContest' );
-            this.notifqueue.setSynchronous( 'notif_newContest', 5000 );
+            this.notifqueue.setSynchronous( 'newContest', 2000 );
             dojo.subscribe( 'newRole', this, 'notif_newRole' );
             dojo.subscribe( 'cardCollected', this, 'notif_cardCollected' );
             dojo.subscribe( 'cardDiscarded', this, 'notif_cardDiscarded' );
             dojo.subscribe( 'newClueCard', this, 'notif_newClue' );
-            this.notifqueue.setSynchronous( 'notif_newClue', 3000 );
+            this.notifqueue.setSynchronous( 'newClueCard', 500 );
             dojo.subscribe( 'setCollected', this, 'notif_setCollected' );
-            this.notifqueue.setSynchronous( 'notif_setCollected', 5000 );
+            this.notifqueue.setSynchronous( 'setCollected', 1000 );
             dojo.subscribe( 'deckEmpty', this, 'notif_deckEmpty' );
-            this.notifqueue.setSynchronous( 'notif_deckEmpty', 5000 );
+            this.notifqueue.setSynchronous( 'deckEmpty', 1000 );
             dojo.subscribe( 'guessed', this, 'notif_guessed' );
-            this.notifqueue.setSynchronous( 'notif_guessed', 5000 );
+            this.notifqueue.setSynchronous( 'guessed', 1000 );
             dojo.subscribe( 'guessedResult', this, 'notif_guessed' );
             dojo.subscribe( 'identitiesRevealed', this, 'notif_identitiesRevealed' );
-            this.notifqueue.setSynchronous( 'notif_identitiesRevealed', 5000 );
+            this.notifqueue.setSynchronous( 'identitiesRevealed', 3000 );
         },
         
         // game notification handling methods
@@ -912,11 +965,9 @@ function (dojo, declare) {
             const arg = parseInt(notif.args.arg);
             const id = CARD_TYPE_TO_POS[type][arg];
             // stock to non-stock movement
-            const dnum = this.createDiscardCard(type, arg);
             this.cluedisplay.removeFromStockById(id, 'cluediscard');
-            let discardtxt = _("Click to view ${num} cards in Discard deck");
-            discardtxt = discardtxt.replace('${num}', dnum);
-            this.addTooltip('cluediscard', discardtxt, '');
+            const dnum = this.createDiscardCard(type, arg);
+            this.decorateDiscardPile(dnum);
         },
 
         /**

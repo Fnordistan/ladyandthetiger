@@ -15,10 +15,10 @@
   <div id="player_north" class="ltdr_display whiteblock">
     <div id="role_north" class="ltdr_rolecontainer">
       <h1 id="rolename_n" class="ltdr_rolename"></h1>
-      <div id="container_n" class="ltdr_flip_container">
+      <div id="flip_container_n" class="ltdr_flip_container">
         <div id="inner_n" class="ltdr_flip_inner">
           <div id="role_n" class="ltdr_rolecard"></div>
-          <div id="flip_n" class="ltdr_cardback"></div>
+          <div id="flip_n" class="ltdr_flipback ltdr_rolecard"></div>
         </div>
       </div>
     </div>
@@ -42,10 +42,10 @@
   <div id="player_south" class="ltdr_display whiteblock">
     <div id="role_south" class="ltdr_rolecontainer">
       <h1 id="rolename_s" class="ltdr_rolename"></h1>
-      <div id="container_s" class="ltdr_flip_container">
+      <div id="flip_container_s" class="ltdr_flip_container">
         <div id="inner_s" class="ltdr_flip_inner">
           <div id="role_s" class="ltdr_rolecard"></div>
-          <div id="flip_s" class="ltdr_cardback"></div>
+          <div id="flip_s" class="ltdr_flipback ltdr_rolecard"></div>
         </div>
       </div>
     </div>
@@ -59,6 +59,8 @@
 // Javascript HTML templates
 
 const jstpl_icon = '<div class="ltdr_traiticon ltdr_trait_${trait}"></div>';
+
+const jstpl_color_text = '<span style="font-family: cursive; font-size: larger; font-weight: bold; color: ${color};">${text}</span>';
 
 </script>  
 
