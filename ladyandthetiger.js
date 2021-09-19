@@ -62,8 +62,6 @@ define([
 function (dojo, declare) {
     return declare("bgagame.ladyandthetiger", ebg.core.gamegui, {
         constructor: function(){
-            console.log('ladyandthetiger constructor');
-              
             // Here, you can init the global variables of your user interface
             this.playerHand = null;
             this.clueCards = null;
@@ -87,8 +85,6 @@ function (dojo, declare) {
         */
         
         setup: function( gamedatas ) {
-            console.log( "Starting game setup" );
-
             const collector = this.gamedatas.collector;
             const guesser = this.gamedatas.guesser;
             this.setupPlayerTableaus(collector, guesser, this.gamedatas.collectorcards);
@@ -104,8 +100,6 @@ function (dojo, declare) {
             this.setupDiscard(discards);
 
             this.setupNotifications();
-
-            console.log( "Ending game setup" );
         },
 
         /**
@@ -822,7 +816,7 @@ function (dojo, declare) {
          */
         onEnteringState: function( stateName, args )
         {
-            console.log( 'Entering state: '+stateName );
+            // console.log( 'Entering state: '+stateName );
             
             switch( stateName )
             {
@@ -854,7 +848,6 @@ function (dojo, declare) {
          */
         onLeavingState: function( stateName )
         {
-            console.log( 'Leaving state: '+stateName );
             switch( stateName )
             {
                 case 'collectorAction':
@@ -870,8 +863,6 @@ function (dojo, declare) {
         //        
         onUpdateActionButtons: function( stateName, args )
         {
-            console.log( 'onUpdateActionButtons: '+stateName );
-                      
             if( this.isCurrentPlayerActive() )
             {            
                 switch( stateName )
@@ -912,7 +903,6 @@ function (dojo, declare) {
         */
         setupNotifications: function()
         {
-            console.log( 'notifications subscriptions setup' );
             // here, associate your game notifications with local methods
             dojo.subscribe( 'newContest', this, 'notif_newContest' );
             this.notifqueue.setSynchronous( 'newContest', 2000 );
