@@ -3,7 +3,7 @@
 <!-- 
 --------
 -- BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
--- LadyAndTheTiger implementation : © <AmadanNaBriona> <david.edelstein@gmail.com>
+-- LadyAndTheTiger implementation : © <David Edelstein> <david.edelstein@gmail.com>
 -- 
 -- This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
 -- See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -61,6 +61,11 @@
 const jstpl_icon = '<div class="ltdr_traiticon ltdr_trait_${trait}"></div>';
 
 const jstpl_color_text = '<span style="font-family: cursive; font-size: larger; font-weight: bold; color: ${color};">${text}</span>';
+const jstpl_color_lg_text = '<span style="font-family: cursive; font-size: 24px; font-weight: bold; color: ${color};">${text}</span>';
+
+const jstpl_card_tooltip = '<span style="font-family: cursive; font-size: 24px; font-weight: bold; color: ${color};">${text}</span>';
+
+const jstpl_card_tooltip_icon = '<div class="ltdr_trait ltdr_trait_${trait}"></div><span style="font-family: cursive; font-size: 24px; font-weight: bold; color: ${color};">${text}</span>';
 
 </script>  
 

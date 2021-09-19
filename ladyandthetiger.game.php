@@ -184,11 +184,11 @@ class LadyAndTheTiger extends Table
 ////////////    
 
     /**
-     * Given a card id, return the string representing its type.
+     * Given a card id, return the type value to give to identity.
      */
     function getCardIdentity($id) {
         $type = self::getUniqueValueFromDB("SELECT card_type FROM cards WHERE card_id=$id");
-        return $this->identity[$type]['name'];
+        return $type;
     }
 
     /**
@@ -257,9 +257,11 @@ class LadyAndTheTiger extends Table
     function refillClueDisplay() {
         $card = $this->cards->pickCardForLocation('deck', 'cluedisplay');
         $decksize = $this->cards->countCardInLocation('deck');
-        self::notifyAllPlayers('newClueCard', clienttranslate('${card_type} added to clue card display'), array(
+        $card_id = $this->getCardIdentity($card['id']);
+        self::notifyAllPlayers('newClueCard', clienttranslate('${card_type} added to clue card display').'${label}', array(
             'i18n' => ['card_type'],
-            'card_type' => $this->getCardIdentity($card['id']),
+            'card_type' => $this->identity[$card_id]['name'],
+            'label' => $this->identity[$card_id]['label'],
             'type' => $card['type'],
             'arg' => $card['type_arg'],
             'decksize' => $decksize
@@ -293,6 +295,7 @@ class LadyAndTheTiger extends Table
      * Guesser guessed trait for identity
      */
     function guessIdentity($trait) {
+        self::checkAction( 'guess' );
         $collector_identity = self::getGameStateValue("collector_identity");
 
         $traits_to_identities = [
@@ -372,14 +375,15 @@ class LadyAndTheTiger extends Table
 
         $id = self::getUniqueValueFromDB("SELECT card_id FROM cards WHERE card_type=$type AND card_type_arg=$arg AND card_location='cluedisplay'");
         if ($id == null) {
-            throw new BgaUserException("That card is not in the display!");
+            throw new BgaUserException(self::_("That card is not in the display!"));
         }
         $this->cards->moveCard($id, COLLECTOR);
-
-        self::notifyAllPlayers('cardCollected', clienttranslate('${player_name} adds ${card_type} to their collection'), array(
+        $card_id = $this->getCardIdentity($id);
+        self::notifyAllPlayers('cardCollected', clienttranslate('${player_name} adds ${card_type} to their collection').'${label}', array(
             'i18n' => ['card_type'],
             'player_name' => self::getActivePlayerName(),
-            'card_type' => $this->getCardIdentity($id),
+            'card_type' => $this->identity[$card_id]['name'],
+            'label' => $this->identity[$card_id]['label'],
             'type' => $type,
             'arg' => $arg
         ));
@@ -400,6 +404,14 @@ class LadyAndTheTiger extends Table
     function scoreSet($role, $trait, $gems) {
         // reveal roles
         $this->revealIdentities();
+
+        $trait_tr = array(
+            "RED" => clienttranslate("RED"),
+            "BLUE" => clienttranslate("BLUE"),
+            "LADY" => clienttranslate("LADY"),
+            "TIGER" => clienttranslate("TIGER"),
+        );
+
         // score
         $player_id = self::getActivePlayerId();
         self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role}) matches four ${trait} cards and scores ${score} gems'), array(
@@ -407,7 +419,8 @@ class LadyAndTheTiger extends Table
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'role' => $role,
-            'trait' => $trait,
+            "traitlbl" => $trait, // used in format_string recursive
+            'trait' => $trait_tr[$trait],
             'score' => $gems
         ));
         self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$player_id" );
@@ -450,14 +463,15 @@ class LadyAndTheTiger extends Table
         self::checkAction( 'discardCard' );
         $id = self::getUniqueValueFromDB("SELECT card_id FROM cards WHERE card_type=$type AND card_type_arg=$arg AND card_location='cluedisplay'");
         if ($id == null) {
-            throw new BgaUserException("That card is not in the display!");
+            throw new BgaUserException(self::_("That card is not in the display!"));
         }
         $this->cards->moveCard($id, 'discard');
-
-        self::notifyAllPlayers('cardDiscarded', clienttranslate('${player_name} discards ${card_type} from the display'), array(
+        $card_id = $this->getCardIdentity($id);
+        self::notifyAllPlayers('cardDiscarded', clienttranslate('${player_name} discards ${card_type} from the display').'${label}', array(
             'i18n' => ['card_type'],
             'player_name' => self::getActivePlayerName(),
-            'card_type' => $this->getCardIdentity($id),
+            'card_type' => $this->identity[$card_id]['name'],
+            'label' => $this->identity[$card_id]['label'],
             'type' => $type,
             'arg' => $arg
         ));

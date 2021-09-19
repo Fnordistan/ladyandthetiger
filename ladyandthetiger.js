@@ -1,7 +1,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * LadyAndTheTiger implementation : © <Your name here> <Your email address here>
+ * LadyAndTheTiger implementation : © <David Edelstein> <david.edelstein@gmail.com>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -138,8 +138,11 @@ function (dojo, declare) {
 
             const hisrolecard = document.getElementById('role_s');
             hisrolecard.classList.add('ltdr_door');
-            let hisroletooltip = _('${role} is behind this door');
-            hisroletooltip = hisroletooltip.replace('${role}', hisrole == COLLECTOR ? CollectorTr : GuesserTr);
+            let doortext = _('${role} is behind this door');
+            doortext = doortext.replace('${role}', hisrole == COLLECTOR ? CollectorTr : GuesserTr);
+
+            let hisroletooltip = this.format_block('jstpl_card_tooltip', {color: 'black', text: doortext});
+
             this.addTooltip(hisrolecard.id, hisroletooltip, '');
 
             let guesser_d, collector_d, guesser_t, collector_t;
@@ -177,13 +180,16 @@ function (dojo, declare) {
             if (!this.isSpectator) {
                 const myidentity = this.getCardIdentity(identity);
                 myrolecard.classList.add('ltdr_'+myidentity);
-                let idtooltip = _('You are the ${identity}!');
-                idtooltip = idtooltip.replace('${identity}', this.getLabelByValue(identity));
+                let myid = _('You are the ${identity}!');
+                myid = myid.replace('${identity}', this.getLabelByValue(identity));
+                let idclr = myidentity.includes("red") ? 'red' : 'blue';
+                let idtooltip = this.format_block('jstpl_card_tooltip_icon', {trait: myidentity, color: idclr, text: myid});
                 this.addTooltip(myrolecard.id, idtooltip, '');
             } else {
                 myrolecard.classList.add('ltdr_door');
-                let roletooltip = _('${role} is behind this door');
-                roletooltip = roletooltip.replace('${role}', CollectorTr);
+                let doortext = _('${role} is behind this door');
+                doortext = doortext.replace('${role}', CollectorTr);
+                let roletooltip = this.format_block('jstpl_card_tooltip', {color: 'black', text: doortext});
                 this.addTooltip(myrolecard.id, roletooltip, '');
             }
         },
@@ -291,9 +297,6 @@ function (dojo, declare) {
             const yoff = Math.floor(pos/6) * -this.cluecardheight;
             const discard = `<div id="discard_${i}" class="ltdr_cluecard ltdr_discard" style="position: absolute; margin: ${offset} 0 0 ${offset}; background-position: ${xoff}px ${yoff}px;;"></div>`;
             dojo.place(discard, 'cluediscard', i);
-            // const id = CARD_TYPE_TO_POS[type][arg];
-            // const label = this.getLabelById(id);
-            // this.addTooltip('discard_'+i, label, '');
             return (i+1);
         },
 
@@ -409,12 +412,22 @@ function (dojo, declare) {
                         args.identity_name = this.spanRedBlue(args.identity_name, args.identity);
                     }
                     if (args.card_type) {
-                        const id = parseInt(args.type);
-                        if (RED_TYPES.includes(id)) {
-                            args.card_type = this.spanRedBlue(args.card_type, 2);
-                        } else if (BLUE_TYPES.includes(id)) {
-                            args.card_type = this.spanRedBlue(args.card_type, 1);
+                        const BLUE = 1;
+                        const RED = 2;
+                        const label = args.label;
+                        if (['redlady', 'redtiger'].includes(label)) {
+                            args.card_type = this.spanRedBlue(args.card_type, RED);
+                        } else if (['bluelady', 'bluetiger'].includes(label)) {
+                            args.card_type = this.spanRedBlue(args.card_type, BLUE);
+                        } else if (label == 'redblue') {
+                            args.card_type =
+                            this.format_block('jstpl_color_text', {color: 'red', text: _("Red")})+
+                            this.format_block('jstpl_color_text', {color: 'black', text: "+"})+
+                            this.format_block('jstpl_color_text', {color: 'blue', text: _("Blue")});
+                        } else {
+                            args.card_type = this.spanRedBlue(args.card_type, 0);
                         }
+                        log = log.replace('${label}', '');
                     }
                     log = log.replace("You", this.spanYou());
                 }
@@ -462,7 +475,7 @@ function (dojo, declare) {
                 // red
                 return this.format_block('jstpl_color_text', {color: 'red', text: text});
             } else {
-                return text;
+                return this.format_block('jstpl_color_text', {color: 'black', text: text});
             }
         },
 
@@ -529,21 +542,23 @@ function (dojo, declare) {
          * @param {int} id 
          * @returns name of card
          */
-        getLabelById: function( id ) {
+        createTooltipHtml: function( id ) {
             if (id == 12) {
-                return "Door";
+                return _("Door");
             } else if (id == 6) {
-                return _("Lady+Tiger");
+                return this.format_block('jstpl_card_tooltip_icon', {trait: 'ladytiger', color: 'black', text: _("Lady+Tiger")});
             } else if (id == 7) {
-                return _("Red+Blue");
+                return this.format_block('jstpl_color_lg_text', {color: 'red', text: _("Red")})+
+                        this.format_block('jstpl_color_lg_text', {color: 'black', text: "+"})+
+                        this.format_block('jstpl_color_lg_text', {color: 'blue', text: _("Blue")});
             } else if (CARD_TYPE_TO_POS[RED+TIGER].includes(id)) {
-                return _("Red Tiger");
+                return this.format_block('jstpl_card_tooltip_icon', {trait: 'redtiger', color: 'red', text: _("Red Tiger")});
             } else if (CARD_TYPE_TO_POS[BLUE+TIGER].includes(id)) {
-                return _("Blue Tiger");
+                return this.format_block('jstpl_card_tooltip_icon', {trait: 'bluetiger', color: 'blue', text: _("Blue Tiger")});
             } else if (CARD_TYPE_TO_POS[RED+LADY].includes(id)) {
-                return _("Red Lady");
+                return this.format_block('jstpl_card_tooltip_icon', {trait: 'redlady', color: 'red', text: _("Red Lady")});
             } else if (CARD_TYPE_TO_POS[BLUE+LADY].includes(id)) {
-                return _("Blue Lady");
+                return this.format_block('jstpl_card_tooltip_icon', {trait: 'bluelady', color: 'blue', text: _("Blue Lady")});
             }
             throw new Error("Unexpected card type: " + id);
         },
@@ -555,7 +570,7 @@ function (dojo, declare) {
          * @param {string} card_id 
          */
         setUpClueCard: function( card_div, card_type_id, card_id ) {
-            this.addTooltip(card_div.id, this.getLabelById(parseInt(card_type_id)), '');
+            this.addTooltip(card_div.id, this.createTooltipHtml(parseInt(card_type_id)), '');
         },
 
         /**

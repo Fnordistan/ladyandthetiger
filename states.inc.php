@@ -2,7 +2,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * LadyAndTheTiger implementation : © <Your name here> <Your email address here>
+ * LadyAndTheTiger implementation : © <David Edelstein> <david.edelstein@gmail.com>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -60,8 +60,7 @@ if (!defined('STATE_SETUP')) { // ensure this block is only invoked once, since 
    define("STATE_END_CONTEST", 90);
    define("STATE_END_GAME", 99);
 }
- 
- 
+
 $machinestates = array(
 
     // The initial state. Please do not modify.
@@ -143,6 +142,3 @@ $machinestates = array(
     )
 
 );
-
-
-

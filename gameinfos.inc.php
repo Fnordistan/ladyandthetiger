@@ -13,7 +13,7 @@
 $gameinfos = array( 
 
 // Name of the game in English (will serve as the basis for translation) 
-'game_name' => "The Lady and the Tiger (Doors)",
+'game_name' => totranslate("The Lady and the Tiger (Doors)"),
 
 // Game designer (or game designers, separated by commas)
 'designer' => 'Peter C. Hayward',
