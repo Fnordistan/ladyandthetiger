@@ -359,7 +359,7 @@ class LadyAndTheTiger extends Table
                 self::incStat(1, 'wrong_guesses', $guesser_id);
             }
 
-            self::notifyAllPlayers('guessed', clienttranslate('${player_name} (Guesser) guessed ${collector_name} (Collector) is ${trait}${icon} ${scorer_name} (${scoring_role}) scores ${score} gems'), array(
+            self::notifyAllPlayers('guessed', clienttranslate('${player_name} guessed ${collector_name} is ${trait}${icon} ${scorer_name} (${scoring_role}) scores ${score} gems'), array(
                 'i18n' => ['trait', 'scoring_role'],
                 'player_name' => self::getActivePlayerName(),
                 'collector' => $collector_id,
@@ -441,13 +441,14 @@ class LadyAndTheTiger extends Table
 
         // score
         $player_id = self::getActivePlayerId();
-        self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role}) matches four ${trait} cards and scores ${score} gems'), array(
+        self::notifyAllPlayers('setCollected', clienttranslate('${player_name} (${role}) matches four ${trait}${icon} cards and scores ${score} gems'), array(
             'i18n' => ['role', 'trait'],
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'role' => $this->role[$role],
             "traitlbl" => $trait, // used in format_string recursive
             'trait' => $trait_tr[$trait],
+            'icon' => $trait,
             'score' => $gems
         ));
         self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$player_id" );
@@ -475,7 +476,7 @@ class LadyAndTheTiger extends Table
         $collector_name = $players[$collector]['player_name'];
         $guesser_name = $players[$guesser]['player_name'];
 
-        self::notifyAllPlayers('identitiesRevealed', clienttranslate('${collector_name} (Collector) is the ${collector_identity}${icon} ${guesser_name} (Guesser) is the ${guesser_identity}${icon2}'), array(
+        self::notifyAllPlayers('identitiesRevealed', clienttranslate('Revealed: ${collector_name} (Collector) is the ${collector_identity}${icon} ${guesser_name} (Guesser) is the ${guesser_identity}${icon2}'), array(
             'i18n' => ['collector_identity', 'guesser_identity'],
             'guesser' => $guesser,
             'guesser_name' => $guesser_name,
@@ -607,7 +608,7 @@ class LadyAndTheTiger extends Table
         foreach( $players as $player_id => $player ) {
             $identity = array_pop($identities);
             // Notify player of his identity
-            self::notifyPlayer( $player_id, 'newRole', clienttranslate('You are the ${identity_name}').ICON, array(
+            self::notifyPlayer( $player_id, 'newRole', clienttranslate('New contest: You are the ${identity_name}').ICON, array(
                 'i18n' => ['identity_name'],
                 'identity' => $identity,
                 'icon' => $this->identity[$identity]['label'],

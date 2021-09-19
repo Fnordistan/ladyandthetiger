@@ -394,6 +394,15 @@ function (dojo, declare) {
                         args.scorer_name = this.spanPlayerName(args.scorer);
                     }
                     if (args.icon) {
+                        if (args.trait) {
+                            let color = "black";
+                            if (['redlady', 'redtiger', 'red', 'RED'].includes(args.icon)) {
+                                color = "red";
+                            } else if (['bluelady', 'bluetiger', 'blue', 'BLUE'].includes(args.icon)) {
+                                color = "blue";
+                            }
+                            args.trait = this.format_block('jstpl_color_text', {color: color, text: args.trait});
+                        }
                         args.icon = this.format_block('jstpl_icon', {trait: args.icon});
                     }
                     if (args.icon2) {
@@ -425,6 +434,9 @@ function (dojo, declare) {
                             args.card_type = this.spanRedBlue(args.card_type, 0);
                         }
                         log = log.replace('${label}', '');
+                    }
+                    if (args.trait) {
+
                     }
                     if (!this.isSpectator) {
                         log = log.replace("You", this.spanYou());
@@ -682,7 +694,7 @@ function (dojo, declare) {
         onGuess: function(event) {
             const target = event.target;
 
-            if (target.id == "guess_button") {
+            if (target.id == "guess_button" || target.id == "guess_sel_txt") {
                 if (this.guess_selection != null) {
                     this.guessDlg.destroy();
                     this.guessCollector(this.guess_selection);
@@ -704,8 +716,15 @@ function (dojo, declare) {
     
                 const traitid = target.id.substring("guess_".length);
                 const trait = traits[traitid];
+                let color = "black";
+                if (["redtiger", "redlady", "red"].includes(traitid)) {
+                    color = "red";
+                } else if (["bluetiger", "bluelady", "blue"].includes(traitid)) {
+                    color = "blue";
+                }
+                let guess_id_text = this.format_block('jstpl_color_text_id', {color: color, text: trait});
                 var guess_txt = _("Guess ${identity}?");
-                guess_txt = guess_txt.replace('${identity}', trait);
+                guess_txt = guess_txt.replace('${identity}', guess_id_text);
                 document.getElementById('guess_button').innerHTML = guess_txt;
                 this.guess_selection = traitid;
             }
