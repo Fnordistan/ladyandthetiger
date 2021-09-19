@@ -55,38 +55,49 @@ $stats_type = array(
         "turns_number" => array("id"=> 10,
                     "name" => totranslate("Number of turns"),
                     "type" => "int" ),
-
-/*
-        Examples:
-
-
-        "table_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("table test stat 1"), 
-                                "type" => "int" ),
-                                
-        "table_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("table test stat 2"), 
-                                "type" => "float" )
-*/  
+        "contests_number" => array("id"=> 11,
+                    "name" => totranslate("Number of contests"),
+                    "type" => "int" ),
     ),
     
     // Statistics existing for each player
     "player" => array(
-
-    
-/*
-        Examples:    
-        
-        
-        "player_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("player test stat 1"), 
+        "gems_guesses" => array(   "id"=> 10,
+                                "name" => totranslate("Gems for correct guesses"), 
                                 "type" => "int" ),
-                                
-        "player_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("player test stat 2"), 
-                                "type" => "float" )
-
-*/    
+        "gems_wrong_guesses" => array(   "id"=> 11,
+                                "name" => totranslate("Gems for wrong guesses"), 
+                                "type" => "int" ),
+        "gems_matches" => array(   "id"=> 12,
+                                "name" => totranslate("Gems for scoring a set"), 
+                                "type" => "int" ),
+        "gems_deck" => array(   "id"=> 13,
+                                "name" => totranslate("Gems for deck running out"), 
+                                "type" => "int" ),
+        "cards_collected" => array(   "id"=> 14,
+                                "name" => totranslate("Cards collected"), 
+                                "type" => "int" ),
+        "passes" => array(   "id"=> 15,
+                                "name" => totranslate("Number of passes as Guesser"), 
+                                "type" => "int" ),
+        "sets_collector" => array(   "id"=> 16,
+                                "name" => totranslate("Sets scored as Collector"), 
+                                "type" => "int" ),
+        "sets_guesser" => array(   "id"=> 17,
+                                "name" => totranslate("Sets scored as Guesser"), 
+                                "type" => "int" ),
+        "discards" => array(   "id"=> 18,
+                                "name" => totranslate("Cards discarded"), 
+                                "type" => "int" ),
+        "wrong_guesses" => array(   "id"=> 19,
+                                "name" => totranslate("Wrong guesses (one trait)"), 
+                                "type" => "int" ),
+        "correct_guesses_1" => array(   "id"=> 21,
+                                "name" => totranslate("Correct guesses (one trait)"), 
+                                "type" => "int" ),
+        "correct_guesses_2" => array(   "id"=> 22,
+                                "name" => totranslate("Correct guesses (two traits)"), 
+                                "type" => "int" ),
     )
 
 );

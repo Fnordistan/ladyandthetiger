@@ -93,7 +93,20 @@ class LadyAndTheTiger extends Table
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        self::initStat( 'table', 'turns_number', 0 );    // Init a table statistics
+        self::initStat( 'table', 'turns_number', 0 );
+        self::initStat( 'table', 'contests_number', 0 );
+        self::initStat( 'player', 'gems_guesses', 0 );
+        self::initStat( 'player', 'gems_wrong_guesses', 0 );
+        self::initStat( 'player', 'gems_matches', 0 );
+        self::initStat( 'player', 'gems_deck', 0 );
+        self::initStat( 'player', 'cards_collected', 0 );
+        self::initStat( 'player', 'passes', 0 );
+        self::initStat( 'player', 'sets_collector', 0 );
+        self::initStat( 'player', 'sets_guesser', 0 );
+        self::initStat( 'player', 'discards', 0 );
+        self::initStat( 'player', 'wrong_guesses', 0 );
+        self::initStat( 'player', 'correct_guesses_1', 0 );
+        self::initStat( 'player', 'correct_guesses_2', 0 );
 
         // Create cards
 		$cluecards = [];
@@ -177,7 +190,6 @@ class LadyAndTheTiger extends Table
 		// score is up to 10        
         return max( 0, min( 100, $minimumScore*10 ) );   // Note: 0 => 100
     }
-
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Utility functions
@@ -333,6 +345,19 @@ class LadyAndTheTiger extends Table
 
             $collector_id = self::getGameStateValue(COLLECTOR);
             $scoring_player_id = self::getGameStateValue($scorer);
+            // stats
+            if ($scorer == GUESSER) {
+                self::incStat($gems, 'gems_guesses', $scoring_player_id);
+                if ($gems == 1) {
+                    self::incStat(1, 'correct_guesses_1', $scoring_player_id);
+                } else {
+                    self::incStat(1, 'correct_guesses_2', $scoring_player_id);
+                }
+            } else {
+                self::incStat($gems, 'gems_wrong_guesses', $scoring_player_id);
+                $guesser_id = self::getGameStateValue(GUESSER);
+                self::incStat(1, 'wrong_guesses', $guesser_id);
+            }
 
             self::notifyAllPlayers('guessed', clienttranslate('${player_name} (Guesser) guessed ${collector_name} (Collector) is ${trait}${icon} ${scorer_name} (${scoring_role}) scores ${score} gems'), array(
                 'i18n' => ['trait', 'scoring_role'],
@@ -364,7 +389,7 @@ class LadyAndTheTiger extends Table
             throw new BgaUserException(self::_("No matching set!"));
         }
 
-        $this->scoreSet($this->role[GUESSER], $traitset, 2);
+        $this->scoreSet(GUESSER, $traitset, 2);
     }
 
     /** 
@@ -388,11 +413,13 @@ class LadyAndTheTiger extends Table
             'arg' => $arg
         ));
 
+        self::incStat(1, 'cards_collected', self::getActivePlayerId());
+
         // does Collector have a set?
         $traitset = $this->getMatchingCollectedTrait('collector_identity');
 
         if ($traitset != null) {
-            $this->scoreSet($this->role[COLLECTOR], $traitset, 6);
+            $this->scoreSet(COLLECTOR, $traitset, 6);
         } else {
             $this->drawCardAction("nextPlayer");
         }
@@ -418,12 +445,19 @@ class LadyAndTheTiger extends Table
             'i18n' => ['role', 'trait'],
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
-            'role' => $role,
+            'role' => $this->role[$role],
             "traitlbl" => $trait, // used in format_string recursive
             'trait' => $trait_tr[$trait],
             'score' => $gems
         ));
         self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$player_id" );
+
+        self::incStat($gems, 'gems_matches', $player_id);
+        if ($role == COLLECTOR) {
+            self::incStat(1, 'sets_collector', $player_id);
+        } else {
+            self::incStat(1, 'sets_guesser', $player_id);
+        }
 
         $this->gamestate->nextState("endContest");
     }
@@ -475,6 +509,7 @@ class LadyAndTheTiger extends Table
             'type' => $type,
             'arg' => $arg
         ));
+        self::incStat(1, 'discards', self::getActivePlayerId());
         $this->drawCardAction("guesser");
     }
 
@@ -486,6 +521,7 @@ class LadyAndTheTiger extends Table
         self::notifyAllPlayers('passed', clienttranslate('${player_name} passes'), array(
             'player_name' => self::getActivePlayerName(),
         ));
+        self::incStat(1, 'passes', self::getActivePlayerId());
 
         $this->gamestate->nextState("nextPlayer");
     }
@@ -508,6 +544,8 @@ class LadyAndTheTiger extends Table
             ));
             $this->revealIdentities();
             self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$guesser" );
+
+            self::incStat(3, 'gems_deck', $guesser);
 
             $this->gamestate->nextState("endContest");
         } else {
@@ -590,6 +628,7 @@ class LadyAndTheTiger extends Table
             'decksize' => $this->cards->countCardInLocation('deck'),
             'cluecards' => $this->cards->getCardsInLocation('cluedisplay')
         ));
+        self::incStat(1, 'contests_number');
 
         $this->gamestate->nextState( "" );
 	}
