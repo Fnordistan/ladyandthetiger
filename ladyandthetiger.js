@@ -188,7 +188,7 @@ function (dojo, declare) {
             } else {
                 myrolecard.classList.add('ltdr_door');
                 let doortext = _('${role} is behind this door');
-                doortext = doortext.replace('${role}', CollectorTr);
+                doortext = doortext.replace('${role}', _("Collector"));
                 let roletooltip = this.format_block('jstpl_card_tooltip', {color: 'black', text: doortext});
                 this.addTooltip(myrolecard.id, roletooltip, '');
             }
@@ -429,7 +429,9 @@ function (dojo, declare) {
                         }
                         log = log.replace('${label}', '');
                     }
-                    log = log.replace("You", this.spanYou());
+                    if (!this.isSpectator) {
+                        log = log.replace("You", this.spanYou());
+                    }
                 }
             } catch (e) {
                 console.error(log, args, "Exception thrown", e.stack);

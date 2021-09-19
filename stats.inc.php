@@ -90,7 +90,7 @@ $stats_type = array(
                                 "name" => totranslate("Cards discarded"), 
                                 "type" => "int" ),
         "wrong_guesses" => array(   "id"=> 19,
-                                "name" => totranslate("Wrong guesses (one trait)"), 
+                                "name" => totranslate("Wrong guesses"),
                                 "type" => "int" ),
         "correct_guesses_1" => array(   "id"=> 21,
                                 "name" => totranslate("Correct guesses (one trait)"), 
