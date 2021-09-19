@@ -270,8 +270,11 @@ function (dojo, declare) {
          */
         decorateDiscardPile: function(num) {
             if (num != 0) {
-                let discardtxt = _("Click to view ${num} cards in Discard deck");
-                discardtxt = discardtxt.replace('${num}', num);
+                let discardtxt = _("1 card in Discard pile");
+                if (num > 1) {
+                    discardtxt = _("Click to view ${num} cards in Discard pile");
+                    discardtxt = discardtxt.replace('${num}', num);
+                }
                 this.addTooltip('cluediscard', discardtxt, '');
             }
         },
