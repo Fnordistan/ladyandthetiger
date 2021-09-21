@@ -51,6 +51,7 @@
   justify-content: flex-start;
   min-height: 370px;
 	transition: width 2s;
+  flex-wrap: wrap;
 }
 
 /* Player tableaus (Guesser's is made hidden) */
@@ -264,6 +265,7 @@
 
 #center_display {
   min-height: 420px;
+  align-items: flex-end;
 }
 
 #center_display h1 {
@@ -278,10 +280,7 @@
 
 #cluedeck {
   min-width: 250px;
-}
-
-#cluedisplay {
-  top: 40px;
+  min-height: 375px;
 }
 
 #discardcontainer {
@@ -290,6 +289,9 @@
   border: 4px;
   border-style: groove;
   border-image: linear-gradient(145deg, red, blue) 1;
+  min-width: 250px;
+  min-height: 375px;
+  margin: 5px;
 }
 
 #cluediscard {
