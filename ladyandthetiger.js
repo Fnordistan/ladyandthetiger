@@ -326,7 +326,7 @@ function (dojo, declare) {
             pile.setSelectionMode(0);
             pile.image_items_per_row = 6;
             pile.onItemCreate = dojo.hitch(this, this.setUpClueCard);
-            pile.autowidth = true;
+            pile.autowidth = document.getElementById('center_display').display != "grid";
             for (let i = 0; i < 3; i++) {
                 for (let type of [RED+TIGER, BLUE+TIGER, RED+LADY, BLUE+LADY]) {
                     pile.addItemType( CARD_TYPE_TO_POS[type][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[type][i] );
