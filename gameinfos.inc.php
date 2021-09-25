@@ -117,7 +117,11 @@ $gameinfos = array(
 // Each paragraph must be wrapped with totranslate() for translation and should not contain html (plain text without formatting).
 // A good length for this text is between 100 and 150 words (about 6 to 9 lines on a standard display)
 'presentation' => array(
-    totranslate("Doors: A 2-player deduction game by Peter C. Hayward.")
+    totranslate("The Lady and the Tiger is five games in one!"),
+    totranslate("Inspired by the classic short story \"The Lady or the Tiger?\" by Frank R. Stockton, each game offers a unique experience. Five amazing games, packed into just eighteen unique cards!"),
+    totranslate("With stunning, evocative art by Tania Walker, The Lady and the Tiger is perfect for couples, families, ladies, tigers, and anyone who enjoys bluffing games."),
+    totranslate("(At present, the only game implemented for BoardGameArena is Doors.)"),
+    totranslate("Doors is A 2-player deduction game by Peter C. Hayward.")
 ),
 
 // Games categories
