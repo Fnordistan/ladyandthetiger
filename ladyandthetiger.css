@@ -44,13 +44,19 @@
 
 @import url(../../../css/csslayer.css); /* Note: you must not use any @import directive other than this one */
 
+:root {
+  --cluecardwidth: 218px;
+  --cluecardheight: 365px;
+}
+
 /* This is the container for a row of cards - both the player tableaus and the center display. */
 .ltdr_display {
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
-  min-height: 370px;
   flex-wrap: wrap;
+  justify-content: flex-start;
+  min-height: min-content;
+  max-width: 100vh;
 }
 
 /* Player tableaus (Guesser's is made hidden) */
@@ -65,6 +71,12 @@
   flex-direction: column;
 }
 
+.ltdr_cluecontainer {
+  display: inline-flex;
+  min-height: 425px;
+  align-items: baseline;
+}
+
 /* Wrapper around "Collector/Guesser" labels */
 .ltdr_rolename {
   font-weight: bold;
@@ -75,8 +87,8 @@
   background-size: 872px 720px;
   background-image: url(img/door_sprites.png);
   background-repeat: no-repeat;
-  width: 218px;
-  height: 360px;
+  width: var(--cluecardwidth);
+  height: var(--cluecardheight);
   margin: 5px;
   transition-delay: 1s;
   backface-visibility: hidden;
@@ -87,32 +99,32 @@
 }
 
 .ltdr_redlady {
-  background-position: -218px 0px;
+  background-position: calc(var(--cluecardwidth)*-1) 0px;
 }
 
 .ltdr_redtiger {
-  background-position: -436px 0px;
+  background-position: calc(var(--cluecardwidth)*-2) 0px;
 }
 
 .ltdr_bluelady {
-  background-position: -654px 0px;
+  background-position: calc(var(--cluecardwidth)*-3) 0px;
 }
 
 .ltdr_door {
-  background-position: 0px -360px;
+  background-position: 0px calc(var(--cluecardheight)*-1);
 }
 
 .ltdr_cluecard {
   background-size: 1308px 1095px;
   background-image: url(img/card_sprites.png);
   background-repeat: no-repeat;
-  width: 218px;
-  height: 365px;
+  width: var(--cluecardwidth);
+  height: var(--cluecardheight);
   margin: 5px;
 }
 
 .ltdr_cardback {
-  background-position: 0 -730px;
+  background-position: 0 calc(var(--cluecardheight)*-2);
 }
 
 .ltdr_discard {
@@ -245,6 +257,17 @@
   transform: rotateY(180deg);
 }
 
+/* holds cards and top caption */
+.ltdr_deckcontainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.ltdr_deckcontainer h1 {
+  font-family: cursive;
+  align-self: center;
+}
+
 /**
 * By IDs
 */
@@ -263,28 +286,19 @@
 }
 
 #center_display {
-  min-height: 420px;
   align-items: flex-end;
 }
 
-#center_display h1 {
-  font-family: cursive;
-  align-self: center;
-}
-
-#deckcontainer {
-  display: flex;
-  flex-direction: column;
-}
-
 #cluedeck {
-  min-width: 250px;
-  min-height: 375px;
+  min-width: min-content;
+  max-height: fit-content;
+}
+
+#cluedisplay_container {
+  align-items: flex-end;
 }
 
 #discardcontainer {
-  display: flex;
-  flex-direction: column;
   border: 4px;
   border-style: groove;
   border-image: linear-gradient(145deg, red, blue) 1;

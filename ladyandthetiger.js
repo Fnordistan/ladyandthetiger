@@ -65,8 +65,6 @@ function (dojo, declare) {
             // Here, you can init the global variables of your user interface
             this.playerHand = null;
             this.clueCards = null;
-            this.rolecardwidth = 218;
-            this.rolecardheight = 360;
             this.cluecardwidth = 218;
             this.cluecardheight = 365;
         },
@@ -326,7 +324,8 @@ function (dojo, declare) {
             pile.setSelectionMode(0);
             pile.image_items_per_row = 6;
             pile.onItemCreate = dojo.hitch(this, this.setUpClueCard);
-            pile.autowidth = document.getElementById('center_display').display != "grid";
+            pile.autowidth = screen.width >= 540;
+
             for (let i = 0; i < 3; i++) {
                 for (let type of [RED+TIGER, BLUE+TIGER, RED+LADY, BLUE+LADY]) {
                     pile.addItemType( CARD_TYPE_TO_POS[type][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[type][i] );
