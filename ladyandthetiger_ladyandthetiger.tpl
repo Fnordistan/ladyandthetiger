@@ -26,17 +26,12 @@
   </div>
 
   <div id="center_display" class="whiteblock">
-    <div id="deckcontainer" class="ltdr_cluecontainer ltdr_deckcontainer">
+    <div id="deckcontainer" class="ltdr_deckcontainer">
       <h1 id="deckcount"></h1>
       <div id="cluedeck"></div>
     </div>
-    <div id="cluedisplay_container" class="ltdr_cluecontainer">
-      <div id="cluecard1"></div>
-      <div id="cluecard2"></div>
-      <div id="cluecard3"></div>
-      <div id="cluecard4"></div>
-    </div>
-    <div id="discardcontainer" class="ltdr_cluecontainer ltdr_deckcontainer">
+    <div id="cluedisplay"></div>
+    <div id="discardcontainer" class="ltdr_deckcontainer">
       <h1>{DISCARDPILE}</h1>
       <div id="cluediscard"></div>
     </div>

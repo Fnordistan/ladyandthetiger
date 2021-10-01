@@ -71,15 +71,12 @@
   flex-direction: column;
 }
 
-.ltdr_cluecontainer {
-  display: flex;
-}
-
 /* holds cards and top caption */
 .ltdr_deckcontainer {
   flex-direction: column;
   min-width: max-content;
-  max-height: 435px;
+  min-height: calc(var(--cluecardheight) + 20px);
+  text-align: center;
 }
 
 .ltdr_deckcontainer h1 {
@@ -136,6 +133,22 @@
 .ltdr_cardback {
   background-position: 0 calc(var(--cluecardheight)*-2);
 }
+
+/* blue lady #1 */
+.ltdr_clue_0 {
+  background-position: 0 o;
+}
+
+/* blue lady #2 */
+.ltdr_clue_13 {
+  background-position: 0 o;
+}
+
+/* blue lady #3 */
+.ltdr_clue_14 {
+  background-position: 0 o;
+}
+
 
 .ltdr_discard {
   filter: grayscale(0.4);
@@ -282,8 +295,8 @@
 }
 
 #cluedeck {
-  min-width: min-content;
-  max-height: fit-content;
+  width: calc(var(--cluecardwidth) + 20px);
+  height: calc(var(--cluecardheight) + 20px);
 }
 
 #cluedisplay_container {
@@ -297,34 +310,27 @@
 
 
 #center_display {
-  display: grid;
-  grid-template-columns: 1fr 4fr 1fr auto;
-  grid-template-rows: 1fr;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   width: 100%;
 }
 
-#deckcontainer {
-  grid-row:1/1;
-  grid-column:1/1;
-}
-
-#cluedisplay_container {
-  grid-row:1/1;
-  grid-column:2/2;
-  justify-self: stretch;
+#cluedisplay {
+  align-self: flex-end;
 }
 
 #discardcontainer {
   grid-row:1/1;
   grid-column:3/3;
   border: 4px;
-  border-style: groove;
+  border-style: solid;
   border-image: linear-gradient(145deg, red, blue) 1;
-  min-height: 375px;
   margin: 5px;
 }
 
-@media (max-width: 540px) {
+/* @media (max-width: 540px) {
   #center_display {
     grid-template-columns: 1fr 2fr;
     grid-template-rows: 1fr 1fr;
@@ -342,4 +348,4 @@
     grid-row:2/2;
     grid-column:1/1;
 }
-}
+} */
