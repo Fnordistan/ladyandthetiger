@@ -176,13 +176,13 @@ function (dojo, declare) {
                 myid = myid.replace('${identity}', this.getLabelByValue(identity));
                 let idclr = myidentity.includes("red") ? 'red' : 'blue';
                 let idtooltip = this.format_block('jstpl_card_tooltip_icon', {trait: myidentity, color: idclr, text: myid});
-                this.addTooltip(myrolecard.id, idtooltip, '');
+                this.addTooltipHtml(myrolecard.id, idtooltip, '');
             } else {
                 myrolecard.classList.add('ltdr_door');
                 let doortext = _('${role} is behind this door');
                 doortext = doortext.replace('${role}', _("Collector"));
                 let roletooltip = this.format_block('jstpl_card_tooltip', {color: 'black', text: doortext});
-                this.addTooltip(myrolecard.id, roletooltip, '');
+                this.addTooltipHtml(myrolecard.id, roletooltip, '');
             }
         },
 
@@ -192,6 +192,15 @@ function (dojo, declare) {
          * @param {Object} cluecards
          */
         setupClueDisplay: function(decksize, cluecards) {
+            this.createClueDeck(decksize);
+            this.createClueDisplay(cluecards);
+        },
+
+        /**
+         * Create the cluedeck with remaining clue cards
+         * @param {int} decksize 
+         */
+        createClueDeck: function(decksize) {
             let cardsremain = _('Cards Remaining: ${decksize}');
             cardsremain = cardsremain.replace('${decksize}', decksize);
             document.getElementById('deckcount').innerHTML = cardsremain;
@@ -201,16 +210,22 @@ function (dojo, declare) {
                 dojo.place(cardback, 'cluedeck', i);
             }
             this.addTooltip('cluedeck', cardsremain, '');
+        },
 
+        /**
+         * Set up clue cards display
+         * @param {Array} cluecards 
+         */
+        createClueDisplay: function(cluecards) {
             this.cluedisplay = this.createCardStockRow('cluedisplay');
             for (const c in cluecards) {
                 const card = cluecards[c];
                 const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
                 this.cluedisplay.addToStockWithId(id, id, 'cluedeck');
                 this.decorateClueCard(id, card.type, card.type_arg);
-              
             }
         },
+
 
         /**
          * For clue cards in cluedisplay, add Event listeners.
@@ -324,7 +339,7 @@ function (dojo, declare) {
             pile.setSelectionMode(0);
             pile.image_items_per_row = 6;
             pile.onItemCreate = dojo.hitch(this, this.setUpClueCard);
-            pile.autowidth = screen.width >= 540;
+            pile.autowidth = true;
 
             for (let i = 0; i < 3; i++) {
                 for (let type of [RED+TIGER, BLUE+TIGER, RED+LADY, BLUE+LADY]) {
@@ -580,7 +595,7 @@ function (dojo, declare) {
          * @param {string} card_id 
          */
         setUpClueCard: function( card_div, card_type_id, card_id ) {
-            this.addTooltip(card_div.id, this.createTooltipHtml(parseInt(card_type_id)), '');
+            this.addTooltipHtml(card_div.id, this.createTooltipHtml(parseInt(card_type_id)), '');
         },
 
         /**

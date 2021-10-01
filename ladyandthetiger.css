@@ -56,7 +56,7 @@
   flex-wrap: wrap;
   justify-content: flex-start;
   min-height: min-content;
-  max-width: 100vh;
+  width: 100%;
 }
 
 /* Player tableaus (Guesser's is made hidden) */
@@ -72,9 +72,19 @@
 }
 
 .ltdr_cluecontainer {
-  display: inline-flex;
-  min-height: 425px;
-  align-items: baseline;
+  display: flex;
+}
+
+/* holds cards and top caption */
+.ltdr_deckcontainer {
+  flex-direction: column;
+  min-width: max-content;
+  max-height: 435px;
+}
+
+.ltdr_deckcontainer h1 {
+  font-family: cursive;
+  align-self: center;
 }
 
 /* Wrapper around "Collector/Guesser" labels */
@@ -257,36 +267,18 @@
   transform: rotateY(180deg);
 }
 
-/* holds cards and top caption */
-.ltdr_deckcontainer {
-  display: flex;
-  flex-direction: column;
-}
-
-.ltdr_deckcontainer h1 {
-  font-family: cursive;
-  align-self: center;
+.ltdr_tooltip {
+  max-width: min-content;
+  text-align: center;
 }
 
 /**
 * By IDs
 */
 
-#role_n {
-  transition: background-position 2s;
-}
-
-#role_s {
-  transition: background-position 2s;
-}
-
 #ladytigerboard {
   display: flex;
   flex-direction: column;
-}
-
-#center_display {
-  align-items: flex-end;
 }
 
 #cluedeck {
@@ -298,23 +290,42 @@
   align-items: flex-end;
 }
 
-#discardcontainer {
-  border: 4px;
-  border-style: groove;
-  border-image: linear-gradient(145deg, red, blue) 1;
-  min-width: 250px;
-  min-height: 375px;
-  margin: 5px;
-}
-
 #cluediscard {
   min-width: 250px;
   min-height: 375px;
 }
 
+
+#center_display {
+  display: grid;
+  grid-template-columns: 1fr 4fr 1fr auto;
+  grid-template-rows: 1fr;
+  width: 100%;
+}
+
+#deckcontainer {
+  grid-row:1/1;
+  grid-column:1/1;
+}
+
+#cluedisplay_container {
+  grid-row:1/1;
+  grid-column:2/2;
+  justify-self: stretch;
+}
+
+#discardcontainer {
+  grid-row:1/1;
+  grid-column:3/3;
+  border: 4px;
+  border-style: groove;
+  border-image: linear-gradient(145deg, red, blue) 1;
+  min-height: 375px;
+  margin: 5px;
+}
+
 @media (max-width: 540px) {
   #center_display {
-    display:grid;
     grid-template-columns: 1fr 2fr;
     grid-template-rows: 1fr 1fr;
   }

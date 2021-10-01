@@ -25,7 +25,7 @@
     <div id="tableau_n"></div>
   </div>
 
-  <div id="center_display" class="ltdr_display whiteblock">
+  <div id="center_display" class="whiteblock">
     <div id="deckcontainer" class="ltdr_cluecontainer ltdr_deckcontainer">
       <h1 id="deckcount"></h1>
       <div id="cluedeck"></div>
@@ -67,7 +67,7 @@ const jstpl_color_lg_text = '<span style="font-family: cursive; font-size: 24px;
 
 const jstpl_card_tooltip = '<span style="font-family: cursive; font-size: 24px; font-weight: bold; color: ${color};">${text}</span>';
 
-const jstpl_card_tooltip_icon = '<div style="width: fit-content;"><div class="ltdr_trait ltdr_trait_${trait}"></div><span style="font-family: cursive; font-size: 24px; font-weight: bold; color: ${color};">${text}</span></div>';
+const jstpl_card_tooltip_icon = '<div class="ltdr_tooltip"><div class="ltdr_trait ltdr_trait_${trait}"></div><span style="font-family: cursive; font-size: 24px; font-weight: bold; color: ${color};">${text}</span></div>';
 
 </script>  
 
