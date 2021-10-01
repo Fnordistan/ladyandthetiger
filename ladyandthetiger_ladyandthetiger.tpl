@@ -31,7 +31,10 @@
       <div id="cluedeck"></div>
     </div>
     <div id="cluedisplay_container" class="ltdr_cluecontainer">
-      <div id="cluedisplay"></div>
+      <div id="cluecard1"></div>
+      <div id="cluecard2"></div>
+      <div id="cluecard3"></div>
+      <div id="cluecard4"></div>
     </div>
     <div id="discardcontainer" class="ltdr_cluecontainer ltdr_deckcontainer">
       <h1>{DISCARDPILE}</h1>
