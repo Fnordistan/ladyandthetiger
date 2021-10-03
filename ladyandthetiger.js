@@ -965,7 +965,7 @@ function (dojo, declare) {
             this.notifqueue.setSynchronous( 'deckEmpty', 1000 );
             dojo.subscribe( 'guessed', this, 'notif_guessed' );
             this.notifqueue.setSynchronous( 'guessed', 1000 );
-            dojo.subscribe( 'guessedResult', this, 'notif_guessed' );
+            dojo.subscribe( 'guessedResult', this, 'notif_guessedResult' );
             dojo.subscribe( 'identitiesRevealed', this, 'notif_identitiesRevealed' );
             this.notifqueue.setSynchronous( 'identitiesRevealed', 3000 );
         },
@@ -1079,7 +1079,14 @@ function (dojo, declare) {
          * When the Guesser guessed
          * @param {Object} notif 
          */
-         notif_guessed: function(notif) {
+        notif_guessed: function(notif) {
+        },
+
+        /**
+         * Results of guess
+         * @param {Object} notif 
+         */
+        notif_guessedResult: function(notif) {
             const scorer_id = notif.args.scorer;
             const score = parseInt(notif.args.score);
             this.scoreCtrl[scorer_id].incValue(score);

@@ -339,9 +339,6 @@ class LadyAndTheTiger extends Table
                 $scorer = COLLECTOR;
                 $gems = 4;
             }
-            // reveal cards
-            $this->revealIdentities();
-
 
             $collector_id = self::getGameStateValue(COLLECTOR);
             $scoring_player_id = self::getGameStateValue($scorer);
@@ -359,18 +356,27 @@ class LadyAndTheTiger extends Table
                 self::incStat(1, 'wrong_guesses', $guesser_id);
             }
 
-            self::notifyAllPlayers('guessed', clienttranslate('${player_name} guessed ${collector_name} is ${trait}${icon} ${scorer_name} (${scoring_role}) scores ${score} gems'), array(
-                'i18n' => ['trait', 'scoring_role'],
+            self::notifyAllPlayers('guessed', clienttranslate('${player_name} guessed ${collector_name} is ${trait}${icon}'), array(
+                'i18n' => ['trait'],
                 'player_name' => self::getActivePlayerName(),
                 'collector' => $collector_id,
                 'collector_name' => $players[$collector_id]['player_name'],
                 'trait' => $this->traits[$trait],
                 'icon' => $trait,
+
+            ));
+
+            // reveal cards
+            $this->revealIdentities();
+
+            self::notifyAllPlayers('guessedResult', clienttranslate('${scorer_name} (${scoring_role}) scores ${score} gems'), array(
+                'i18n' => ['scoring_role'],
                 'scorer' => $scoring_player_id,
                 'scorer_name' => $players[$scoring_player_id]['player_name'],
                 'scoring_role' => $this->role[$scorer],
                 'score' => $gems
             ));
+
             self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$scoring_player_id" );
             $this->gamestate->nextState("endContest");
         } else {
