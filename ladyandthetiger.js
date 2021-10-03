@@ -261,20 +261,32 @@ function (dojo, declare) {
             }
             this.decorateDiscardPile(Object.keys(discards).length);
             var discarded = document.getElementsByClassName('ltdr_discard');
-            discard.addEventListener('click', () => {
-                var off = 0;
-                for (let d of discarded) {
-                    const offX = ((this.cluecardwidth/3)*off)+'px';
-                    const offY = ((this.cluecardheight/3)*off)+'px';
-                    d.style['transform'] = 'translate('+offX+','+offY+')';
-                    off++;
-                }
+            const discardcontainer = document.getElementById('discardcontainer');
+            discardcontainer.addEventListener('click', () => {
+                this.spreadCardsDiagonally(discarded);
             });
-            discard.addEventListener('mouseout', () => {
+            discardcontainer.addEventListener('mouseover', () => {
+                this.spreadCardsDiagonally(discarded);
+            });
+            discardcontainer.addEventListener('mouseout', () => {
                 for (let d of discarded) {
                     d.style['transform'] = '';
                 }
             });
+        },
+
+        /**
+         * Transform cards to display diagonally.
+         * @param {Array} discarded 
+         */
+        spreadCardsDiagonally: function(discarded) {
+            var off = 0;
+            for (let d of discarded) {
+                const offX = ((this.cluecardwidth/3)*off)+'px';
+                const offY = ((this.cluecardheight/3)*off)+'px';
+                d.style['transform'] = 'translate('+offX+','+offY+')';
+                off++;
+            }
         },
 
         /**
@@ -285,7 +297,7 @@ function (dojo, declare) {
             if (num != 0) {
                 let discardtxt = _("1 card in Discard pile");
                 if (num > 1) {
-                    discardtxt = _("Click to view ${num} cards in Discard pile");
+                    discardtxt = _("${num} cards in Discard pile");
                     discardtxt = discardtxt.replace('${num}', num);
                 }
                 this.addTooltip('cluediscard', discardtxt, '');
