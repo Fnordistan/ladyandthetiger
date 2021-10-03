@@ -698,8 +698,21 @@ class LadyAndTheTiger extends Table
     	
         if ($state['type'] === "activeplayer") {
             switch ($statename) {
+                case 'collectorAction':
+                    $display = $this->cards->getCardsInLocation('cluedisplay');
+                    $card = array_pop($display);
+                    $this->collectCard($card['type'], $card['type_arg']);
+                    break;
+                case 'guesserDiscard':
+                    $display = $this->cards->getCardsInLocation('cluedisplay');
+                    $card = array_pop($display);
+                    $this->discardCard($card['type'], $card['type_arg']);
+                    break;
+                case 'guesserAction':
+                    $this->pass();
+                    break;
                 default:
-                    $this->gamestate->nextState( "zombiePass" );
+                    throw new BgaVisibleSystemException("Unexpected game state in zombie mode: ".$statename); // NOI18N
                 	break;
             }
 
@@ -713,7 +726,7 @@ class LadyAndTheTiger extends Table
             return;
         }
 
-        throw new feException( "Zombie mode not supported at this game state: ".$statename );
+        throw new BgaVisibleSystemException( "Zombie mode not supported at this game state: ".$statename ); // NOI18N
     }
     
 ///////////////////////////////////////////////////////////////////////////////////:
