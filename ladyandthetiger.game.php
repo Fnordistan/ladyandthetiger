@@ -482,7 +482,7 @@ class LadyAndTheTiger extends Table
         $collector_name = $players[$collector]['player_name'];
         $guesser_name = $players[$guesser]['player_name'];
 
-        self::notifyAllPlayers('identitiesRevealed', clienttranslate('Revealed: ${collector_name} (Collector) is the ${collector_identity}${icon} ${guesser_name} (Guesser) is the ${guesser_identity}${icon2}'), array(
+        self::notifyAllPlayers('identitiesRevealed', clienttranslate('Revealed! ${collector_name} is the ${collector_identity}${icon} ${guesser_name} is the ${guesser_identity}${icon2}'), array(
             'i18n' => ['collector_identity', 'guesser_identity'],
             'guesser' => $guesser,
             'guesser_name' => $guesser_name,
