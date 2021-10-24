@@ -463,10 +463,6 @@ function (dojo, declare) {
                         } else {
                             args.card_type = this.spanRedBlue(args.card_type, 0);
                         }
-                        log = log.replace('${label}', '');
-                    }
-                    if (!this.isSpectator) {
-                        log = log.replace("You", this.spanYou());
                     }
                 }
             } catch (e) {

@@ -32,8 +32,6 @@ define('LADYTIGER', 6);
 define('COLLECTOR', 'collector');
 define('GUESSER', 'guesser');
 
-define('ICON', '${icon}');
-
 class LadyAndTheTiger extends Table
 {
 	function __construct( )
@@ -413,7 +411,7 @@ class LadyAndTheTiger extends Table
         }
         $this->cards->moveCard($id, COLLECTOR);
         $card_id = $this->getCardIdentity($id);
-        self::notifyAllPlayers('cardCollected', clienttranslate('${player_name} adds ${card_type} to their collection'), array(
+        self::notifyAllPlayers('cardCollected', clienttranslate('${player_name} adds ${card_type} to collection'), array(
             'i18n' => ['card_type'],
             'player_name' => self::getActivePlayerName(),
             'card_type' => $this->identity[$card_id]['name'],
@@ -458,7 +456,7 @@ class LadyAndTheTiger extends Table
             'role' => $this->role[$role],
             'trait' => $trait_tr[$trait],
             'icon' => $trait,
-            'score' => $gems
+            'score' => $gems,
         ));
         self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$player_id" );
 
@@ -496,7 +494,7 @@ class LadyAndTheTiger extends Table
             'collector_name' => $collector_name,
             'collector_id' => $collector_id,
             'icon' => $this->identity[$collector_id]['label'],
-            'collector_identity' => $this->identity[$collector_id]['name'],
+            'collector_identity' => $this->identity[$collector_id]['name']
         ));
     }
 
@@ -511,13 +509,14 @@ class LadyAndTheTiger extends Table
         }
         $this->cards->moveCard($id, 'discard');
         $card_id = $this->getCardIdentity($id);
-        self::notifyAllPlayers('cardDiscarded', clienttranslate('${player_name} discards ${card_type} from the display').'${label}', array(
+        self::notifyAllPlayers('cardDiscarded', clienttranslate('${player_name} discards ${card_type} from the display'), array(
             'i18n' => ['card_type'],
             'player_name' => self::getActivePlayerName(),
             'card_type' => $this->identity[$card_id]['name'],
             'label' => $this->identity[$card_id]['label'],
             'type' => $type,
-            'arg' => $arg
+            'arg' => $arg,
+            'preserve' => ['label']
         ));
         self::incStat(1, 'discards', self::getActivePlayerId());
         $this->drawCardAction("guesser");
@@ -617,12 +616,12 @@ class LadyAndTheTiger extends Table
         foreach( $players as $player_id => $player ) {
             $identity = array_pop($identities);
             // Notify player of his identity
-            self::notifyPlayer( $player_id, 'newRole', clienttranslate('New contest: You are the ${identity_name}').ICON, array(
+            self::notifyPlayer( $player_id, 'newRole', clienttranslate('New contest: You are the ${identity_name}'), array(
                 'i18n' => ['identity_name'],
                 'identity' => $identity,
                 'icon' => $this->identity[$identity]['label'],
                 'identity_name' => $this->identity[$identity]['name'],
-                'preserve' => ['identity'],
+                'preserve' => ['icon', 'identity'],
             ) );
             if (self::getGameStateValue(COLLECTOR) == $player_id) {
                 self::setGameStateValue('collector_identity', $identity);
@@ -638,7 +637,7 @@ class LadyAndTheTiger extends Table
             'guesser_name' => $players[$guesser]['player_name'],
             'decksize' => $this->cards->countCardInLocation('deck'),
             'cluecards' => $this->cards->getCardsInLocation('cluedisplay'),
-            'preserve' => [GUESSER]
+            'preserve' => [COLLECTOR, GUESSER]
         ));
         self::incStat(1, 'contests_number');
 

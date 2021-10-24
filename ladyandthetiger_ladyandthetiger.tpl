@@ -58,14 +58,14 @@
 
 const jstpl_icon = '<div class="ltdr_traiticon ltdr_trait_${trait}"></div>';
 
-const jstpl_color_text = '<span style="font-family: cursive; font-size: larger; font-weight: bold; color: ${color};">${text}</span>';
+const jstpl_color_text = '<span style="font-family: \'Overlock\'; font-size: larger; font-weight: bold; color: ${color};">${text}</span>';
 // specifically to make guess selection button clickable
-const jstpl_color_text_id = '<span id="guess_sel_txt" style="font-family: cursive; font-size: larger; font-weight: bold; color: ${color};">${text}</span>';
-const jstpl_color_lg_text = '<span style="font-family: cursive; font-size: 24px; font-weight: bold; color: ${color};">${text}</span>';
+const jstpl_color_text_id = '<span id="guess_sel_txt" style="font-family: \'Overlock\'; font-size: larger; font-weight: bold; color: ${color};">${text}</span>';
+const jstpl_color_lg_text = '<span style="font-family: \'Overlock\'; font-size: 24px; font-weight: bold; color: ${color};">${text}</span>';
 
-const jstpl_card_tooltip = '<span style="font-family: cursive; font-size: 24px; font-weight: bold; color: ${color};">${text}</span>';
+const jstpl_card_tooltip = '<span style="font-family: \'Overlock\'; font-size: 24px; font-weight: bold; color: ${color};">${text}</span>';
 
-const jstpl_card_tooltip_icon = '<div class="ltdr_tooltip"><div class="ltdr_trait ltdr_trait_${trait}"></div><span style="font-family: cursive; font-size: 24px; font-weight: bold; color: ${color};">${text}</span></div>';
+const jstpl_card_tooltip_icon = '<div class="ltdr_tooltip"><div class="ltdr_trait ltdr_trait_${trait}"></div><span style="font-family: \'Overlock\'; font-size: 24px; font-weight: bold; color: ${color};">${text}</span></div>';
 
 </script>  
 
