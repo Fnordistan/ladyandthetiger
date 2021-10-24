@@ -49,6 +49,20 @@
   --cluecardheight: 365px;
 }
 
+@font-face {
+  font-family: 'Amatic+SC', cursive;
+  src: local('Amatic+SC'), url('https://fonts.googleapis.com/css2?family=Amatic+SC');
+  font-style: normal;
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'Overlock', cursive;
+  src: local('Overlock'), url('https://fonts.googleapis.com/css2?family=Overlock:ital,wght@0,400;1,400;1,700&');
+  font-style: normal;
+  font-weight: normal;
+}
+
 /* This is the container for a row of cards - both the player tableaus and the center display. */
 .ltdr_display {
   display: flex;
