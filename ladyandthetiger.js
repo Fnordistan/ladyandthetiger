@@ -263,29 +263,33 @@ function (dojo, declare) {
             var discarded = document.getElementsByClassName('ltdr_discard');
             const discardcontainer = document.getElementById('discardcontainer');
             discardcontainer.addEventListener('click', () => {
-                this.spreadCardsDiagonally(discarded);
+                this.spread = this.spread ? false : true;
+                this.spreadCardsDiagonally(discarded, this.spread);
             });
-            discardcontainer.addEventListener('mouseover', () => {
-                this.spreadCardsDiagonally(discarded);
+            discardcontainer.addEventListener('mouseenter', () => {
+                this.spreadCardsDiagonally(discarded, true);
             });
-            discardcontainer.addEventListener('mouseout', () => {
-                for (let d of discarded) {
-                    d.style['transform'] = '';
-                }
+            discardcontainer.addEventListener('mouseleave', () => {
+                this.spreadCardsDiagonally(discarded, false);
             });
         },
 
         /**
          * Transform cards to display diagonally.
          * @param {Array} discarded 
+         * @param {bool} bSpread
          */
-        spreadCardsDiagonally: function(discarded) {
+        spreadCardsDiagonally: function(discarded, bSpread) {
             var off = 0;
             for (let d of discarded) {
-                const offX = ((this.cluecardwidth/3)*off)+'px';
-                const offY = ((this.cluecardheight/3)*off)+'px';
-                d.style['transform'] = 'translate('+offX+','+offY+')';
-                off++;
+                if (bSpread) {
+                    const offX = ((this.cluecardwidth/3)*off)+'px';
+                    const offY = ((this.cluecardheight/3)*off)+'px';
+                    d.style['transform'] = 'translate('+offX+','+offY+')';
+                    off++;
+                } else {
+                    d.style['transform'] = null;
+                }
             }
         },
 
@@ -461,9 +465,6 @@ function (dojo, declare) {
                         }
                         log = log.replace('${label}', '');
                     }
-                    if (args.trait) {
-
-                    }
                     if (!this.isSpectator) {
                         log = log.replace("You", this.spanYou());
                     }
@@ -491,7 +492,7 @@ function (dojo, declare) {
         spanYou: function() {
             const color = this.gamedatas.players[this.player_id].color;
             let color_bg = "";
-            if (this.gamedatas.players[this.player_id] && this.gamedatas.players[this.player_id].color_back) {
+            if (this.gamedatas.players[this.player_id].color_back) {
                 color_bg = "background-color:#" + this.gamedatas.players[this.player_id].color_back + ";";
             }
             const you = "<span style=\"font-weight:bold;color:#" + color + ";" + color_bg + "\">" + __("lang_mainsite", "You") + "</span>";

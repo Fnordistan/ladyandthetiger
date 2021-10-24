@@ -270,13 +270,14 @@ class LadyAndTheTiger extends Table
         $card = $this->cards->pickCardForLocation('deck', 'cluedisplay');
         $decksize = $this->cards->countCardInLocation('deck');
         $card_id = $this->getCardIdentity($card['id']);
-        self::notifyAllPlayers('newClueCard', clienttranslate('${card_type} added to clue card display').'${label}', array(
+        self::notifyAllPlayers('newClueCard', clienttranslate('${card_type} added to clue card display'), array(
             'i18n' => ['card_type'],
             'card_type' => $this->identity[$card_id]['name'],
             'label' => $this->identity[$card_id]['label'],
             'type' => $card['type'],
             'arg' => $card['type_arg'],
-            'decksize' => $decksize
+            'decksize' => $decksize,
+            'preserve' => ['label'],
         ));
         return $decksize;
     }
@@ -363,6 +364,7 @@ class LadyAndTheTiger extends Table
                 'collector_name' => $players[$collector_id]['player_name'],
                 'trait' => $this->traits[$trait],
                 'icon' => $trait,
+                'preserve' => ['collector'],
 
             ));
 
@@ -374,7 +376,8 @@ class LadyAndTheTiger extends Table
                 'scorer' => $scoring_player_id,
                 'scorer_name' => $players[$scoring_player_id]['player_name'],
                 'scoring_role' => $this->role[$scorer],
-                'score' => $gems
+                'score' => $gems,
+                'preserve' => ['scorer'],
             ));
 
             self::DbQuery( "UPDATE player SET player_score=player_score+$gems WHERE player_id=$scoring_player_id" );
@@ -410,13 +413,14 @@ class LadyAndTheTiger extends Table
         }
         $this->cards->moveCard($id, COLLECTOR);
         $card_id = $this->getCardIdentity($id);
-        self::notifyAllPlayers('cardCollected', clienttranslate('${player_name} adds ${card_type} to their collection').'${label}', array(
+        self::notifyAllPlayers('cardCollected', clienttranslate('${player_name} adds ${card_type} to their collection'), array(
             'i18n' => ['card_type'],
             'player_name' => self::getActivePlayerName(),
             'card_type' => $this->identity[$card_id]['name'],
             'label' => $this->identity[$card_id]['label'],
             'type' => $type,
-            'arg' => $arg
+            'arg' => $arg,
+            'preserve' => ['label'],
         ));
 
         self::incStat(1, 'cards_collected', self::getActivePlayerId());
@@ -452,7 +456,6 @@ class LadyAndTheTiger extends Table
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'role' => $this->role[$role],
-            "traitlbl" => $trait, // used in format_string recursive
             'trait' => $trait_tr[$trait],
             'icon' => $trait,
             'score' => $gems
@@ -618,7 +621,8 @@ class LadyAndTheTiger extends Table
                 'i18n' => ['identity_name'],
                 'identity' => $identity,
                 'icon' => $this->identity[$identity]['label'],
-                'identity_name' => $this->identity[$identity]['name']
+                'identity_name' => $this->identity[$identity]['name'],
+                'preserve' => ['identity'],
             ) );
             if (self::getGameStateValue(COLLECTOR) == $player_id) {
                 self::setGameStateValue('collector_identity', $identity);
@@ -633,7 +637,8 @@ class LadyAndTheTiger extends Table
             GUESSER => $guesser,
             'guesser_name' => $players[$guesser]['player_name'],
             'decksize' => $this->cards->countCardInLocation('deck'),
-            'cluecards' => $this->cards->getCardsInLocation('cluedisplay')
+            'cluecards' => $this->cards->getCardsInLocation('cluedisplay'),
+            'preserve' => [GUESSER]
         ));
         self::incStat(1, 'contests_number');
 
