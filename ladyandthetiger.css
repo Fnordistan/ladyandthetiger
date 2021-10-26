@@ -389,7 +389,7 @@
 }
 
 #discardcontainer {
-  border: 4px;
+  border: 6px;
   border-style: solid;
   border-image: linear-gradient(145deg, red, blue) 1;
   margin: 5px;

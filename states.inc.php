@@ -85,8 +85,8 @@ $machinestates = array(
     // player must Collect or Discard, according to role
     STATE_COLLECTOR => array(
     	"name" => "collectorAction",
-    	"description" => clienttranslate('${actplayer} (${role}) must choose a card from the display'),
-    	"descriptionmyturn" => clienttranslate('${you} (${role}) must choose a card from the display'),
+    	"description" => clienttranslate('${actplayer} (Collector) must choose a card from the display'),
+    	"descriptionmyturn" => clienttranslate('${you} (Collector) must choose a card from the display'),
     	"type" => "activeplayer",
         "args" => "argGetRole",
     	"possibleactions" => array( "collectCard" ),
@@ -104,8 +104,8 @@ $machinestates = array(
     // player discards, or optionally guesses or matches first
     STATE_GUESSER => array(
     	"name" => "guesserDiscard",
-    	"description" => clienttranslate('${actplayer} (${role}) must guess, match a set, or discard a card from the display'),
-    	"descriptionmyturn" => clienttranslate('${you} (${role}) must guess, match a set, or discard a card from the display'),
+    	"description" => clienttranslate('${actplayer} (Guesser) must guess, match a set, or discard a card from the display'),
+    	"descriptionmyturn" => clienttranslate('${you} (Guesser) must guess, match a set, or discard a card from the display'),
     	"type" => "activeplayer",
         "args" => "argGetRole",
     	"possibleactions" => array( "discardCard", "match", "guess" ),
@@ -115,8 +115,8 @@ $machinestates = array(
     // player has already discarded, so guess, match, or pass
     STATE_GUESSER_ACTION => array(
     	"name" => "guesserAction",
-    	"description" => clienttranslate('${actplayer} (${role}) must guess, match a set, or pass'),
-    	"descriptionmyturn" => clienttranslate('${you} (${role}) must guess, match a set, or pass'),
+    	"description" => clienttranslate('${actplayer} (Guesser) must guess, match a set, or pass'),
+    	"descriptionmyturn" => clienttranslate('${you} (Guesser) must guess, match a set, or pass'),
     	"type" => "activeplayer",
         "args" => "argGetRole",
     	"possibleactions" => array( "guess", "match", "pass" ),

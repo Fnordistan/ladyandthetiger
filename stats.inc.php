@@ -66,7 +66,7 @@ $stats_type = array(
                                 "name" => totranslate("Gems for correct guesses"), 
                                 "type" => "int" ),
         "gems_wrong_guesses" => array(   "id"=> 11,
-                                "name" => totranslate("Gems for wrong guesses"), 
+                                "name" => totranslate("Gems for incorrect guesses"), 
                                 "type" => "int" ),
         "gems_matches" => array(   "id"=> 12,
                                 "name" => totranslate("Gems for scoring a set"), 
@@ -96,7 +96,7 @@ $stats_type = array(
                                 "name" => totranslate("Correct guesses (one trait)"), 
                                 "type" => "int" ),
         "correct_guesses_2" => array(   "id"=> 22,
-                                "name" => totranslate("Correct guesses (two traits)"), 
+                                "name" => totranslate("Correct guesses (both traits)"), 
                                 "type" => "int" ),
     )
 
