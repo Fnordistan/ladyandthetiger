@@ -265,7 +265,18 @@ class LadyAndTheTiger extends Table
      * Return number of cards remaining in deck.
      */
     function refillClueDisplay() {
-        $card = $this->cards->pickCardForLocation('deck', 'cluedisplay');
+        $currentcards = self::getObjectListFromDB("SELECT card_location_arg FROM cards WHERE card_location='cluedisplay'", true);
+        $wt = -1;
+        for ($i = 0; $i < 4; $i++) {
+            if (!in_array($i, $currentcards)) {
+                $wt = $i;
+                break;
+            }
+        }
+        if ($wt == -1) {
+            throw new BgaVisibleSystemException("Unexpected value for new cluedisplay card"); // NOI18N
+        }
+        $card = $this->cards->pickCardForLocation('deck', 'cluedisplay', $wt);
         $decksize = $this->cards->countCardInLocation('deck');
         $card_id = $this->getCardIdentity($card['id']);
         self::notifyAllPlayers('newClueCard', clienttranslate('${card_type} added to clue card display'), array(
@@ -275,6 +286,7 @@ class LadyAndTheTiger extends Table
             'type' => $card['type'],
             'arg' => $card['type_arg'],
             'decksize' => $decksize,
+            'weight' => $wt,
             'preserve' => ['label'],
         ));
         return $decksize;
@@ -409,7 +421,8 @@ class LadyAndTheTiger extends Table
         if ($id == null) {
             throw new BgaUserException(self::_("That card is not in the display!"));
         }
-        $this->cards->moveCard($id, COLLECTOR);
+        $wt = $this->cards->countCardInLocation(COLLECTOR);
+        $this->cards->moveCard($id, COLLECTOR, $wt);
         $card_id = $this->getCardIdentity($id);
         self::notifyAllPlayers('cardCollected', clienttranslate('${player_name} adds ${card_type} to collection'), array(
             'i18n' => ['card_type'],
@@ -418,6 +431,7 @@ class LadyAndTheTiger extends Table
             'label' => $this->identity[$card_id]['label'],
             'type' => $type,
             'arg' => $arg,
+            'weight' => $wt,
             'preserve' => ['label'],
         ));
 
@@ -507,7 +521,8 @@ class LadyAndTheTiger extends Table
         if ($id == null) {
             throw new BgaUserException(self::_("That card is not in the display!"));
         }
-        $this->cards->moveCard($id, 'discard');
+        $wt = $this->cards->countCardInLocation('discard');
+        $this->cards->moveCard($id, 'discard', $wt);
         $card_id = $this->getCardIdentity($id);
         self::notifyAllPlayers('cardDiscarded', clienttranslate('${player_name} discards ${card_type} from the display'), array(
             'i18n' => ['card_type'],
@@ -542,7 +557,6 @@ class LadyAndTheTiger extends Table
     function drawCardAction($state) {
         $size = $this->refillClueDisplay();
         if ($size == 0) {
-
             $players = self::loadPlayersBasicInfos();
             $guesser = self::getGameStateValue(GUESSER);
             $gems = 3;
@@ -607,7 +621,9 @@ class LadyAndTheTiger extends Table
         // (re)shuffle the Clue cards
 		$this->cards->moveAllCardsInLocation(null, 'deck');
 		$this->cards->shuffle('deck');
-		$this->cards->pickCardsForLocation(4, 'deck', 'cluedisplay');
+        for ($i = 0; $i < 4; $i++) {
+            $this->cards->pickCardForLocation('deck', 'cluedisplay', $i);
+        }
 
         $identities = [RED+TIGER, RED+LADY, BLUE+TIGER, BLUE+LADY];
         shuffle($identities);
@@ -636,7 +652,7 @@ class LadyAndTheTiger extends Table
             GUESSER => $guesser,
             'guesser_name' => $players[$guesser]['player_name'],
             'decksize' => $this->cards->countCardInLocation('deck'),
-            'cluecards' => $this->cards->getCardsInLocation('cluedisplay'),
+            'cluecards' => $this->cards->getCardsInLocation('cluedisplay', null, 'card_location_arg'),
             'preserve' => [COLLECTOR, GUESSER]
         ));
         self::incStat(1, 'contests_number');

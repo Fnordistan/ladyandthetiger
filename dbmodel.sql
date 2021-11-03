@@ -25,6 +25,6 @@ CREATE TABLE IF NOT EXISTS `cards` (
    `card_type` TINYINT NOT NULL,
    `card_type_arg` TINYINT NULL,
    `card_location` varchar(16) NOT NULL,
-   `card_location_arg` TINYINT NULL,
+   `card_location_arg` TINYINT NOT NULL,
    PRIMARY KEY (`card_id`)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;

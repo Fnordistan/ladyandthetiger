@@ -221,6 +221,8 @@ function (dojo, declare) {
             for (const c in cluecards) {
                 const card = cluecards[c];
                 const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
+                const wt = parseInt(card.location_arg);
+                this.cluedisplay.item_type[id].weight = wt;
                 this.cluedisplay.addToStockWithId(id, id, 'cluedeck');
                 this.decorateClueCard(id, card.type, card.type_arg);
             }
@@ -255,7 +257,8 @@ function (dojo, declare) {
             while (discard.firstChild) {
                 discard.firstChild.remove();
             }
-            for (const d in discards) {
+            const keys = Object.keys(discards).sort((a,b) => discards[a].location_arg - discards[b].location_arg);
+            for (const d of keys) {
                 const card = discards[d];
                 this.createDiscardCard(card.type, card.type_arg);
             }
@@ -340,6 +343,8 @@ function (dojo, declare) {
             for (const c in collectorcards) {
                 const card = collectorcards[c];
                 const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
+                const wt = parseInt(card.location_arg);
+                this.collection.item_type[id].weight = wt;
                 this.collection.addToStockWithId(id, id, 'cluedisplay');
             }
         },
@@ -1002,7 +1007,7 @@ function (dojo, declare) {
             const arg = parseInt(notif.args.arg);
             const id = CARD_TYPE_TO_POS[type][arg];
             // stock to stock movement
-            const wt = this.collection.count();
+            const wt = parseInt(notif.args.weight);
             this.collection.item_type[id].weight = wt;
             this.collection.addToStockWithId(id, id, 'cluedisplay_item_'+id);
             this.cluedisplay.removeFromStockById(id);
@@ -1016,6 +1021,7 @@ function (dojo, declare) {
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
             const id = CARD_TYPE_TO_POS[type][arg];
+            // cons twt = parseInt(notif.args.weight);
             // stock to non-stock movement
             this.cluedisplay.removeFromStockById(id, 'cluediscard');
             const dnum = this.createDiscardCard(type, arg);
@@ -1033,7 +1039,7 @@ function (dojo, declare) {
             const size = parseInt(notif.args.decksize);
 
             // non-stock to stock movement
-            const wt = this.cluedisplay.count();
+            const wt = parseInt(notif.args.weight);
             this.cluedisplay.item_type[id].weight = wt;
             this.cluedisplay.addToStockWithId(id, id, 'cluedeck');
             this.decorateClueCard(id, type, arg);
