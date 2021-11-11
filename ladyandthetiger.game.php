@@ -131,6 +131,8 @@ class LadyAndTheTiger extends Table
         self::setGameStateInitialValue( COLLECTOR, 0 );
         self::setGameStateInitialValue( 'guesser_identity', 0 );
         self::setGameStateInitialValue( 'collector_identity', 0 );
+
+        $this->stNewContest(true);
     }
 
     /*
@@ -598,7 +600,7 @@ class LadyAndTheTiger extends Table
 	/**
 	 * Set/switch roles and deal identity cards.
 	 */
-    function stNewContest() {
+    function stNewContest($bSetup = false) {
         $collector = self::getGameStateValue(COLLECTOR);
         $guesser = self::getGameStateValue(GUESSER);
 
@@ -656,8 +658,9 @@ class LadyAndTheTiger extends Table
             'preserve' => [COLLECTOR, GUESSER]
         ));
         self::incStat(1, 'contests_number');
-
-        $this->gamestate->nextState( "" );
+        if (!$bSetup) {
+            $this->gamestate->nextState( "" );
+        }
 	}
 
     /**

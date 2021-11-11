@@ -69,7 +69,7 @@ $machinestates = array(
         "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => STATE_NEW_CONTEST )
+        "transitions" => array( "" => STATE_COLLECTOR )
     ),
     
     // Assign/Switch Roles between Collector and Guesser
