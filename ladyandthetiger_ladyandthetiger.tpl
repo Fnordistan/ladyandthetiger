@@ -30,7 +30,10 @@
       <h1 id="deckcount"></h1>
       <div id="cluedeck"></div>
     </div>
-    <div id="cluedisplay"></div>
+    <div id="clueslot1" class="ltdr_clue_slot"></div>
+    <div id="clueslot2" class="ltdr_clue_slot"></div>
+    <div id="clueslot3" class="ltdr_clue_slot"></div>
+    <div id="clueslot4" class="ltdr_clue_slot"></div>
     <div id="discardcontainer" class="ltdr_deckcontainer">
       <h1>{DISCARDPILE}</h1>
       <div id="cluediscard"></div>
@@ -66,6 +69,8 @@ const jstpl_color_lg_text = '<span style="font-family: \'Overlock\'; font-size: 
 const jstpl_card_tooltip = '<span style="font-family: \'Overlock\'; font-size: 24px; font-weight: bold; color: ${color};">${text}</span>';
 
 const jstpl_card_tooltip_icon = '<div class="ltdr_tooltip"><div class="ltdr_trait ltdr_trait_${trait}"></div><span style="font-family: \'Overlock\'; font-size: 24px; font-weight: bold; color: ${color};">${text}</span></div>';
+
+const jstpl_cluecard = '<div id="cluecard_${i}" class="ltdr_cluecard" style="background-position: ${x}px ${y}px;;"></div>';
 
 </script>  
 

@@ -140,8 +140,6 @@
 .ltdr_deckcontainer {
   display: flex;
   flex-direction: column;
-  min-width: max-content;
-  min-height: calc(var(--cluecardheight) + 20px);
   text-align: center;
 }
 
@@ -186,6 +184,12 @@
 
 .ltdr_door {
   background-position: 0px calc(var(--cluecardheight)*-1);
+}
+
+.ltdr_clue_slot {
+  width: var(--cluecardwidth);
+  height: var(--cluecardheight);
+  border: 1px solid black;
 }
 
 .ltdr_cluecard {
@@ -366,51 +370,40 @@
   height: calc(var(--cluecardheight) + 20px);
 }
 
-#cluedisplay_container {
-  align-items: flex-end;
-}
-
 #cluediscard {
   width: calc(var(--cluecardwidth) + 20px);
   height: calc(var(--cluecardheight) + 20px);
 }
 
-
 #center_display {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: flex-start;
+  display: grid;
   width: 100%;
+  grid-template-columns: minmax(min-content, max-content) repeat(4, var(--cluecardwidth)) minmax(min-content, max-content);
 }
 
-#cluedisplay {
-  align-self: center;
+#deckcontainer {
+  grid-row :1/2;
+  grid-column: 1/2;
 }
 
 #discardcontainer {
+  grid-row: 1/1;
+  grid-column: 6/7;
   border: 6px;
   border-style: solid;
   border-image: linear-gradient(145deg, red, blue) 1;
   margin: 5px;
 }
 
-/* @media (max-width: 540px) {
+@media only screen and (max-width: 600px) {
   #center_display {
-    grid-template-columns: 1fr 2fr;
-    grid-template-rows: 1fr 1fr;
+    background-color: red;
+    grid-template-columns: repeat(3, var(--cluecardwidth));
+    grid-template-rows: 1fr repeat(2, var(--cluecardheight));
   }
 
-  #deckcontainer {
-    grid-row:1/1;
-    grid-column:1/1;
-}
-  #cluedisplay_container {
-    grid-row:1/2;
-    grid-column:2/2;
-}
   #discardcontainer {
-    grid-row:2/2;
-    grid-column:1/1;
+    grid-row: 2/3;
+    grid-column: 1/2;
+  }
 }
-} */

@@ -217,14 +217,14 @@ function (dojo, declare) {
          * @param {Array} cluecards 
          */
         createClueDisplay: function(cluecards) {
-            this.cluedisplay = this.createCardStockRow('cluedisplay');
+            // this.cluedisplay = this.createCardStockRow('cluedisplay');
             for (const c in cluecards) {
-                const card = cluecards[c];
-                const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
-                const wt = parseInt(card.location_arg);
-                this.cluedisplay.item_type[id].weight = wt;
-                this.cluedisplay.addToStockWithId(id, id, 'cluedeck');
-                this.decorateClueCard(id, card.type, card.type_arg);
+            //     const card = cluecards[c];
+            //     const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
+            //     const wt = parseInt(card.location_arg);
+            //     this.cluedisplay.item_type[id].weight = wt;
+            //     this.cluedisplay.addToStockWithId(id, id, 'cluedeck');
+            //     this.decorateClueCard(id, card.type, card.type_arg);
             }
         },
 
@@ -327,6 +327,19 @@ function (dojo, declare) {
             const discard = `<div id="discard_${i}" class="ltdr_cluecard ltdr_discard" style="position: absolute; margin: ${offset} 0 0 ${offset}; background-position: ${xoff}px ${yoff}px;;"></div>`;
             dojo.place(discard, 'cluediscard', i);
             return (i+1);
+        },
+
+        /**
+         * Generates HTML for a clue card.
+         * @param {int} id
+         * @param {int} type 
+         * @param {int} arg 
+         */
+        createClueCard: function(id, type, arg) {
+            const pos = CARD_TYPE_TO_POS[type][arg];
+            const xoff = (pos - (Math.floor(pos/6)*6)) * -this.cluecardwidth;
+            const yoff = Math.floor(pos/6) * -this.cluecardheight;
+            this.format_block('jstpl_cluecard', {i: id, x: xoff, y: yoff});
         },
 
         /**
@@ -884,8 +897,8 @@ function (dojo, declare) {
                 break;
                 case 'collectorAction':
                 case 'guesserDiscard':
-                    const sel = this.isCurrentPlayerActive() ? 1 : 0;
-                    this.cluedisplay.setSelectionMode(sel);
+                    // const sel = this.isCurrentPlayerActive() ? 1 : 0;
+                    // this.cluedisplay.setSelectionMode(sel);
                     break;
             case 'dummmy':
                 break;
