@@ -9,13 +9,7 @@
   * -----
   * 
   * ladyandthetiger.game.php
-  *
-  * This is the main file for your game logic.
-  *
-  * In this PHP file, you are going to defines the rules of the game.
-  *
   */
-
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
@@ -36,12 +30,6 @@ class LadyAndTheTiger extends Table
 {
 	function __construct( )
 	{
-        // Your global variables labels:
-        //  Here, you can assign labels to global variables you are using for this game.
-        //  You can use any number of global variables with IDs between 10 and 99.
-        //  If your game has options (variants), you also have to associate here a label to
-        //  the corresponding ID in gameoptions.inc.php.
-        // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
 
         self::initGameStateLabels( array(
@@ -107,6 +95,7 @@ class LadyAndTheTiger extends Table
         self::initStat( 'player', 'correct_guesses_2', 0 );
 
         // Create cards
+        // type is the card type (below), type_arg represents the unique # of each type
 		$cluecards = [];
 		// Door cards = type 1, Clue cards = type 2
 		// 0 = Door (Hidden)
@@ -268,27 +257,30 @@ class LadyAndTheTiger extends Table
      */
     function refillClueDisplay() {
         $currentcards = self::getObjectListFromDB("SELECT card_location_arg FROM cards WHERE card_location='cluedisplay'", true);
-        $wt = -1;
-        for ($i = 0; $i < 4; $i++) {
-            if (!in_array($i, $currentcards)) {
-                $wt = $i;
+        // get the empty slot to be filled
+        $slot = -1;
+        for ($s = 0; $s < 4; $s++) {
+            if (!in_array($s, $currentcards)) {
+                $slot = $s;
                 break;
             }
         }
-        if ($wt == -1) {
+        if ($slot == -1) {
             throw new BgaVisibleSystemException("Unexpected value for new cluedisplay card"); // NOI18N
         }
-        $card = $this->cards->pickCardForLocation('deck', 'cluedisplay', $wt);
+        $card = $this->cards->pickCardForLocation('deck', 'cluedisplay', $slot);
         $decksize = $this->cards->countCardInLocation('deck');
-        $card_id = $this->getCardIdentity($card['id']);
+        $id = $card['id'];
+        $card_type = $this->getCardIdentity($id);
         self::notifyAllPlayers('newClueCard', clienttranslate('${card_type} added to clue card display'), array(
             'i18n' => ['card_type'],
-            'card_type' => $this->identity[$card_id]['name'],
-            'label' => $this->identity[$card_id]['label'],
+            'id' => $id,
+            'card_type' => $this->identity[$card_type]['name'],
+            'label' => $this->identity[$card_type]['label'],
             'type' => $card['type'],
             'arg' => $card['type_arg'],
             'decksize' => $decksize,
-            'weight' => $wt,
+            'slot' => $slot,
             'preserve' => ['label'],
         ));
         return $decksize;
@@ -429,6 +421,7 @@ class LadyAndTheTiger extends Table
         self::notifyAllPlayers('cardCollected', clienttranslate('${player_name} adds ${card_type} to collection'), array(
             'i18n' => ['card_type'],
             'player_name' => self::getActivePlayerName(),
+            'id' => $id,
             'card_type' => $this->identity[$card_id]['name'],
             'label' => $this->identity[$card_id]['label'],
             'type' => $type,
@@ -519,15 +512,18 @@ class LadyAndTheTiger extends Table
      */
     function discardCard($type, $arg) {
         self::checkAction( 'discardCard' );
-        $id = self::getUniqueValueFromDB("SELECT card_id FROM cards WHERE card_type=$type AND card_type_arg=$arg AND card_location='cluedisplay'");
-        if ($id == null) {
+        $discarded = self::getObjectFromDB("SELECT card_id id, card_location_arg slot FROM cards WHERE card_type=$type AND card_type_arg=$arg AND card_location='cluedisplay'", true);
+        if ($discarded == null) {
             throw new BgaUserException(self::_("That card is not in the display!"));
         }
+        $id = $discarded['id'];
         $wt = $this->cards->countCardInLocation('discard');
         $this->cards->moveCard($id, 'discard', $wt);
         $card_id = $this->getCardIdentity($id);
         self::notifyAllPlayers('cardDiscarded', clienttranslate('${player_name} discards ${card_type} from the display'), array(
             'i18n' => ['card_type'],
+            'id' => $id,
+            'slot' => $discarded['slot'],
             'player_name' => self::getActivePlayerName(),
             'card_type' => $this->identity[$card_id]['name'],
             'label' => $this->identity[$card_id]['label'],

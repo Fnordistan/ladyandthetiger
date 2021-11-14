@@ -30,10 +30,10 @@
       <h1 id="deckcount"></h1>
       <div id="cluedeck"></div>
     </div>
-    <div id="clueslot1" class="ltdr_clue_slot"></div>
-    <div id="clueslot2" class="ltdr_clue_slot"></div>
-    <div id="clueslot3" class="ltdr_clue_slot"></div>
-    <div id="clueslot4" class="ltdr_clue_slot"></div>
+    <div id="clue_slot_0" class="ltdr_clue_slot"></div>
+    <div id="clue_slot_1" class="ltdr_clue_slot"></div>
+    <div id="clue_slot_2" class="ltdr_clue_slot"></div>
+    <div id="clue_slot_3" class="ltdr_clue_slot"></div>
     <div id="discardcontainer" class="ltdr_deckcontainer">
       <h1>{DISCARDPILE}</h1>
       <div id="cluediscard"></div>
@@ -70,7 +70,11 @@ const jstpl_card_tooltip = '<span style="font-family: \'Overlock\'; font-size: 2
 
 const jstpl_card_tooltip_icon = '<div class="ltdr_tooltip"><div class="ltdr_trait ltdr_trait_${trait}"></div><span style="font-family: \'Overlock\'; font-size: 24px; font-weight: bold; color: ${color};">${text}</span></div>';
 
-const jstpl_cluecard = '<div id="cluecard_${i}" class="ltdr_cluecard" style="background-position: ${x}px ${y}px;;"></div>';
+const jstpl_cluedeck = '<div id="cluedeck_${id}" class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset} 0 0 ${offset};"></div>';
+
+const jstpl_discard = '<div id="discard_${id}" class="ltdr_cluecard ltdr_discard" style="position: absolute; margin: ${offset} 0 0 ${offset}; background-position: ${xoff}px ${yoff}px;;"></div>';
+
+const jstpl_cluecard = '<div id="cluecard_${id}" class="ltdr_cluecard" style="background-position: ${x}px ${y}px;;"></div>';
 
 </script>  
 

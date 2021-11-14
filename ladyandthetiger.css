@@ -198,7 +198,7 @@
   background-repeat: no-repeat;
   width: var(--cluecardwidth);
   height: var(--cluecardheight);
-  margin: 5px;
+  margin: auto;
 }
 
 .ltdr_cardback {
@@ -377,8 +377,10 @@
 
 #center_display {
   display: grid;
-  width: 100%;
   grid-template-columns: minmax(min-content, max-content) repeat(4, var(--cluecardwidth)) minmax(min-content, max-content);
+  align-items: end;
+  column-gap: 5px;
+  width: 100%;
 }
 
 #deckcontainer {

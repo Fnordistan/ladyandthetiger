@@ -68,7 +68,7 @@ function (dojo, declare) {
             this.cluecardwidth = 218;
             this.cluecardheight = 365;
         },
-        
+
         /*
             setup:
             
@@ -205,9 +205,9 @@ function (dojo, declare) {
             cardsremain = cardsremain.replace('${decksize}', decksize);
             document.getElementById('deckcount').innerHTML = cardsremain;
             for (let i = 0; i < decksize; i++) {
-                const offset = 5+(2*i)+"px";
-                const cardback = `<div id="cluecard_${i}" class="ltdr_cluecard ltdr_cardback" style="position: absolute; margin: ${offset} 0 0 ${offset};"></div>`;
-                dojo.place(cardback, 'cluedeck', i);
+                const off = 5+(2*i)+"px";
+                const cardback_html = this.format_block('jstpl_cluedeck', {id: i, offset: off});
+                dojo.place(cardback_html, 'cluedeck', i);
             }
             this.addTooltip('cluedeck', cardsremain, '');
         },
@@ -217,34 +217,36 @@ function (dojo, declare) {
          * @param {Array} cluecards 
          */
         createClueDisplay: function(cluecards) {
-            // this.cluedisplay = this.createCardStockRow('cluedisplay');
             for (const c in cluecards) {
-            //     const card = cluecards[c];
-            //     const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
-            //     const wt = parseInt(card.location_arg);
-            //     this.cluedisplay.item_type[id].weight = wt;
-            //     this.cluedisplay.addToStockWithId(id, id, 'cluedeck');
-            //     this.decorateClueCard(id, card.type, card.type_arg);
+                const cc = cluecards[c];
+                const slot = cc.location_arg;
+                const card_html = this.createClueCard(cc.id, cc.type, cc.type_arg);
+
+                const card = dojo.place(card_html, 'clue_slot_'+slot);
+                card.style['transition'] = 'transform 0.5s';
+                this.decorateClueCard(cc.id, cc.type, cc.type_arg);
             }
         },
 
-
         /**
-         * For clue cards in cluedisplay, add Event listeners.
+         * For clue cards in cluedisplay, add Event listeners and tooltip.
          * @param {string} id 
          * @param {int} type 
          * @param {int} arg 
          */
         decorateClueCard: function(id, type, arg) {
-            $('cluedisplay_item_'+id).addEventListener('click', () => {
+            const cluecard = 'cluecard_'+id;
+            $(cluecard).addEventListener('click', () => {
                 this.onClueCardSelected(type, arg);
             });
-            $('cluedisplay_item_'+id).addEventListener('mouseenter', () => {
+            $(cluecard).addEventListener('mouseenter', () => {
                 this.onClueCardHover(id, true);
             });
-            $('cluedisplay_item_'+id).addEventListener('mouseout', () => {
+            $(cluecard).addEventListener('mouseout', () => {
                 this.onClueCardHover(id, false);
             });
+            const pos = CARD_TYPE_TO_POS[type][arg];
+            this.addTooltipHtml(cluecard, this.createTooltipHtml(pos), '');
         },
 
 
@@ -320,11 +322,9 @@ function (dojo, declare) {
         createDiscardCard: function(type, arg) {
             const discard_div = document.getElementById('cluediscard');
             const i = discard_div.childElementCount;
-            const pos = CARD_TYPE_TO_POS[type][arg];
-            const offset = (4*i)+"px";
-            const xoff = (pos - (Math.floor(pos/6)*6)) * -this.cluecardwidth;
-            const yoff = Math.floor(pos/6) * -this.cluecardheight;
-            const discard = `<div id="discard_${i}" class="ltdr_cluecard ltdr_discard" style="position: absolute; margin: ${offset} 0 0 ${offset}; background-position: ${xoff}px ${yoff}px;;"></div>`;
+            const margin = (4*i)+"px";
+            const offsets = this.getCardOffsets(type, arg);
+            const discard = this.format_block('jstpl_discard', {id: i, offset: margin, xoff: offsets.x, yoff: offsets.y});
             dojo.place(discard, 'cluediscard', i);
             return (i+1);
         },
@@ -336,10 +336,25 @@ function (dojo, declare) {
          * @param {int} arg 
          */
         createClueCard: function(id, type, arg) {
-            const pos = CARD_TYPE_TO_POS[type][arg];
+            const offsets = this.getCardOffsets(type, arg);
+            const card_html = this.format_block('jstpl_cluecard', {id: id, x: offsets.x, y: offsets.y});
+            return card_html;
+        },
+
+        /**
+         * Given type and type_arg of a card, get the xoff and yoff for sprite background-position
+         * @param {int} type 
+         * @param {int} arg 
+         * @return {x: xoff, y: yoff}
+         */
+        getCardOffsets: function(type, arg) {
+            const pos = CARD_TYPE_TO_POS[toint(type)][toint(arg)];
             const xoff = (pos - (Math.floor(pos/6)*6)) * -this.cluecardwidth;
             const yoff = Math.floor(pos/6) * -this.cluecardheight;
-            this.format_block('jstpl_cluecard', {i: id, x: xoff, y: yoff});
+            return {
+                x: xoff,
+                y: yoff
+            };
         },
 
         /**
@@ -351,6 +366,7 @@ function (dojo, declare) {
             const collector_tableau = document.getElementById(collector_id);
             collector_tableau.style['display'] = 'initial';
             collector_tableau.style['top'] = '40px';
+            debugger;
             this.collection = this.createCardStockRow(collector_id);
             // now add the ones actually on display
             for (const c in collectorcards) {
@@ -414,13 +430,11 @@ function (dojo, declare) {
             this.collection.removeAll();
 
             // move cards from Clue display to Deck
-            const cluedisplay = document.getElementById('cluedisplay');
-            while (cluedisplay.firstChild) {
-                this.slideToObject(cluedisplay.firstChild, cluedeck, 1000, 1000);
-                cluedisplay.firstChild.remove();
+            for (let s = 0; s < 4; s++) {
+                const cluecard = $('clue_slot_'+s).firstChild;
+                this.slideToObject(cluecard, cluedeck, 1000, 1000);
+                cluecard.remove();
             }
-            this.cluedisplay.removeAll();
-
             this.setupClueDisplay(decksize, cluecards);
         },
 
@@ -686,12 +700,13 @@ function (dojo, declare) {
          */
         onClueCardHover: function(id, hover) {
             if (this.checkAction("collectCard", true) || this.checkAction("discardCard", true)) {
-                const thiscard = document.getElementById('cluedisplay_item_'+id);
-                thiscard.style['transform'] = hover ? 'scale(1.05)' : '';
-                thiscard.style['transition'] = 'transform 0.5s';
+                $('cluecard_'+id).style['transform'] = hover ? 'scale(1.05)' : '';
             }
         },
 
+        /**
+         * Guess Role popup dialog box.
+         */
         guessRole: function() {
             this.guess_selection = null;
             this.guessDlg = new ebg.popindialog();
@@ -879,7 +894,6 @@ function (dojo, declare) {
          */
         onEnteringState: function( stateName, args )
         {
-            // console.log( 'Entering state: '+stateName );
             
             switch( stateName )
             {
@@ -895,11 +909,6 @@ function (dojo, declare) {
                         cardback_n.classList.remove(...IDENTITY_CLASSES);
                     }
                 break;
-                case 'collectorAction':
-                case 'guesserDiscard':
-                    // const sel = this.isCurrentPlayerActive() ? 1 : 0;
-                    // this.cluedisplay.setSelectionMode(sel);
-                    break;
             case 'dummmy':
                 break;
             }
@@ -911,13 +920,12 @@ function (dojo, declare) {
          */
         onLeavingState: function( stateName )
         {
-            switch( stateName )
-            {
-                case 'collectorAction':
-                case 'guesserDiscard':
-                        this.cluedisplay.setSelectionMode(0);
-                        break;
-            }
+            // switch( stateName )
+            // {
+            //     case 'collectorAction':
+            //     case 'guesserDiscard':
+            //             break;
+            // }
             
         }, 
 
@@ -1016,14 +1024,15 @@ function (dojo, declare) {
          * @param {Object} notif 
          */
         notif_cardCollected: function(notif) {
+            const id = notif.args.id;
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
-            const id = CARD_TYPE_TO_POS[type][arg];
+            const pos = CARD_TYPE_TO_POS[type][arg];
             // stock to stock movement
             const wt = parseInt(notif.args.weight);
-            this.collection.item_type[id].weight = wt;
-            this.collection.addToStockWithId(id, id, 'cluedisplay_item_'+id);
-            this.cluedisplay.removeFromStockById(id);
+            this.collection.item_type[pos].weight = wt;
+            this.collection.addToStockWithId(pos, pos, 'cluecard_'+id);
+            $('cluecard_'+id).remove();
         },
 
         /**
@@ -1033,10 +1042,10 @@ function (dojo, declare) {
         notif_cardDiscarded: function(notif) {
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
-            const id = CARD_TYPE_TO_POS[type][arg];
+            const id = notif.args.id;
             // cons twt = parseInt(notif.args.weight);
             // stock to non-stock movement
-            this.cluedisplay.removeFromStockById(id, 'cluediscard');
+            $('cluecard_'+id).remove();
             const dnum = this.createDiscardCard(type, arg);
             this.decorateDiscardPile(dnum);
         },
@@ -1048,14 +1057,12 @@ function (dojo, declare) {
         notif_newClue: function(notif) {
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
-            const id = CARD_TYPE_TO_POS[type][arg];
+            const id = notif.args.id;
+            const slot = notif.args.slot;
             const size = parseInt(notif.args.decksize);
 
-            // non-stock to stock movement
-            const wt = parseInt(notif.args.weight);
-            this.cluedisplay.item_type[id].weight = wt;
-            this.cluedisplay.addToStockWithId(id, id, 'cluedeck');
-            this.decorateClueCard(id, type, arg);
+            const card_html = this.createClueCard(id, type, arg);
+            dojo.place(card_html, 'clue_slot_'+slot);
 
             const cluedeck = document.getElementById('cluedeck');
             if (size != 0) {
