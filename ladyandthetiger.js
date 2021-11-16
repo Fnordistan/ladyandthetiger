@@ -150,15 +150,11 @@ function (dojo, declare) {
                 collector_t = 'tableau_n';
             }
 
-            const guesser_tableau = document.getElementById(guesser_t);
-            guesser_tableau.style['display'] = 'none';
+            $(guesser_t).classList.remove('ltdr_tableau');
+            $(guesser_t).style['display'] = 'none';
+            $(guesser_d).style['width'] = 'fit-content';
 
-            const guesser_display = document.getElementById(guesser_d);
-            guesser_display.style['width'] = 'fit-content';
-
-            const collector_display = document.getElementById(collector_d);
-            collector_display.style['width'] = '100%';
-
+            $(collector_d).style['width'] = '100%';
             this.setupCollectorDisplay(collector_t, collectorcards);
         },
 
@@ -219,12 +215,7 @@ function (dojo, declare) {
         createClueDisplay: function(cluecards) {
             for (const c in cluecards) {
                 const cc = cluecards[c];
-                const slot = cc.location_arg;
-                const card_html = this.createClueCard(cc.id, cc.type, cc.type_arg);
-
-                const card = dojo.place(card_html, 'clue_slot_'+slot);
-                card.style['transition'] = 'transform 0.5s';
-                this.decorateClueCard(cc.id, cc.type, cc.type_arg);
+                this.placeClueDisplayCard(cc.location_arg, cc.id, cc.type, cc.type_arg);
             }
         },
 
@@ -323,7 +314,7 @@ function (dojo, declare) {
             const discard_div = document.getElementById('cluediscard');
             const i = discard_div.childElementCount;
             const margin = (4*i)+"px";
-            const offsets = this.getCardOffsets(type, arg);
+            const offsets = this.clueSpritePos(type, arg);
             const discard = this.format_block('jstpl_discard', {id: i, offset: margin, xoff: offsets.x, yoff: offsets.y});
             dojo.place(discard, 'cluediscard', i);
             return (i+1);
@@ -331,13 +322,14 @@ function (dojo, declare) {
 
         /**
          * Generates HTML for a clue card.
+         * @param {string} location clue|collector
          * @param {int} id
          * @param {int} type 
          * @param {int} arg 
          */
-        createClueCard: function(id, type, arg) {
-            const offsets = this.getCardOffsets(type, arg);
-            const card_html = this.format_block('jstpl_cluecard', {id: id, x: offsets.x, y: offsets.y});
+        createClueCard: function(location, id, type, arg) {
+            const position = this.clueSpritePos(type, arg);
+            const card_html = this.format_block('jstpl_cluecard', {board: location, id: id, x: position.x, y: position.y});
             return card_html;
         },
 
@@ -347,10 +339,10 @@ function (dojo, declare) {
          * @param {int} arg 
          * @return {x: xoff, y: yoff}
          */
-        getCardOffsets: function(type, arg) {
+        clueSpritePos: function(type, arg) {
             const pos = CARD_TYPE_TO_POS[toint(type)][toint(arg)];
-            const xoff = (pos - (Math.floor(pos/6)*6)) * -this.cluecardwidth;
-            const yoff = Math.floor(pos/6) * -this.cluecardheight;
+            const xoff = -this.cluecardwidth * (pos - (Math.floor(pos/6)*6));
+            const yoff = -this.cluecardheight * Math.floor(pos/6);
             return {
                 x: xoff,
                 y: yoff
@@ -364,18 +356,42 @@ function (dojo, declare) {
          */
          setupCollectorDisplay: function(collector_id, collectorcards) {
             const collector_tableau = document.getElementById(collector_id);
-            collector_tableau.style['display'] = 'initial';
-            collector_tableau.style['top'] = '40px';
-            debugger;
-            this.collection = this.createCardStockRow(collector_id);
+            collector_tableau.classList.add('ltdr_tableau');
+
             // now add the ones actually on display
             for (const c in collectorcards) {
-                const card = collectorcards[c];
-                const id = CARD_TYPE_TO_POS[card.type][card.type_arg];
-                const wt = parseInt(card.location_arg);
-                this.collection.item_type[id].weight = wt;
-                this.collection.addToStockWithId(id, id, 'cluedisplay');
+                const cc = collectorcards[c];
+                this.placeCollectorCard(collector_tableau, cc.id, cc.type, cc.type_arg);
             }
+        },
+
+
+        /**
+         * Create a clue card and put it on the collector tableau
+         * @param {*} collector_div 
+         * @param {*} id 
+         * @param {*} type 
+         * @param {*} type_arg 
+         */
+        placeCollectorCard: function(collector_div, id, type, type_arg) {
+            const card_html = this.createClueCard("collector", id, type, type_arg);
+            const card = dojo.place(card_html, collector_div);
+            const pos = CARD_TYPE_TO_POS[type][type_arg];
+            this.addTooltipHtml(card.id, this.createTooltipHtml(pos), '');
+        },
+
+        /**
+         * Create a clue card and put it on the clue display.
+         * @param {*} slot 
+         * @param {*} id 
+         * @param {*} type 
+         * @param {*} type_arg 
+         */
+        placeClueDisplayCard: function(slot, id, type, type_arg) {
+            const card_html = this.createClueCard("clue", id, type, type_arg);
+            const card = dojo.place(card_html, 'clue_slot_'+slot);
+            card.style['transition'] = 'transform 0.5s';
+            this.decorateClueCard(id, type, type_arg);
         },
 
         /**
@@ -420,14 +436,12 @@ function (dojo, declare) {
 
             const myrole = (this.isSpectator) ? COLLECTOR : (this.player_id == oldcollector) ? COLLECTOR : GUESSER;
             const tableau = (myrole == COLLECTOR) ? 'tableau_n' : 'tableau_s';
-            const tab_div = document.getElementById(tableau);
+            const collection = document.getElementById(tableau);
             // move cards from Collector display to Deck
-            while (tab_div.firstChild) {
-                this.slideToObject(tab_div.firstChild, cluedeck, 1000, 1000);
-                tab_div.firstChild.remove();
+            while (collection.firstChild) {
+                this.slideToObject(collection.firstChild, cluedeck, 1000, 1000);
+                collection.firstChild.remove();
             }
-            // clear Collector display
-            this.collection.removeAll();
 
             // move cards from Clue display to Deck
             for (let s = 0; s < 4; s++) {
@@ -700,6 +714,7 @@ function (dojo, declare) {
          */
         onClueCardHover: function(id, hover) {
             if (this.checkAction("collectCard", true) || this.checkAction("discardCard", true)) {
+                $('cluecard_'+id).style['cursor'] = hover ? 'grab' : 'default';
                 $('cluecard_'+id).style['transform'] = hover ? 'scale(1.05)' : '';
             }
         },
@@ -803,22 +818,154 @@ function (dojo, declare) {
                 identity = RED+LADY;
             }
             const traits = this.getAttributesByValue(identity);
-            if (this.collection.items.length >= 4) {
+
+            const collection = document.getElementById('tableau_s');
+
+            if (collection.childElementCount >= 4) {
                 for (let t of traits) {
                     var m = 0;
-                    for (c of this.collection.items) {
+                    [...collection.childNodes].forEach(c => {
                         if (t.includes(c.type)) {
                             m++;
                             if (m >= 4) {
                                 return true;
                             }
                         }
-                    }
+                    });
                 }
             }
             return false;
         },
 
+        ///////////////////////////////////////////////////
+        /// Utility shared-code messages
+
+                /**
+         * This method will remove all inline style added to element that affect positioning
+         */
+                 stripPosition: function (token) {
+                    // console.log(token + " STRIPPING");
+                    // remove any added positioning style
+                    token = $(token);
+        
+                    token.style.removeProperty("display");
+                    token.style.removeProperty("top");
+                    token.style.removeProperty("bottom");
+                    token.style.removeProperty("left");
+                    token.style.removeProperty("right");
+                    token.style.removeProperty("position");
+                    // dojo.style(token, "transform", null);
+                },
+                stripTransition: function (token) {
+                    this.setTransition(token, "");
+                },
+                setTransition: function (token, value) {
+                    dojo.style(token, "transition", value);
+                    dojo.style(token, "-webkit-transition", value);
+                    dojo.style(token, "-moz-transition", value);
+                    dojo.style(token, "-o-transition", value);
+                },
+                /**
+                 * This method will attach mobile to a new_parent without destroying, unlike original attachToNewParent which destroys mobile and
+                 * all its connectors (onClick, etc)
+                 */
+                attachToNewParentNoDestroy: function (mobile_in, new_parent_in, relation, place_position) {
+                    //console.log("attaching ",mobile,new_parent,relation);
+                    const mobile = $(mobile_in);
+                    const new_parent = $(new_parent_in);
+        
+                    var src = dojo.position(mobile);
+                    if (place_position)
+                        mobile.style.position = place_position;
+                    dojo.place(mobile, new_parent, relation);
+                    mobile.offsetTop;//force re-flow
+                    var tgt = dojo.position(mobile);
+                    var box = dojo.marginBox(mobile);
+                    var cbox = dojo.contentBox(mobile);
+                    var left = box.l + src.x - tgt.x;
+                    var top = box.t + src.y - tgt.y;
+        
+                    mobile.style.position = "absolute";
+                    mobile.style.left = left + "px";
+                    mobile.style.top = top + "px";
+                    box.l += box.w - cbox.w;
+                    box.t += box.h - cbox.h;
+                    mobile.offsetTop;//force re-flow
+                    return box;
+                },
+        
+                /**
+                 * This method is similar to slideToObject but works on object which do not use inline style positioning. It also attaches object to
+                 * new parent immediately, so parent is correct during animation
+                 * 
+                 * @param {*} token 
+                 * @param {*} finalPlace 
+                 * @param {*} duration 
+                 * @param {*} delay 
+                 * @param {*} onEnd 
+                 * @param {*} relation 
+                 */
+                slideToObjectRelative: function (token, finalPlace, duration, delay, onEnd, relation) {
+                    token = $(token);
+                    this.delayedExec(() => {
+                        token.style.transition = "none";
+                        token.classList.add('moving_token');
+                        var box = this.attachToNewParentNoDestroy(token, finalPlace, relation, 'static');
+                        token.offsetHeight; // re-flow
+                        token.style.transition = "all " + duration + "ms ease-in-out";
+                        token.style.left = box.l + "px";
+                        token.style.top = box.t + "px";
+                    }, () => {
+                        token.style.removeProperty("transition");
+                        this.stripPosition(token);
+                        token.classList.remove('moving_token');
+                        if (onEnd) onEnd(token);
+                    }, duration, delay);
+                },
+
+                slideToObjectAbsolute: function (token, finalPlace, x, y, duration, delay, onEnd, relation) {
+                    token = $(token);
+                    this.delayedExec(() => {
+                        token.style.transition = "none";
+                        token.classList.add('moving_token');
+                        this.attachToNewParentNoDestroy(token, finalPlace, relation, 'absolute');
+                        token.offsetHeight; // re-flow
+                        token.style.transition = "all " + duration + "ms ease-in-out";
+                        token.style.left = x + "px";
+                        token.style.top = y + "px";
+                    }, () => {
+                        token.style.removeProperty("transition");
+                        token.classList.remove('moving_token');
+                        if (onEnd) onEnd(token);
+                    }, duration, delay);
+                },
+
+                delayedExec: function (onStart, onEnd, duration, delay) {
+                    if (typeof duration == "undefined") {
+                        duration = this.defaultAnimationDuration;
+                    }
+                    if (typeof delay == "undefined") {
+                        delay = 0;
+                    }
+                    if (this.instantaneousMode) {
+                        delay = Math.min(1, delay);
+                        duration = Math.min(1, duration);
+                    }
+                    if (delay) {
+                        setTimeout(function () {
+                            onStart();
+                            if (onEnd) {
+                                setTimeout(onEnd, duration);
+                            }
+                        }, delay);
+                    } else {
+                        onStart();
+                        if (onEnd) {
+                            setTimeout(onEnd, duration);
+                        }
+                    }
+                },
+        
         ///////////////////////////////////////////////////
         //// Ajax calls
 
@@ -1027,12 +1174,16 @@ function (dojo, declare) {
             const id = notif.args.id;
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
-            const pos = CARD_TYPE_TO_POS[type][arg];
-            // stock to stock movement
-            const wt = parseInt(notif.args.weight);
-            this.collection.item_type[pos].weight = wt;
-            this.collection.addToStockWithId(pos, pos, 'cluecard_'+id);
-            $('cluecard_'+id).remove();
+
+            const collector_div = this.getCollectorTableau();
+            // this.slideToObjectAndDestroy('cluecard_'+id, collector_div, 1000, 1000);
+            this.slideToObjectRelative('cluecard_'+id, collector_div, 1000, 1000, null, "last");
+            // turn it into a collector card
+            $('cluecard_'+id).style['cursor'] = "initial";
+            $('cluecard_'+id).style['transform'] = null;
+            $('cluecard_'+id).id = 'collector_'+id;
+
+            // this.placeCollectorCard(collector_div, id, type, arg);
         },
 
         /**
@@ -1043,7 +1194,7 @@ function (dojo, declare) {
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
             const id = notif.args.id;
-            // cons twt = parseInt(notif.args.weight);
+
             // stock to non-stock movement
             $('cluecard_'+id).remove();
             const dnum = this.createDiscardCard(type, arg);
@@ -1061,8 +1212,7 @@ function (dojo, declare) {
             const slot = notif.args.slot;
             const size = parseInt(notif.args.decksize);
 
-            const card_html = this.createClueCard(id, type, arg);
-            dojo.place(card_html, 'clue_slot_'+slot);
+            this.placeClueDisplayCard(slot, id, type, arg);
 
             const cluedeck = document.getElementById('cluedeck');
             if (size != 0) {

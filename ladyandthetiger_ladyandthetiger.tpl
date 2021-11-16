@@ -74,7 +74,7 @@ const jstpl_cluedeck = '<div id="cluedeck_${id}" class="ltdr_cluecard ltdr_cardb
 
 const jstpl_discard = '<div id="discard_${id}" class="ltdr_cluecard ltdr_discard" style="position: absolute; margin: ${offset} 0 0 ${offset}; background-position: ${xoff}px ${yoff}px;;"></div>';
 
-const jstpl_cluecard = '<div id="cluecard_${id}" class="ltdr_cluecard" style="background-position: ${x}px ${y}px;;"></div>';
+const jstpl_cluecard = '<div id="${board}card_${id}" class="ltdr_cluecard" style="background-position: ${x}px ${y}px;;"></div>';
 
 </script>  
 
