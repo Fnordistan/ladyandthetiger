@@ -145,7 +145,7 @@
   flex-direction: column;
   text-align: center;
   width: calc(var(--cluecardwidth) + 20px);
-  height: calc(var(--cluecardheight) + 20px);
+  min-height: calc(var(--cluecardheight) + 20px);
 }
 
 .ltdr_deckcontainer h1 {
@@ -383,14 +383,16 @@
 #center_display {
   display: grid;
   grid-template-columns: minmax(min-content, max-content) repeat(4, var(--cluecardwidth)) minmax(min-content, max-content);
-  align-items: end;
+  align-items: flex-end;
   column-gap: 5px;
   width: 100%;
+  min-height: 430px;
 }
 
 #deckcontainer {
   grid-row :1/2;
   grid-column: 1/2;
+  align-self: flex-start;
 }
 
 #discardcontainer {
@@ -402,11 +404,11 @@
   margin: 5px;
 }
 
-@media only screen and (max-width: 950px) {
+@media only screen and (max-width: 1630px) {
   #center_display {
     background-color: blue;
     grid-template-columns: minmax(min-content, max-content) repeat(4, var(--cluecardwidth));
-    grid-template-rows: repeat(2, var(--cluecardheight));
+    grid-template-rows: repeat(2, max-content);
   }
 
   #discardcontainer {
@@ -417,11 +419,11 @@
 }
 
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 1395px) {
   #center_display {
     background-color: red;
     grid-template-columns: minmax(min-content, max-content) repeat(2, var(--cluecardwidth));
-    grid-template-rows: repeat(2, var(--cluecardheight));
+    grid-template-rows: repeat(2, max-content);
   }
 
   #discardcontainer {

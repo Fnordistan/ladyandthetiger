@@ -240,7 +240,6 @@ function (dojo, declare) {
             this.addTooltipHtml(cluecard, this.createTooltipHtml(pos), '');
         },
 
-
         /**
          * Set up the discard deck.
          * @param {Object} discards
@@ -282,9 +281,11 @@ function (dojo, declare) {
                     const offX = ((this.cluecardwidth/3)*off)+'px';
                     const offY = ((this.cluecardheight/3)*off)+'px';
                     d.style['transform'] = 'translate('+offX+','+offY+')';
+                    d.style['z-index'] = off+1;
                     off++;
                 } else {
                     d.style['transform'] = null;
+                    d.style['z-index'] = null;
                 }
             }
         },
@@ -364,7 +365,6 @@ function (dojo, declare) {
                 this.placeCollectorCard(collector_tableau, cc.id, cc.type, cc.type_arg);
             }
         },
-
 
         /**
          * Create a clue card and put it on the collector tableau
@@ -1162,7 +1162,6 @@ function (dojo, declare) {
             const guesser = parseInt(notif.args.guesser);
             // passing guesser because right now display is still formerly guesser
             this.refreshClueDisplay(decksize, cluecards, guesser);
- 
             this.setupPlayerTableaus(collector, guesser, []);
         },
 
@@ -1172,8 +1171,6 @@ function (dojo, declare) {
          */
         notif_cardCollected: function(notif) {
             const id = notif.args.id;
-            const type = parseInt(notif.args.type);
-            const arg = parseInt(notif.args.arg);
 
             const collector_div = this.getCollectorTableau();
             // this.slideToObjectAndDestroy('cluecard_'+id, collector_div, 1000, 1000);
@@ -1181,8 +1178,11 @@ function (dojo, declare) {
             // turn it into a collector card
             $('cluecard_'+id).style['cursor'] = "initial";
             $('cluecard_'+id).style['transform'] = null;
+            $('cluecard_'+id).removeEventListener('mouseenter', this.onClueCardHover, false);
+            $('cluecard_'+id).removeEventListener('mouseout', this.onClueCardHover, false);
+            $('cluecard_'+id).removeEventListener('click', this.onClueCardSelected, false);
             $('cluecard_'+id).id = 'collector_'+id;
-
+            
             // this.placeCollectorCard(collector_div, id, type, arg);
         },
 
