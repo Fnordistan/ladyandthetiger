@@ -83,6 +83,8 @@ function (dojo, declare) {
         */
         
         setup: function( gamedatas ) {
+            this.listeners = {};
+
             const collector = this.gamedatas.collector;
             const guesser = this.gamedatas.guesser;
             this.setupPlayerTableaus(collector, guesser, this.gamedatas.collectorcards);
@@ -96,6 +98,7 @@ function (dojo, declare) {
             this.setupClueDisplay(decksize, cluecards);
             const discards = this.gamedatas.discards;
             this.setupDiscard(discards);
+
 
             this.setupNotifications();
         },
@@ -227,15 +230,21 @@ function (dojo, declare) {
          */
         decorateClueCard: function(id, type, arg) {
             const cluecard = 'cluecard_'+id;
-            $(cluecard).addEventListener('click', () => {
-                this.onClueCardSelected(type, arg);
-            });
-            $(cluecard).addEventListener('mouseenter', () => {
-                this.onClueCardHover(id, true);
-            });
-            $(cluecard).addEventListener('mouseout', () => {
-                this.onClueCardHover(id, false);
-            });
+
+            const selector = () => this.onClueCardSelected(id, type, arg);
+            const hover = () => this.onClueCardHover(id, true);
+            const unhover = () => this.onClueCardHover(id, false);
+
+            $(cluecard).addEventListener('click', selector);
+            $(cluecard).addEventListener('mouseenter', hover);
+            $(cluecard).addEventListener('mouseout', unhover);
+            const mylisteners = {
+                'click' : selector,
+                'mouseenter' : hover,
+                'mouseout' : unhover
+            };
+            this.listeners[cluecard] = mylisteners;
+
             const pos = CARD_TYPE_TO_POS[type][arg];
             this.addTooltipHtml(cluecard, this.createTooltipHtml(pos), '');
         },
@@ -386,10 +395,19 @@ function (dojo, declare) {
          * @param {*} id 
          * @param {*} type 
          * @param {*} type_arg 
+         * @param {bool} slide
          */
-        placeClueDisplayCard: function(slot, id, type, type_arg) {
+        placeClueDisplayCard: function(slot, id, type, type_arg, slide=false) {
             const card_html = this.createClueCard("clue", id, type, type_arg);
-            const card = dojo.place(card_html, 'clue_slot_'+slot);
+            const slot_id = 'clue_slot_'+slot;
+            var card;
+            if (slide) {
+                card = dojo.place(card_html, 'cluedeck');
+                this.slideToObjectRelative(card.id, slot_id, 1000, 1000, null, "last");
+            } else {
+                card = dojo.place(card_html, slot_id);
+            }
+
             card.style['transition'] = 'transform 0.5s';
             this.decorateClueCard(id, type, type_arg);
         },
@@ -696,12 +714,13 @@ function (dojo, declare) {
         /**
          * onClueCardSelected:
          * Hooked to selection of a clue card.
+         * @param {int} int
          * @param {int} type 
          * @param {int} arg 
          */
-         onClueCardSelected: function( type, arg ) {
+         onClueCardSelected: function(id, type, arg ) {
             if (this.checkAction("collectCard", true)) {
-                this.collectCard(type, arg);
+                this.collectCard(id, type, arg);
             } else if (this.checkAction("discardCard", true)) {
                 this.discardCard(type, arg);
             }
@@ -714,8 +733,10 @@ function (dojo, declare) {
          */
         onClueCardHover: function(id, hover) {
             if (this.checkAction("collectCard", true) || this.checkAction("discardCard", true)) {
-                $('cluecard_'+id).style['cursor'] = hover ? 'grab' : 'default';
-                $('cluecard_'+id).style['transform'] = hover ? 'scale(1.05)' : '';
+                const card = $('cluecard_'+id);
+                console.log(card);
+                card.style['cursor'] = hover ? 'grab' : 'default';
+                card.style['transform'] = hover ? 'scale(1.05)' : '';
             }
         },
 
@@ -856,15 +877,6 @@ function (dojo, declare) {
                     token.style.removeProperty("position");
                     // dojo.style(token, "transform", null);
                 },
-                stripTransition: function (token) {
-                    this.setTransition(token, "");
-                },
-                setTransition: function (token, value) {
-                    dojo.style(token, "transition", value);
-                    dojo.style(token, "-webkit-transition", value);
-                    dojo.style(token, "-moz-transition", value);
-                    dojo.style(token, "-o-transition", value);
-                },
                 /**
                  * This method will attach mobile to a new_parent without destroying, unlike original attachToNewParent which destroys mobile and
                  * all its connectors (onClick, etc)
@@ -908,17 +920,12 @@ function (dojo, declare) {
                 slideToObjectRelative: function (token, finalPlace, duration, delay, onEnd, relation) {
                     token = $(token);
                     this.delayedExec(() => {
-                        token.style.transition = "none";
-                        token.classList.add('moving_token');
                         var box = this.attachToNewParentNoDestroy(token, finalPlace, relation, 'static');
                         token.offsetHeight; // re-flow
-                        token.style.transition = "all " + duration + "ms ease-in-out";
                         token.style.left = box.l + "px";
                         token.style.top = box.t + "px";
                     }, () => {
-                        token.style.removeProperty("transition");
                         this.stripPosition(token);
-                        token.classList.remove('moving_token');
                         if (onEnd) onEnd(token);
                     }, duration, delay);
                 },
@@ -926,16 +933,11 @@ function (dojo, declare) {
                 slideToObjectAbsolute: function (token, finalPlace, x, y, duration, delay, onEnd, relation) {
                     token = $(token);
                     this.delayedExec(() => {
-                        token.style.transition = "none";
-                        token.classList.add('moving_token');
                         this.attachToNewParentNoDestroy(token, finalPlace, relation, 'absolute');
                         token.offsetHeight; // re-flow
-                        token.style.transition = "all " + duration + "ms ease-in-out";
                         token.style.left = x + "px";
                         token.style.top = y + "px";
                     }, () => {
-                        token.style.removeProperty("transition");
-                        token.classList.remove('moving_token');
                         if (onEnd) onEnd(token);
                     }, duration, delay);
                 },
@@ -971,10 +973,11 @@ function (dojo, declare) {
 
         /**
          * Action to collect a card.
+         * @param {int} id
          * @param {int} type 
          * @param {int} arg 
          */
-        collectCard: function(type, arg) {
+        collectCard: function(id, type, arg) {
             if (this.checkAction("collectCard", true)) {
                 this.ajaxcall( "/ladyandthetiger/ladyandthetiger/collect.html", { 
                     card_type: type,
@@ -1173,17 +1176,13 @@ function (dojo, declare) {
             const id = notif.args.id;
 
             const collector_div = this.getCollectorTableau();
-            // this.slideToObjectAndDestroy('cluecard_'+id, collector_div, 1000, 1000);
-            this.slideToObjectRelative('cluecard_'+id, collector_div, 1000, 1000, null, "last");
+            const cluecard = 'cluecard_'+id;
             // turn it into a collector card
-            $('cluecard_'+id).style['cursor'] = "initial";
-            $('cluecard_'+id).style['transform'] = null;
-            $('cluecard_'+id).removeEventListener('mouseenter', this.onClueCardHover, false);
-            $('cluecard_'+id).removeEventListener('mouseout', this.onClueCardHover, false);
-            $('cluecard_'+id).removeEventListener('click', this.onClueCardSelected, false);
-            $('cluecard_'+id).id = 'collector_'+id;
-            
-            // this.placeCollectorCard(collector_div, id, type, arg);
+            $(cluecard).style['cursor'] = "initial";
+            $(cluecard).style['transform'] = null;
+            this.removeClueCardListeners(cluecard);
+            this.slideToObjectRelative(cluecard, collector_div, 1000, 1000, null, "last");
+            $(cluecard).id = 'collector_'+id;
         },
 
         /**
@@ -1194,11 +1193,23 @@ function (dojo, declare) {
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
             const id = notif.args.id;
+            this.slideToObjectAndDestroy('cluecard_'+id, 'cluediscard', 1000);
 
-            // stock to non-stock movement
-            $('cluecard_'+id).remove();
             const dnum = this.createDiscardCard(type, arg);
             this.decorateDiscardPile(dnum);
+        },
+
+        /**
+         * When a cluecard is moved to Collection, remove event listeners and cursor/transformation.
+         * @param {string} cluecard
+         */
+        removeClueCardListeners: function(cluecard) {
+            $(cluecard).style['cursor'] = "initial";
+            $(cluecard).style['transform'] = null;
+            Object.entries(this.listeners[cluecard]).forEach(([e,f]) => {
+                $(cluecard).removeEventListener(e, f);
+            });
+            delete this.listeners[cluecard];
         },
 
         /**
@@ -1212,8 +1223,8 @@ function (dojo, declare) {
             const slot = notif.args.slot;
             const size = parseInt(notif.args.decksize);
 
-            this.placeClueDisplayCard(slot, id, type, arg);
-
+            this.placeClueDisplayCard(slot, id, type, arg, true);
+            // adjust cluedeck
             const cluedeck = document.getElementById('cluedeck');
             if (size != 0) {
                 cluedeck.removeChild(cluedeck.lastElementChild);

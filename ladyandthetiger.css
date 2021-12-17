@@ -121,6 +121,7 @@
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
+  align-items: flex-end;
   min-height: min-content;
   width: 100%;
 }
@@ -167,8 +168,9 @@
   width: var(--cluecardwidth);
   height: var(--cluecardheight);
   margin: 5px;
-  transition-delay: 1s;
+  /* transition-delay: 1s; */
   backface-visibility: hidden;
+  margin: auto;
 }
 
 .ltdr_bluetiger {
@@ -194,7 +196,6 @@
 .ltdr_clue_slot {
   width: var(--cluecardwidth);
   height: var(--cluecardheight);
-  border: 1px solid black;
 }
 
 .ltdr_cluecard {
@@ -209,22 +210,6 @@
 .ltdr_cardback {
   background-position: 0 calc(var(--cluecardheight)*-2);
 }
-
-/* blue lady #1 */
-.ltdr_clue_0 {
-  background-position: 0 o;
-}
-
-/* blue lady #2 */
-.ltdr_clue_13 {
-  background-position: 0 o;
-}
-
-/* blue lady #3 */
-.ltdr_clue_14 {
-  background-position: 0 o;
-}
-
 
 .ltdr_discard {
   filter: grayscale(0.4);
@@ -306,7 +291,7 @@
   width: 300px;
   height: 50px;
   font-family: 'Overlock';
-  font-size: 24px;
+  font-size: 14px;
   font-weight: bold;
 	color: #494949;
   text-align: center;
@@ -383,7 +368,7 @@
 #center_display {
   display: grid;
   grid-template-columns: minmax(min-content, max-content) repeat(4, var(--cluecardwidth)) minmax(min-content, max-content);
-  align-items: flex-end;
+  align-items:center;
   column-gap: 5px;
   width: 100%;
   min-height: 430px;
@@ -404,7 +389,7 @@
   margin: 5px;
 }
 
-@media only screen and (max-width: 1630px) {
+/* @media only screen and (max-width: 1630px) {
   #center_display {
     background-color: blue;
     grid-template-columns: minmax(min-content, max-content) repeat(4, var(--cluecardwidth));
@@ -416,10 +401,10 @@
     grid-column: 1/2;
   }
 
-}
+} */
 
 
-@media only screen and (max-width: 1395px) {
+@media only screen and (max-width: 1400px) {
   #center_display {
     background-color: red;
     grid-template-columns: minmax(min-content, max-content) repeat(2, var(--cluecardwidth));
