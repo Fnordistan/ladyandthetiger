@@ -52,15 +52,15 @@ const IDENTITY_CLASSES = ['ltdr_redlady', 'ltdr_bluelady', 'ltdr_redtiger', 'ltd
 define([
     "dojo","dojo/_base/declare",
     "ebg/core/gamegui",
+    g_gamethemeurl + 'modules/js/Core/game.js',
     "ebg/counter",
-    "ebg/stock"
 ],
 
 /**
  * For Door cards (door, bl, rl, bt, rt), add these numbers to get the card
  */
 function (dojo, declare) {
-    return declare("bgagame.ladyandthetiger", ebg.core.gamegui, {
+    return declare("bgagame.ladyandthetiger", customgame.game, {
         constructor: function(){
             // Here, you can init the global variables of your user interface
             this.playerHand = null;
@@ -369,7 +369,8 @@ function (dojo, declare) {
             collector_tableau.classList.add('ltdr_tableau');
 
             // now add the ones actually on display
-            for (const c in collectorcards) {
+            const cards = Object.keys(collectorcards).sort((a,b) => collectorcards[a].location_arg - collectorcards[b].location_arg);
+            for (const c of cards) {
                 const cc = collectorcards[c];
                 this.placeCollectorCard(collector_tableau, cc.id, cc.type, cc.type_arg);
             }
@@ -412,28 +413,28 @@ function (dojo, declare) {
             this.decorateClueCard(id, type, type_arg);
         },
 
-        /**
-         * Create a Stock item with clue cards.
-         * @param {string} id 
-         * @returns Stock item
-         */
-        createCardStockRow: function(id) {
-            var pile = new ebg.stock();
-            pile.create(this, $(id), this.cluecardwidth, this.cluecardheight );
-            pile.setSelectionMode(0);
-            pile.image_items_per_row = 6;
-            pile.onItemCreate = dojo.hitch(this, this.setUpClueCard);
-            pile.autowidth = true;
+        // /**
+        //  * Create a Stock item with clue cards.
+        //  * @param {string} id 
+        //  * @returns Stock item
+        //  */
+        // createCardStockRow: function(id) {
+        //     var pile = new ebg.stock();
+        //     pile.create(this, $(id), this.cluecardwidth, this.cluecardheight );
+        //     pile.setSelectionMode(0);
+        //     pile.image_items_per_row = 6;
+        //     pile.onItemCreate = dojo.hitch(this, this.setUpClueCard);
+        //     pile.autowidth = true;
 
-            for (let i = 0; i < 3; i++) {
-                for (let type of [RED+TIGER, BLUE+TIGER, RED+LADY, BLUE+LADY]) {
-                    pile.addItemType( CARD_TYPE_TO_POS[type][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[type][i] );
-                }
-            }
-            pile.addItemType( CARD_TYPE_TO_POS[REDBLUE][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[REDBLUE][0] );
-            pile.addItemType( CARD_TYPE_TO_POS[LADYTIGER][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[LADYTIGER][0] );
-            return pile;
-        },
+        //     for (let i = 0; i < 3; i++) {
+        //         for (let type of [RED+TIGER, BLUE+TIGER, RED+LADY, BLUE+LADY]) {
+        //             pile.addItemType( CARD_TYPE_TO_POS[type][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[type][i] );
+        //         }
+        //     }
+        //     pile.addItemType( CARD_TYPE_TO_POS[REDBLUE][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[REDBLUE][0] );
+        //     pile.addItemType( CARD_TYPE_TO_POS[LADYTIGER][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[LADYTIGER][0] );
+        //     return pile;
+        // },
 
         /**
          * At start of new contest. Move cards in discard pile, clue display, and collectors tableau back to dek.
@@ -734,7 +735,6 @@ function (dojo, declare) {
         onClueCardHover: function(id, hover) {
             if (this.checkAction("collectCard", true) || this.checkAction("discardCard", true)) {
                 const card = $('cluecard_'+id);
-                console.log(card);
                 card.style['cursor'] = hover ? 'grab' : 'default';
                 card.style['transform'] = hover ? 'scale(1.05)' : '';
             }
@@ -865,7 +865,6 @@ function (dojo, declare) {
          * This method will remove all inline style added to element that affect positioning
          */
                  stripPosition: function (token) {
-                    // console.log(token + " STRIPPING");
                     // remove any added positioning style
                     token = $(token);
         
@@ -1176,13 +1175,32 @@ function (dojo, declare) {
             const id = notif.args.id;
 
             const collector_div = this.getCollectorTableau();
-            const cluecard = 'cluecard_'+id;
+            const clueid = 'cluecard_'+id;
+            const cluecard = $(clueid);
+
+            Object.entries(this.listeners[clueid]).forEach(([e,f]) => {
+                cluecard.removeEventListener(e, f);
+            });
+            delete this.listeners[clueid];
+            this.slide(cluecard, collector_div, {phantom: true});
+
+            // const clueparent = cluecard.parentNode;
+            // const slider = cluecard.cloneNode();
+            // const collectorcard = clueparent.removeChild(cluecard);
+            // // show movement
+            // const cardno = $(collector_div).childElementCount;
+
+            // this.slideToObjectPos( slider, collector_div, cardno*this.cluecardwidth, 0, 5000, 50000 ).play();
+            // this.fadeOutAndDestroy(slider, 1000, 1000);
+            // $(collector_div).appendChild(collectorcard);
+
             // turn it into a collector card
-            $(cluecard).style['cursor'] = "initial";
-            $(cluecard).style['transform'] = null;
-            this.removeClueCardListeners(cluecard);
-            this.slideToObjectRelative(cluecard, collector_div, 1000, 1000, null, "last");
-            $(cluecard).id = 'collector_'+id;
+            Object.assign(cluecard.style, {
+                'cursor' : "initial",
+                'transform' : null,
+            });
+
+            cluecard.id = 'collector_'+id;
         },
 
         /**
@@ -1197,19 +1215,6 @@ function (dojo, declare) {
 
             const dnum = this.createDiscardCard(type, arg);
             this.decorateDiscardPile(dnum);
-        },
-
-        /**
-         * When a cluecard is moved to Collection, remove event listeners and cursor/transformation.
-         * @param {string} cluecard
-         */
-        removeClueCardListeners: function(cluecard) {
-            $(cluecard).style['cursor'] = "initial";
-            $(cluecard).style['transform'] = null;
-            Object.entries(this.listeners[cluecard]).forEach(([e,f]) => {
-                $(cluecard).removeEventListener(e, f);
-            });
-            delete this.listeners[cluecard];
         },
 
         /**
