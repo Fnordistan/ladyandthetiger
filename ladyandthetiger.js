@@ -52,7 +52,7 @@ const IDENTITY_CLASSES = ['ltdr_redlady', 'ltdr_bluelady', 'ltdr_redtiger', 'ltd
 define([
     "dojo","dojo/_base/declare",
     "ebg/core/gamegui",
-    g_gamethemeurl + 'modules/js/Core/game.js',
+    // g_gamethemeurl + 'modules/js/Core/game.js',
     "ebg/counter",
 ],
 
@@ -60,7 +60,7 @@ define([
  * For Door cards (door, bl, rl, bt, rt), add these numbers to get the card
  */
 function (dojo, declare) {
-    return declare("bgagame.ladyandthetiger", customgame.game, {
+    return declare("bgagame.ladyandthetiger", ebg.core.gamegui, {
         constructor: function(){
             // Here, you can init the global variables of your user interface
             this.playerHand = null;
@@ -401,12 +401,18 @@ function (dojo, declare) {
         placeClueDisplayCard: function(slot, id, type, type_arg, slide=false) {
             const card_html = this.createClueCard("clue", id, type, type_arg);
             const slot_id = 'clue_slot_'+slot;
-            var card;
+
+            const card = dojo.place(card_html, slide ? 'cluedeck' : slot_id);
             if (slide) {
-                card = dojo.place(card_html, 'cluedeck');
-                this.slideToObjectRelative(card.id, slot_id, 1000, 1000, null, "last");
-            } else {
-                card = dojo.place(card_html, slot_id);
+                const ch = $(slot_id).firstChild;
+                if (ch) {
+                    ch.style.display = 'none';
+                }
+                this.slide(card, slot_id, {phantom: true}).then(() => {
+                    if (ch) {
+                        ch.style.display = 'initial';
+                    }
+                });
             }
 
             card.style['transition'] = 'transform 0.5s';
@@ -445,8 +451,8 @@ function (dojo, declare) {
          */
         refreshClueDisplay: function(decksize, cluecards, oldcollector) {
             // move cards from Discard pile to Deck
-            const cluedeck = document.getElementById('cluedeck');
-            const discard = document.getElementById('cluediscard');
+            const cluedeck = $('cluedeck');
+            const discard = $('cluediscard');
             while (discard.lastChild) {
                 this.slideToObject(discard.lastChild, cluedeck, 1000, 1000);
                 discard.lastChild.remove();
@@ -455,18 +461,17 @@ function (dojo, declare) {
 
             const myrole = (this.isSpectator) ? COLLECTOR : (this.player_id == oldcollector) ? COLLECTOR : GUESSER;
             const tableau = (myrole == COLLECTOR) ? 'tableau_n' : 'tableau_s';
-            const collection = document.getElementById(tableau);
+            const collection = $(tableau);
             // move cards from Collector display to Deck
             while (collection.firstChild) {
-                this.slideToObject(collection.firstChild, cluedeck, 1000, 1000);
+                this.slideToObjectAndDestroy(collection.firstChild, cluedeck, 800, 800);
                 collection.firstChild.remove();
             }
 
             // move cards from Clue display to Deck
             for (let s = 0; s < 4; s++) {
                 const cluecard = $('clue_slot_'+s).firstChild;
-                this.slideToObject(cluecard, cluedeck, 1000, 1000);
-                cluecard.remove();
+                this.slideToObjectAndDestroy(cluecard.id, cluedeck, 800, 800);
             }
             this.setupClueDisplay(decksize, cluecards);
         },
@@ -749,7 +754,7 @@ function (dojo, declare) {
             this.guessDlg.create( 'guessDialog' );
             this.guessDlg.setTitle( _("Guess Collector's identity") );
             this.guessDlg.setMaxWidth( 720 );
-            
+
             const html = '<div id="GuessDialogDiv" style="display: flex; flex-direction: column;">\
                             <div style="display: flex; flex-direction: row;">\
                                 <div id="guess_redtiger" class="ltdr_trait ltdr_trait_redtiger"></div>\
@@ -861,6 +866,151 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         /// Utility shared-code messages
 
+        isFastMode: function() {
+            return this.instantaneousMode;
+        },
+
+        /**
+         * Tisaac's slide function.
+         * @param {*} mobileElt 
+         * @param {*} targetElt 
+         * @param {*} options 
+         * @returns 
+         */
+        slide: function(mobileElt, targetElt, options = {}) {
+            let config = Object.assign(
+              {
+                duration: 800,
+                delay: 0,
+                destroy: false,
+                attach: true,
+                changeParent: true, // Change parent during sliding to avoid zIndex issue
+                pos: null,
+                className: 'moving',
+                from: null,
+                clearPos: true,
+                beforeBrother: null,
+      
+                phantom: false,
+              },
+              options,
+            );
+            config.phantomStart = config.phantomStart || config.phantom;
+            config.phantomEnd = config.phantomEnd || config.phantom;
+      
+            // Mobile elt
+            mobileElt = $(mobileElt);
+            let mobile = mobileElt;
+            // Target elt
+            targetElt = $(targetElt);
+            let targetId = targetElt;
+            const newParent = config.attach ? targetId : $(mobile).parentNode;
+      
+            // Handle fast mode
+            if (this.isFastMode() && (config.destroy || config.clearPos)) {
+              if (config.destroy) dojo.destroy(mobile);
+              else dojo.place(mobile, targetElt);
+      
+              return new Promise((resolve, reject) => {
+                resolve();
+              });
+            }
+      
+            // Handle phantom at start
+            if (config.phantomStart) {
+              mobile = dojo.clone(mobileElt);
+              dojo.attr(mobile, 'id', mobileElt.id + '_animated');
+              dojo.place(mobile, 'game_play_area');
+              this.placeOnObject(mobile, mobileElt);
+              dojo.addClass(mobileElt, 'phantom');
+              config.from = mobileElt;
+            }
+      
+            // Handle phantom at end
+            if (config.phantomEnd) {
+              targetId = dojo.clone(mobileElt);
+              dojo.attr(targetId, 'id', mobileElt.id + '_afterSlide');
+              dojo.addClass(targetId, 'phantomm');
+              if (config.beforeBrother != null) {
+                dojo.place(targetId, config.beforeBrother, 'before');
+              } else {
+                dojo.place(targetId, targetElt);
+              }
+            }
+      
+            dojo.style(mobile, 'zIndex', 5000);
+            dojo.addClass(mobile, config.className);
+            if (config.changeParent) this.changeParent(mobile, 'game_play_area');
+            if (config.from != null) this.placeOnObject(mobile, config.from);
+            return new Promise((resolve, reject) => {
+              const animation =
+                config.pos == null
+                  ? this.slideToObject(mobile, targetId, config.duration, config.delay)
+                  : this.slideToObjectPos(mobile, targetId, config.pos.x, config.pos.y, config.duration, config.delay);
+      
+              dojo.connect(animation, 'onEnd', () => {
+                dojo.style(mobile, 'zIndex', null);
+                dojo.removeClass(mobile, config.className);
+                if (config.phantomStart) {
+                  dojo.place(mobileElt, mobile, 'replace');
+                  dojo.removeClass(mobileElt, 'phantom');
+                  mobile = mobileElt;
+                }
+                if (config.changeParent) {
+                  if (config.phantomEnd) dojo.place(mobile, targetId, 'replace');
+                  else this.changeParent(mobile, newParent);
+                }
+                if (config.destroy) dojo.destroy(mobile);
+                if (config.clearPos && !config.destroy) dojo.style(mobile, { top: null, left: null, position: null });
+                resolve();
+              });
+              animation.play();
+            });
+          },
+      
+          changeParent: function(mobile, new_parent, relation) {
+            if (mobile === null) {
+              console.error('attachToNewParent: mobile obj is null');
+              return;
+            }
+            if (new_parent === null) {
+              console.error('attachToNewParent: new_parent is null');
+              return;
+            }
+            if (typeof mobile == 'string') {
+              mobile = $(mobile);
+            }
+            if (typeof new_parent == 'string') {
+              new_parent = $(new_parent);
+            }
+            if (typeof relation == 'undefined') {
+              relation = 'last';
+            }
+            var src = dojo.position(mobile);
+            dojo.style(mobile, 'position', 'absolute');
+            dojo.place(mobile, new_parent, relation);
+            var tgt = dojo.position(mobile);
+            var box = dojo.marginBox(mobile);
+            var cbox = dojo.contentBox(mobile);
+            var left = box.l + src.x - tgt.x;
+            var top = box.t + src.y - tgt.y;
+            this.positionObjectDirectly(mobile, left, top);
+            box.l += box.w - cbox.w;
+            box.t += box.h - cbox.h;
+            return box;
+          },
+      
+          positionObjectDirectly: function(mobileObj, x, y) {
+            // do not remove this "dead" code some-how it makes difference
+            dojo.style(mobileObj, 'left'); // bug? re-compute style
+            // console.log("place " + x + "," + y);
+            dojo.style(mobileObj, {
+              left: x + 'px',
+              top: y + 'px',
+            });
+            dojo.style(mobileObj, 'left'); // bug? re-compute style
+          },
+      
                 /**
          * This method will remove all inline style added to element that affect positioning
          */
@@ -1173,7 +1323,6 @@ function (dojo, declare) {
          */
         notif_cardCollected: function(notif) {
             const id = notif.args.id;
-
             const collector_div = this.getCollectorTableau();
             const clueid = 'cluecard_'+id;
             const cluecard = $(clueid);
@@ -1182,25 +1331,16 @@ function (dojo, declare) {
                 cluecard.removeEventListener(e, f);
             });
             delete this.listeners[clueid];
-            this.slide(cluecard, collector_div, {phantom: true});
+            this.slide(cluecard, collector_div, {phantom: true}).then(() => {
+                    // turn it into a collector card
+                    Object.assign(cluecard.style, {
+                        'cursor' : "initial",
+                        'transform' : null,
+                    });
 
-            // const clueparent = cluecard.parentNode;
-            // const slider = cluecard.cloneNode();
-            // const collectorcard = clueparent.removeChild(cluecard);
-            // // show movement
-            // const cardno = $(collector_div).childElementCount;
-
-            // this.slideToObjectPos( slider, collector_div, cardno*this.cluecardwidth, 0, 5000, 50000 ).play();
-            // this.fadeOutAndDestroy(slider, 1000, 1000);
-            // $(collector_div).appendChild(collectorcard);
-
-            // turn it into a collector card
-            Object.assign(cluecard.style, {
-                'cursor' : "initial",
-                'transform' : null,
-            });
-
-            cluecard.id = 'collector_'+id;
+                    cluecard.id = 'collector_'+id;
+                }
+            );
         },
 
         /**
@@ -1211,10 +1351,12 @@ function (dojo, declare) {
             const type = parseInt(notif.args.type);
             const arg = parseInt(notif.args.arg);
             const id = notif.args.id;
-            this.slideToObjectAndDestroy('cluecard_'+id, 'cluediscard', 1000);
 
-            const dnum = this.createDiscardCard(type, arg);
-            this.decorateDiscardPile(dnum);
+            this.slide('cluecard_'+id, 'cluediscard', {phantomStart: true, phantomEnd: false, destroy: true}).then(() => {
+                const dnum = this.createDiscardCard(type, arg);
+                this.decorateDiscardPile(dnum);
+            });
+
         },
 
         /**
