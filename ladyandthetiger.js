@@ -419,29 +419,6 @@ function (dojo, declare) {
             this.decorateClueCard(id, type, type_arg);
         },
 
-        // /**
-        //  * Create a Stock item with clue cards.
-        //  * @param {string} id 
-        //  * @returns Stock item
-        //  */
-        // createCardStockRow: function(id) {
-        //     var pile = new ebg.stock();
-        //     pile.create(this, $(id), this.cluecardwidth, this.cluecardheight );
-        //     pile.setSelectionMode(0);
-        //     pile.image_items_per_row = 6;
-        //     pile.onItemCreate = dojo.hitch(this, this.setUpClueCard);
-        //     pile.autowidth = true;
-
-        //     for (let i = 0; i < 3; i++) {
-        //         for (let type of [RED+TIGER, BLUE+TIGER, RED+LADY, BLUE+LADY]) {
-        //             pile.addItemType( CARD_TYPE_TO_POS[type][i], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[type][i] );
-        //         }
-        //     }
-        //     pile.addItemType( CARD_TYPE_TO_POS[REDBLUE][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[REDBLUE][0] );
-        //     pile.addItemType( CARD_TYPE_TO_POS[LADYTIGER][0], 0, g_gamethemeurl+CARD_SPRITES, CARD_TYPE_TO_POS[LADYTIGER][0] );
-        //     return pile;
-        // },
-
         /**
          * At start of new contest. Move cards in discard pile, clue display, and collectors tableau back to dek.
          * Animate 'dealing new cards.
@@ -463,17 +440,21 @@ function (dojo, declare) {
             const tableau = (myrole == COLLECTOR) ? 'tableau_n' : 'tableau_s';
             const collection = $(tableau);
             // move cards from Collector display to Deck
-            while (collection.firstChild) {
-                this.slideToObjectAndDestroy(collection.firstChild, cluedeck, 800, 800);
-                collection.firstChild.remove();
+            for (let i = 0; i < collection.children.length; i++) {
+                const ch = collection.children[i];
+                this.slide(ch, cluedeck, {phantom: true, destroy: true});
             }
 
             // move cards from Clue display to Deck
             for (let s = 0; s < 4; s++) {
                 const cluecard = $('clue_slot_'+s).firstChild;
-                this.slideToObjectAndDestroy(cluecard.id, cluedeck, 800, 800);
+                const prom = this.slide(cluecard, cluedeck, {phantom: true, destroy: true});
+                if (s == 3) {
+                    prom.then(() => {
+                        this.setupClueDisplay(decksize, cluecards);
+                    })
+                }
             }
-            this.setupClueDisplay(decksize, cluecards);
         },
 
          ///////////////////////////////////////////////////
