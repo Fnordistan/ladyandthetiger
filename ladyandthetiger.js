@@ -83,8 +83,6 @@ function (dojo, declare) {
         */
         
         setup: function( gamedatas ) {
-            this.listeners = {};
-
             const collector = this.gamedatas.collector;
             const guesser = this.gamedatas.guesser;
             this.setupPlayerTableaus(collector, guesser, this.gamedatas.collectorcards);
@@ -98,8 +96,6 @@ function (dojo, declare) {
             this.setupClueDisplay(decksize, cluecards);
             const discards = this.gamedatas.discards;
             this.setupDiscard(discards);
-
-
             this.setupNotifications();
         },
 
@@ -153,11 +149,14 @@ function (dojo, declare) {
                 collector_t = 'tableau_n';
             }
 
-            $(guesser_t).classList.remove('ltdr_tableau');
-            $(guesser_t).style['display'] = 'none';
-            $(guesser_d).style['width'] = 'fit-content';
+            $(guesser_t).classList.remove("ltdr_collector");
+            $(guesser_t).classList.add("ltdr_guesser");
+            $(guesser_d).style['width'] = "fit-content";
 
+            $(collector_t).classList.remove("ltdr_guesser");
+            $(collector_t).classList.add("ltdr_collector");
             $(collector_d).style['width'] = '100%';
+
             this.setupCollectorDisplay(collector_t, collectorcards);
         },
 
@@ -224,29 +223,15 @@ function (dojo, declare) {
 
         /**
          * For clue cards in cluedisplay, add Event listeners and tooltip.
-         * @param {string} id 
-         * @param {int} type 
-         * @param {int} arg 
+         * @param {Object} element
          */
-        decorateClueCard: function(id, type, arg) {
-            const cluecard = 'cluecard_'+id;
+        decorateClueCard: function(cluecard) {
+            this.connect(cluecard, 'click', this.onClueCardSelected);
+            this.connect(cluecard, 'mouseenter', this.onClueCardHover);
+            this.connect(cluecard, 'mouseleave', this.onClueCardUnhover);
 
-            const selector = () => this.onClueCardSelected(id, type, arg);
-            const hover = () => this.onClueCardHover(id, true);
-            const unhover = () => this.onClueCardHover(id, false);
-
-            $(cluecard).addEventListener('click', selector);
-            $(cluecard).addEventListener('mouseenter', hover);
-            $(cluecard).addEventListener('mouseout', unhover);
-            const mylisteners = {
-                'click' : selector,
-                'mouseenter' : hover,
-                'mouseout' : unhover
-            };
-            this.listeners[cluecard] = mylisteners;
-
-            const pos = CARD_TYPE_TO_POS[type][arg];
-            this.addTooltipHtml(cluecard, this.createTooltipHtml(pos), '');
+            const pos = CARD_TYPE_TO_POS[cluecard.dataset.type][cluecard.dataset.arg];
+            this.addTooltipHtml(cluecard.id, this.createTooltipHtml(pos), '');
         },
 
         /**
@@ -339,7 +324,7 @@ function (dojo, declare) {
          */
         createClueCard: function(location, id, type, arg) {
             const position = this.clueSpritePos(type, arg);
-            const card_html = this.format_block('jstpl_cluecard', {board: location, id: id, x: position.x, y: position.y});
+            const card_html = this.format_block('jstpl_cluecard', {board: location, id: id, x: position.x, y: position.y, dtype: type, darg: arg});
             return card_html;
         },
 
@@ -416,43 +401,48 @@ function (dojo, declare) {
             }
 
             card.style['transition'] = 'transform 0.5s';
-            this.decorateClueCard(id, type, type_arg);
+            this.decorateClueCard(card);
         },
 
         /**
          * At start of new contest. Move cards in discard pile, clue display, and collectors tableau back to dek.
          * Animate 'dealing new cards.
+         * Note that it assumes gamedatas.collector and gamedatas.guesser have been updated.
          * @param {int} decksize 
          * @param {array} cluecards 
-         * @param {id} oldcollector player_id of collector
          */
-        refreshClueDisplay: function(decksize, cluecards, oldcollector) {
+        refreshClueDisplay: function(decksize, cluecards) {
             // move cards from Discard pile to Deck
             const cluedeck = $('cluedeck');
-            const discard = $('cluediscard');
-            while (discard.lastChild) {
-                this.slideToObject(discard.lastChild, cluedeck, 1000, 1000);
-                discard.lastChild.remove();
+            const discarddeck = $('cluediscard');
+            for (let d = 0; d < discarddeck.children.length; d++) {
+                const discard = discarddeck.children[d];
+                this.slide(discard, cluedeck, {phantom: true, destroy: true});
             }
             this.addTooltip('cluediscard', '', '');
 
-            const myrole = (this.isSpectator) ? COLLECTOR : (this.player_id == oldcollector) ? COLLECTOR : GUESSER;
+            // move cards from Collector display to Deck
+            const myrole = (this.isSpectator) ? COLLECTOR : (this.player_id == this.gamedatas.collector) ? COLLECTOR : GUESSER;
             const tableau = (myrole == COLLECTOR) ? 'tableau_n' : 'tableau_s';
             const collection = $(tableau);
-            // move cards from Collector display to Deck
             for (let i = 0; i < collection.children.length; i++) {
                 const ch = collection.children[i];
                 this.slide(ch, cluedeck, {phantom: true, destroy: true});
             }
 
-            // move cards from Clue display to Deck
+            // move cards from Clue display to Deck,
+            // and deal out new clue cards
             for (let s = 0; s < 4; s++) {
                 const cluecard = $('clue_slot_'+s).firstChild;
-                const prom = this.slide(cluecard, cluedeck, {phantom: true, destroy: true});
-                if (s == 3) {
-                    prom.then(() => {
-                        this.setupClueDisplay(decksize, cluecards);
-                    })
+                if (cluecard != null) {
+                    const prom = this.slide(cluecard, cluedeck, {phantom: true, destroy: true});
+                    // hook setting up new clues to the last cluecard
+                    // remember one will be null because it was the last card chosen!
+                    if (s == 3 || (s == 2 && $('clue_slot_3').firstChild == null)) {
+                        prom.then(() => {
+                            this.setupClueDisplay(decksize, cluecards);
+                        })
+                    }
                 }
             }
         },
@@ -701,26 +691,42 @@ function (dojo, declare) {
         /**
          * onClueCardSelected:
          * Hooked to selection of a clue card.
-         * @param {int} int
-         * @param {int} type 
-         * @param {int} arg 
+         * @param {Object} evt
          */
-         onClueCardSelected: function(id, type, arg ) {
+         onClueCardSelected: function(evt) {
+            const cluecard = evt.currentTarget;
             if (this.checkAction("collectCard", true)) {
-                this.collectCard(id, type, arg);
+                this.collectCard(cluecard);
             } else if (this.checkAction("discardCard", true)) {
-                this.discardCard(type, arg);
+                this.discardCard(cluecard);
             }
         },
 
         /**
-         * For cluecards, hover and unhover effects.
-         * @param {string} id 
-         * @param {bool} hover 
+         * Hover effect
+         * @param {Object} evt
          */
-        onClueCardHover: function(id, hover) {
+        onClueCardHover: function(evt) {
+            const cluecard = evt.currentTarget;
+            this.clueCardHover(cluecard, true);
+        },
+
+        /**
+         * Unhover effect
+         * @param {Object} evt
+         */
+         onClueCardUnhover: function(evt) {
+            const cluecard = evt.currentTarget;
+            this.clueCardHover(cluecard, false);
+        },
+
+        /**
+         * Wrapped method
+         * @param {*} card 
+         * @param {*} hover 
+         */
+        clueCardHover: function(card, hover) {
             if (this.checkAction("collectCard", true) || this.checkAction("discardCard", true)) {
-                const card = $('cluecard_'+id);
                 card.style['cursor'] = hover ? 'grab' : 'default';
                 card.style['transform'] = hover ? 'scale(1.05)' : '';
             }
@@ -871,7 +877,6 @@ function (dojo, declare) {
                 from: null,
                 clearPos: true,
                 beforeBrother: null,
-      
                 phantom: false,
               },
               options,
@@ -1103,15 +1108,13 @@ function (dojo, declare) {
 
         /**
          * Action to collect a card.
-         * @param {int} id
-         * @param {int} type 
-         * @param {int} arg 
+         * @param {Object} card
          */
-        collectCard: function(id, type, arg) {
+        collectCard: function(card) {
             if (this.checkAction("collectCard", true)) {
                 this.ajaxcall( "/ladyandthetiger/ladyandthetiger/collect.html", { 
-                    card_type: type,
-                    card_arg: arg,
+                    card_type: card.dataset.type,
+                    card_arg: card.dataset.arg,
                     lock: true 
                 }, this, function( result ) {  }, function( is_error) { } );
             }
@@ -1119,14 +1122,13 @@ function (dojo, declare) {
 
         /**
          * Action to discard a card.
-         * @param {int} type 
-         * @param {int} arg 
+         * @param {Object} card
          */
-         discardCard: function(type, arg) {
+         discardCard: function(card) {
             if (this.checkAction("discardCard", true)) {
                 this.ajaxcall( "/ladyandthetiger/ladyandthetiger/discard.html", { 
-                    card_type: type,
-                    card_arg: arg,
+                    card_type: card.dataset.type,
+                    card_arg: card.dataset.arg,
                     lock: true 
                 }, this, function( result ) {  }, function( is_error) { } );
             }
@@ -1293,9 +1295,13 @@ function (dojo, declare) {
             const cluecards = notif.args.cluecards;
             const collector = parseInt(notif.args.collector);
             const guesser = parseInt(notif.args.guesser);
-            // passing guesser because right now display is still formerly guesser
-            this.refreshClueDisplay(decksize, cluecards, guesser);
+
+            // reset gamedatas, used in refresh
+            this.gamedatas.collector = collector;
+            this.gamedatas.guesser = guesser;
+
             this.setupPlayerTableaus(collector, guesser, []);
+            this.refreshClueDisplay(decksize, cluecards);
         },
 
         /**
@@ -1305,20 +1311,22 @@ function (dojo, declare) {
         notif_cardCollected: function(notif) {
             const id = notif.args.id;
             const collector_div = this.getCollectorTableau();
-            const clueid = 'cluecard_'+id;
-            const cluecard = $(clueid);
+            const cluecard = $('cluecard_'+id);
 
-            Object.entries(this.listeners[clueid]).forEach(([e,f]) => {
-                cluecard.removeEventListener(e, f);
-            });
-            delete this.listeners[clueid];
+            this.disconnect(cluecard, 'click');
+            this.disconnect(cluecard, 'mouseenter');
+            this.disconnect(cluecard, 'mouseleave');
+
+            // console.log("%o sent to %s", cluecard, collector_div);
+            // debugger;
+            // const div = $(collector_div);
+
             this.slide(cluecard, collector_div, {phantom: true}).then(() => {
                     // turn it into a collector card
                     Object.assign(cluecard.style, {
                         'cursor' : "initial",
                         'transform' : null,
                     });
-
                     cluecard.id = 'collector_'+id;
                 }
             );
