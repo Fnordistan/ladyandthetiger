@@ -149,23 +149,17 @@ function (dojo, declare) {
             let guesser_d, collector_d;
             if (myrole == GUESSER) {
                 guesser_d = 'player_north';
-                // guesser_t = 'tableau_n';
                 collector_d = 'player_south';
-                // collector_t = 'tableau_s';
             } else {
                 guesser_d = 'player_south';
-                // guesser_t = 'tableau_s';
                 collector_d = 'player_north';
-                // collector_t = 'tableau_n';
             }
 
             $(guesser_d).classList.remove("ltdr_collector");
             $(guesser_d).classList.add("ltdr_guesser");
-            $(guesser_d).style['width'] = "fit-content";
 
             $(collector_d).classList.remove("ltdr_guesser");
             $(collector_d).classList.add("ltdr_collector");
-            $(collector_d).style['width'] = '100%';
 
             this.setupCollectorDisplay(collector_d, collectorcards);
         },
