@@ -146,28 +146,28 @@ function (dojo, declare) {
 
             this.addTooltip(hisrolecard.id, hisroletooltip, '');
 
-            let guesser_d, collector_d, guesser_t, collector_t;
+            let guesser_d, collector_d;
             if (myrole == GUESSER) {
                 guesser_d = 'player_north';
-                guesser_t = 'tableau_n';
+                // guesser_t = 'tableau_n';
                 collector_d = 'player_south';
-                collector_t = 'tableau_s';
+                // collector_t = 'tableau_s';
             } else {
                 guesser_d = 'player_south';
-                guesser_t = 'tableau_s';
+                // guesser_t = 'tableau_s';
                 collector_d = 'player_north';
-                collector_t = 'tableau_n';
+                // collector_t = 'tableau_n';
             }
 
-            $(guesser_t).classList.remove("ltdr_collector");
-            $(guesser_t).classList.add("ltdr_guesser");
+            $(guesser_d).classList.remove("ltdr_collector");
+            $(guesser_d).classList.add("ltdr_guesser");
             $(guesser_d).style['width'] = "fit-content";
 
-            $(collector_t).classList.remove("ltdr_guesser");
-            $(collector_t).classList.add("ltdr_collector");
+            $(collector_d).classList.remove("ltdr_guesser");
+            $(collector_d).classList.add("ltdr_collector");
             $(collector_d).style['width'] = '100%';
 
-            this.setupCollectorDisplay(collector_t, collectorcards);
+            this.setupCollectorDisplay(collector_d, collectorcards);
         },
 
         /**
@@ -361,8 +361,7 @@ function (dojo, declare) {
          * @param {array} collectorcards
          */
          setupCollectorDisplay: function(collector_id, collectorcards) {
-            const collector_tableau = document.getElementById(collector_id);
-            collector_tableau.classList.add('ltdr_tableau');
+            const collector_tableau = $(collector_id);
 
             // now add the ones actually on display
             const cards = Object.keys(collectorcards).sort((a,b) => collectorcards[a].location_arg - collectorcards[b].location_arg);
@@ -406,15 +405,15 @@ function (dojo, declare) {
                 }
                 card.style.position = "absolute";
                 this.slide(card, slot_id, {phantom: true}).then(() => {
+                    card.style.position = "relative";
                     if (ch) {
                         ch.style.display = 'initial';
                     }
-                    card.style.position = "relative";
                 });
             }
             card.style['transition'] = 'transform 0.5s';
             this.decorateClueCard(card);
-    },
+        },
 
         /**
          * At start of new contest. Move cards in discard pile, clue display, and collectors tableau back to dek.

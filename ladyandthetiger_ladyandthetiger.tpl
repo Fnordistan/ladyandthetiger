@@ -22,7 +22,7 @@
         </div>
       </div>
     </div>
-    <div id="tableau_n"></div>
+    <!-- <div id="tableau_n"></div> -->
   </div>
 
   <div id="center_display" class="whiteblock">
@@ -50,7 +50,7 @@
         </div>
       </div>
     </div>
-    <div id="tableau_s"></div>
+    <!-- <div id="tableau_s"></div> -->
   </div>
  
 </div>

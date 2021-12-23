@@ -137,9 +137,9 @@
   top: 40px;
 }
 
-.ltdr_guesser {
+/* .ltdr_guesser {
   display: none;
-}
+} */
 
 /* Role label and card container */
 .ltdr_rolecontainer {
@@ -212,7 +212,7 @@
   position: relative;
   width: var(--cluecardwidth);
   height: var(--cluecardheight);
-  margin: auto;
+  /* margin: auto; */
 }
 
 .ltdr_cardback {
