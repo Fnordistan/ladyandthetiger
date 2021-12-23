@@ -39,6 +39,16 @@ const CARD_TYPE_TO_POS = [
     /** LADYTIGER */    [6]
 ];
 
+const CARD_TYPE_TO_TRAITS = {
+    0: [],
+    1: ["blue", "lady"],
+    2: ["red", "lady"],
+    3: ["blue", "tiger"],
+    4: ["red", "tiger"],
+    5: ["red", "blue"],
+    6: ["lady", "tiger"],
+};
+
 const RED_TYPES = [4, 8, 9, 5, 10, 11, 7];
 const BLUE_TYPES = [0, 13, 14, 1, 2, 3, 7];
 const LADY_TYPES = [0, 13, 14, 4, 8, 9, 6];
@@ -230,7 +240,7 @@ function (dojo, declare) {
             this.connect(cluecard, 'mouseenter', this.onClueCardHover);
             this.connect(cluecard, 'mouseleave', this.onClueCardUnhover);
 
-            const pos = CARD_TYPE_TO_POS[cluecard.dataset.type][cluecard.dataset.arg];
+            const pos = CARD_TYPE_TO_POS[toint(cluecard.dataset.type)][toint(cluecard.dataset.arg)];
             this.addTooltipHtml(cluecard.id, this.createTooltipHtml(pos), '');
         },
 
@@ -595,24 +605,6 @@ function (dojo, declare) {
         },
 
         /**
-         * Return a tuple of two arrays of types corresponding to types.
-         * @param {int} value 
-         * @returns two-member array
-         */
-        getAttributesByValue: function(value) {
-            if (value == BLUE+LADY) {
-                return [BLUE_TYPES, LADY_TYPES];
-            } else if (value == RED+LADY) {
-                return [RED_TYPES, LADY_TYPES];
-            } else if (value == BLUE+TIGER) {
-                return [BLUE_TYPES, TIGER_TYPES];
-            } else if (value == RED+TIGER) {
-                return [RED_TYPES, TIGER_TYPES];
-            }
-            throw new Error("Invalid card identity: " + value);
-        },
-
-        /**
          * Given a card id, get the name string.
          * @param {int} id 
          * @returns name of card
@@ -819,32 +811,34 @@ function (dojo, declare) {
          * @returns true if four or more matching a trait
          */
         matchSet: function() {
-            const myrolecard = document.getElementById('role_n');
-            var identity = 0;
+            const myrolecard = $('role_n');
+            let traits = [];
             if (myrolecard.classList.contains("ltdr_bluetiger")) {
-                identity = BLUE+TIGER;
+                traits = ["blue", "tiger"];
             } else if (myrolecard.classList.contains("ltdr_redtiger")) {
-                identity = RED+TIGER;
+                traits = ["red", "tiger"];
             } else if (myrolecard.classList.contains("ltdr_bluelady")) {
-                identity = BLUE+LADY;
+                traits = ["blue", "lady"];
             } else if (myrolecard.classList.contains("ltdr_redlady")) {
-                identity = RED+LADY;
+                traits = ["red", "lady"];
             }
-            const traits = this.getAttributesByValue(identity);
 
-            const collection = document.getElementById('tableau_s');
+            const collection = $('tableau_s');
 
             if (collection.childElementCount >= 4) {
                 for (let t of traits) {
                     var m = 0;
-                    [...collection.childNodes].forEach(c => {
-                        if (t.includes(c.type)) {
+                    for (let c = 0; c < collection.children.length; c++) {
+                        const card = collection.children[c];
+                        const cardtype = card.dataset.type;
+                        const card_traits = CARD_TYPE_TO_TRAITS[cardtype];
+                        if (card_traits.includes(t)) {
                             m++;
                             if (m >= 4) {
                                 return true;
                             }
                         }
-                    });
+                    }
                 }
             }
             return false;
@@ -997,112 +991,6 @@ function (dojo, declare) {
             dojo.style(mobileObj, 'left'); // bug? re-compute style
           },
       
-                /**
-         * This method will remove all inline style added to element that affect positioning
-         */
-                 stripPosition: function (token) {
-                    // remove any added positioning style
-                    token = $(token);
-        
-                    token.style.removeProperty("display");
-                    token.style.removeProperty("top");
-                    token.style.removeProperty("bottom");
-                    token.style.removeProperty("left");
-                    token.style.removeProperty("right");
-                    token.style.removeProperty("position");
-                    // dojo.style(token, "transform", null);
-                },
-                /**
-                 * This method will attach mobile to a new_parent without destroying, unlike original attachToNewParent which destroys mobile and
-                 * all its connectors (onClick, etc)
-                 */
-                attachToNewParentNoDestroy: function (mobile_in, new_parent_in, relation, place_position) {
-                    //console.log("attaching ",mobile,new_parent,relation);
-                    const mobile = $(mobile_in);
-                    const new_parent = $(new_parent_in);
-        
-                    var src = dojo.position(mobile);
-                    if (place_position)
-                        mobile.style.position = place_position;
-                    dojo.place(mobile, new_parent, relation);
-                    mobile.offsetTop;//force re-flow
-                    var tgt = dojo.position(mobile);
-                    var box = dojo.marginBox(mobile);
-                    var cbox = dojo.contentBox(mobile);
-                    var left = box.l + src.x - tgt.x;
-                    var top = box.t + src.y - tgt.y;
-        
-                    mobile.style.position = "absolute";
-                    mobile.style.left = left + "px";
-                    mobile.style.top = top + "px";
-                    box.l += box.w - cbox.w;
-                    box.t += box.h - cbox.h;
-                    mobile.offsetTop;//force re-flow
-                    return box;
-                },
-        
-                /**
-                 * This method is similar to slideToObject but works on object which do not use inline style positioning. It also attaches object to
-                 * new parent immediately, so parent is correct during animation
-                 * 
-                 * @param {*} token 
-                 * @param {*} finalPlace 
-                 * @param {*} duration 
-                 * @param {*} delay 
-                 * @param {*} onEnd 
-                 * @param {*} relation 
-                 */
-                slideToObjectRelative: function (token, finalPlace, duration, delay, onEnd, relation) {
-                    token = $(token);
-                    this.delayedExec(() => {
-                        var box = this.attachToNewParentNoDestroy(token, finalPlace, relation, 'static');
-                        token.offsetHeight; // re-flow
-                        token.style.left = box.l + "px";
-                        token.style.top = box.t + "px";
-                    }, () => {
-                        this.stripPosition(token);
-                        if (onEnd) onEnd(token);
-                    }, duration, delay);
-                },
-
-                slideToObjectAbsolute: function (token, finalPlace, x, y, duration, delay, onEnd, relation) {
-                    token = $(token);
-                    this.delayedExec(() => {
-                        this.attachToNewParentNoDestroy(token, finalPlace, relation, 'absolute');
-                        token.offsetHeight; // re-flow
-                        token.style.left = x + "px";
-                        token.style.top = y + "px";
-                    }, () => {
-                        if (onEnd) onEnd(token);
-                    }, duration, delay);
-                },
-
-                delayedExec: function (onStart, onEnd, duration, delay) {
-                    if (typeof duration == "undefined") {
-                        duration = this.defaultAnimationDuration;
-                    }
-                    if (typeof delay == "undefined") {
-                        delay = 0;
-                    }
-                    if (this.instantaneousMode) {
-                        delay = Math.min(1, delay);
-                        duration = Math.min(1, duration);
-                    }
-                    if (delay) {
-                        setTimeout(function () {
-                            onStart();
-                            if (onEnd) {
-                                setTimeout(onEnd, duration);
-                            }
-                        }, delay);
-                    } else {
-                        onStart();
-                        if (onEnd) {
-                            setTimeout(onEnd, duration);
-                        }
-                    }
-                },
-        
         ///////////////////////////////////////////////////
         //// Ajax calls
 
@@ -1316,10 +1204,6 @@ function (dojo, declare) {
             this.disconnect(cluecard, 'click');
             this.disconnect(cluecard, 'mouseenter');
             this.disconnect(cluecard, 'mouseleave');
-
-            // console.log("%o sent to %s", cluecard, collector_div);
-            // debugger;
-            // const div = $(collector_div);
 
             this.slide(cluecard, collector_div, {phantom: true}).then(() => {
                     // turn it into a collector card
