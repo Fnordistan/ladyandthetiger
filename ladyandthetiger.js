@@ -129,15 +129,15 @@ function (dojo, declare) {
             const hisrole = (myrole == COLLECTOR) ? GUESSER : COLLECTOR;
             const hiscolor = (hisrole == COLLECTOR) ? collectorColor : guesserColor;
 
-            const role_n = document.getElementById('rolename_n');
+            const role_n = $('rolename_n');
             role_n.innerHTML = (myrole == COLLECTOR) ? CollectorTr : GuesserTr;
             role_n.style['color'] = '#'+mycolor;
 
-            const role_s = document.getElementById('rolename_s');
+            const role_s = $('rolename_s');
             role_s.innerHTML = (hisrole == COLLECTOR) ? CollectorTr : GuesserTr;
             role_s.style['color'] = '#'+hiscolor;
 
-            const hisrolecard = document.getElementById('role_s');
+            const hisrolecard = $('role_s');
             hisrolecard.classList.add('ltdr_door');
             let doortext = _('${role} is behind this door');
             doortext = doortext.replace('${role}', hisrole == COLLECTOR ? CollectorTr : GuesserTr);
@@ -434,9 +434,9 @@ function (dojo, declare) {
             this.addTooltip('cluediscard', '', '');
 
             // move cards from Collector display to Deck
-            const collection = document.getElementsByClassName("ltdr_collector")[0];
-            for (let i = 0; i < collection.children.length; i++) {
-                const ch = collection.children[i];
+            const collection = this.getCollectedCards();
+            for (let i = 0; i < collection.length; i++) {
+                const ch = collection[i];
                 ch.style.position = "absolute";
                 this.slide(ch, cluedeck, {phantom: true, destroy: true, delay: i*400});
             }
@@ -651,9 +651,7 @@ function (dojo, declare) {
          * Get HTML id of Collector's tableau
          */
         getCollectorTableau: function() {
-            const collector = this.gamedatas.collector;
-            const id = (this.isSpectator) ? 'tableau_n' : (this.player_id == collector) ? 'tableau_n' : 'tableau_s';
-            return id;
+            return document.getElementsByClassName("ltdr_collector")[0];
         },
 
         /**
@@ -682,6 +680,27 @@ function (dojo, declare) {
 
             const door_inner = document.getElementById('inner_'+dir);
             door_inner.style['transform'] = 'rotateY(180deg)';
+        },
+
+        /**
+         * Make the door div a Door image
+         * @param {string} d "n" or "s"
+         */
+         makeDoor: function(d) {
+            const door = $('inner_'+d);
+            door.style['transform'] = '';
+            const cardback = $('flip_'+d);
+            cardback.classList.remove(...IDENTITY_CLASSES);
+        },
+
+        /**
+         * Get collection of the cluecard HTML elements in the Collector's tableau
+         * @returns a DOM collection
+         */
+        getCollectedCards: function() {
+            const collector = this.getCollectorTableau();
+            const collection = collector.getElementsByClassName("ltdr_cluecard");
+            return collection;
         },
 
         ///////////////////////////////////////////////////
@@ -830,13 +849,13 @@ function (dojo, declare) {
                 traits = ["red", "lady"];
             }
 
-            const collection = $('tableau_s');
+            const collection = this.getCollectedCards();
 
-            if (collection.childElementCount >= 4) {
+            if (collection.length >= 4) {
                 for (let t of traits) {
                     var m = 0;
-                    for (let c = 0; c < collection.children.length; c++) {
-                        const card = collection.children[c];
+                    for (let c = 0; c < collection.length; c++) {
+                        const card = collection[c];
                         const cardtype = card.dataset.type;
                         const card_traits = CARD_TYPE_TO_TRAITS[cardtype];
                         if (card_traits.includes(t)) {
@@ -1075,15 +1094,9 @@ function (dojo, declare) {
             switch( stateName )
             {
                 case 'assignRoles':
-                    const door_south = document.getElementById('inner_s');
-                    door_south.style['transform'] = '';
-                    const cardback_s = document.getElementById('flip_s');
-                    cardback_s.classList.remove(...IDENTITY_CLASSES);
+                    this.makeDoor("s");
                     if (this.isSpectator) {
-                        const door_north = document.getElementById('inner_n');
-                        door_north.style['transform'] = '';
-                        const cardback_n = document.getElementById('flip_n');
-                        cardback_n.classList.remove(...IDENTITY_CLASSES);
+                        this.makeDoor("n");
                     }
                 break;
             case 'dummmy':
