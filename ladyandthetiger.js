@@ -111,7 +111,7 @@ function (dojo, declare) {
 
         /**
          * Set up Collector and Guesser boards and Role cards.
-         * Make both Doors for Spectator.
+         * Make both Doors for Spectator. This is where collector and guesser tableaus get assigned.
          * @param {int} collector player_id
          * @param {int} guesser player_id
          * @param {array} collectorcards
@@ -199,9 +199,9 @@ function (dojo, declare) {
          * @param {int} decksize
          * @param {Object} cluecards
          */
-        setupClueDisplay: function(decksize, cluecards) {
+        setupClueDisplay: function(decksize, cluecards, slide=false) {
             this.createClueDeck(decksize);
-            this.createClueDisplay(cluecards);
+            this.createClueDisplay(cluecards, slide);
         },
 
         /**
@@ -222,12 +222,13 @@ function (dojo, declare) {
 
         /**
          * Set up clue cards display
-         * @param {Array} cluecards 
+         * @param {Array} cluecards
+         * @param {bool} slide
          */
-        createClueDisplay: function(cluecards) {
+        createClueDisplay: function(cluecards, slide) {
             for (const c in cluecards) {
                 const cc = cluecards[c];
-                this.placeClueDisplayCard(cc.location_arg, cc.id, cc.type, cc.type_arg);
+                this.placeClueDisplayCard(cc.location_arg, cc.id, cc.type, cc.type_arg, slide);
             }
         },
 
@@ -403,16 +404,17 @@ function (dojo, declare) {
                 if (ch) {
                     ch.style.display = 'none';
                 }
+                card.style.position = "absolute";
                 this.slide(card, slot_id, {phantom: true}).then(() => {
                     if (ch) {
                         ch.style.display = 'initial';
                     }
+                    card.style.position = "relative";
                 });
             }
-
             card.style['transition'] = 'transform 0.5s';
             this.decorateClueCard(card);
-        },
+    },
 
         /**
          * At start of new contest. Move cards in discard pile, clue display, and collectors tableau back to dek.
@@ -427,30 +429,36 @@ function (dojo, declare) {
             const discarddeck = $('cluediscard');
             for (let d = 0; d < discarddeck.children.length; d++) {
                 const discard = discarddeck.children[d];
-                this.slide(discard, cluedeck, {phantom: true, destroy: true});
+                discard.style.position = "absolute";
+                this.slide(discard, cluedeck, {phantom: true, destroy: true, delay: d*400});
             }
             this.addTooltip('cluediscard', '', '');
 
             // move cards from Collector display to Deck
-            const myrole = (this.isSpectator) ? COLLECTOR : (this.player_id == this.gamedatas.collector) ? COLLECTOR : GUESSER;
-            const tableau = (myrole == COLLECTOR) ? 'tableau_n' : 'tableau_s';
-            const collection = $(tableau);
+            const collection = document.getElementsByClassName("ltdr_collector")[0];
             for (let i = 0; i < collection.children.length; i++) {
                 const ch = collection.children[i];
-                this.slide(ch, cluedeck, {phantom: true, destroy: true});
+                ch.style.position = "absolute";
+                this.slide(ch, cluedeck, {phantom: true, destroy: true, delay: i*400});
             }
 
             // move cards from Clue display to Deck,
             // and deal out new clue cards
+            let cluect = 0;
             for (let s = 0; s < 4; s++) {
                 const cluecard = $('clue_slot_'+s).firstChild;
                 if (cluecard != null) {
-                    const prom = this.slide(cluecard, cluedeck, {phantom: true, destroy: true});
+                    cluecard.style.position = "absolute";
+                    const prom = this.slide(cluecard, cluedeck, {phantom: true, destroy: true, delay: cluect*400});
+                    cluect++;
                     // hook setting up new clues to the last cluecard
                     // remember one will be null because it was the last card chosen!
-                    if (s == 3 || (s == 2 && $('clue_slot_3').firstChild == null)) {
+                    if (cluect == 2) {
                         prom.then(() => {
-                            this.setupClueDisplay(decksize, cluecards);
+                            setTimeout(() => {
+                                this.setupClueDisplay(decksize, cluecards, true);    
+                            }, 1200);
+                            
                         })
                     }
                 }
@@ -1188,8 +1196,8 @@ function (dojo, declare) {
             this.gamedatas.collector = collector;
             this.gamedatas.guesser = guesser;
 
-            this.setupPlayerTableaus(collector, guesser, []);
             this.refreshClueDisplay(decksize, cluecards);
+            this.setupPlayerTableaus(collector, guesser, []);
         },
 
         /**
