@@ -347,10 +347,10 @@
 
 #center_display {
   display: grid;
-  grid-template-columns: minmax(min-content, max-content) auto minmax(min-content, max-content);
+  grid-template-columns: minmax(min-content, max-content) fit-content minmax(min-content, max-content);
   align-items:center;
   column-gap: 5px;
-  width: max-content;
+  width: 100%;
   min-height: 430px;
 }
 
@@ -367,6 +367,7 @@
   justify-content: flex-start;
   align-items: flex-end;
   align-content: flex-start;
+  height: 100%;
 }
 
 #discardcontainer {
@@ -378,27 +379,12 @@
   margin: 5px;
 }
 
-/* @media only screen and (max-width: 1630px) {
-  #center_display {
-    background-color: blue;
-    grid-template-columns: minmax(min-content, max-content) repeat(4, var(--cluecardwidth));
-    grid-template-rows: repeat(2, max-content);
-  }
-
-  #discardcontainer {
-    grid-row: 2/3;
-    grid-column: 1/2;
-  }
-
-} */
-
-
 @media only screen and (max-width: 1400px) {
   #center_display {
-    background-color: red;
     grid-template-columns: minmax(min-content, max-content) minmax(456px, fit-content);
     grid-template-rows: repeat(2, max-content);
   }
+
   #cluecontainer {
     grid-row: 1/3;
     grid-column: 2/3;
