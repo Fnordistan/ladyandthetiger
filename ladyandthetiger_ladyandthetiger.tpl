@@ -22,7 +22,6 @@
         </div>
       </div>
     </div>
-    <!-- <div id="tableau_n"></div> -->
   </div>
 
   <div id="center_display" class="whiteblock">
@@ -30,10 +29,12 @@
       <h1 id="deckcount"></h1>
       <div id="cluedeck"></div>
     </div>
-    <div id="clue_slot_0" class="ltdr_clue_slot"></div>
-    <div id="clue_slot_1" class="ltdr_clue_slot"></div>
-    <div id="clue_slot_2" class="ltdr_clue_slot"></div>
-    <div id="clue_slot_3" class="ltdr_clue_slot"></div>
+    <div id="cluecontainer">
+      <div id="clue_slot_0" class="ltdr_clue_slot"></div>
+      <div id="clue_slot_1" class="ltdr_clue_slot"></div>
+      <div id="clue_slot_2" class="ltdr_clue_slot"></div>
+      <div id="clue_slot_3" class="ltdr_clue_slot"></div>
+    </div>
     <div id="discardcontainer" class="ltdr_deckcontainer">
       <h1>{DISCARDPILE}</h1>
       <div id="cluediscard"></div>
@@ -50,7 +51,6 @@
         </div>
       </div>
     </div>
-    <!-- <div id="tableau_s"></div> -->
   </div>
  
 </div>
