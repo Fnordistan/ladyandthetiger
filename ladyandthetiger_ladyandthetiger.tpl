@@ -35,10 +35,12 @@
       <div id="clue_slot_2" class="ltdr_clue_slot"></div>
       <div id="clue_slot_3" class="ltdr_clue_slot"></div>
     </div>
-    <div id="discardcontainer" class="ltdr_deckcontainer">
-      <h1>{DISCARDPILE}</h1>
-      <div id="cluediscard"></div>
-    </div>
+      <div id="discardcontainer">
+        <div id="discardpile" class="ltdr_deckcontainer">
+          <h1>{DISCARDPILE}</h1>
+          <div id="cluediscard"></div>
+        </div>
+      </div>
   </div>
 
   <div id="player_south" class="ltdr_display whiteblock">

@@ -347,7 +347,7 @@
 
 #center_display {
   display: grid;
-  grid-template-columns: minmax(min-content, max-content) fit-content minmax(min-content, max-content);
+  grid-template-columns: minmax(min-content, max-content) minmax(min-content, max-content) auto;
   align-items:center;
   column-gap: 5px;
   width: 100%;
@@ -359,6 +359,7 @@
   align-self: flex-start;
 }
 
+/* default - four cards across */
 #cluecontainer {
   grid-column: 2/3;
   display: flex;
@@ -367,27 +368,43 @@
   justify-content: flex-start;
   align-items: flex-end;
   align-content: flex-start;
+  width: calc(var(--cluecardwidth)*4);
   height: 100%;
 }
 
 #discardcontainer {
   grid-column: 3/4;
   align-self: flex-start;
+}
+
+#discardpile {
   border: 6px;
   border-style: solid;
   border-image: linear-gradient(145deg, red, blue) 1;
   margin: 5px;
 }
 
-@media only screen and (max-width: 1400px) {
-  #center_display {
-    grid-template-columns: minmax(min-content, max-content) minmax(456px, fit-content);
-    grid-template-rows: repeat(2, max-content);
+/* cluedisplay 3 card width, discard to right */
+@media only screen and (max-width: 1900px) {
+  #cluecontainer {
+    width: calc(var(--cluecardwidth)*3);
   }
+}
+
+/* cluedisplay 2 card width, discard pile to right */
+@media only screen and (max-width: 1690px) {
+  #cluecontainer {
+    width: calc(var(--cluecardwidth)*2);
+  }
+}
+
+/* cluedisplay 2 card width, discard pile to left */
+@media only screen and (max-width: 1450px) {
 
   #cluecontainer {
     grid-row: 1/3;
     grid-column: 2/3;
+    width: calc(var(--cluecardwidth)*2);
   }
   
   #discardcontainer {

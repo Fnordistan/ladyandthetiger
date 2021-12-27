@@ -107,6 +107,10 @@ function (dojo, declare) {
             const discards = this.gamedatas.discards;
             this.setupDiscard(discards);
             this.setupNotifications();
+            // window.addEventListener("resize", () => {
+            //     console.log("window: " + window.innerWidth);
+            //     console.log("cluecontainer: " + $('cluecontainer').offsetWidth);
+            // })
         },
 
         /**
@@ -244,7 +248,7 @@ function (dojo, declare) {
          * @param {Object} discards
          */
         setupDiscard: function(discards) {
-            const discard = document.getElementById('cluediscard');
+            const discard = $('cluediscard');
             while (discard.firstChild) {
                 discard.firstChild.remove();
             }
@@ -255,15 +259,15 @@ function (dojo, declare) {
             }
             this.decorateDiscardPile(Object.keys(discards).length);
             var discarded = document.getElementsByClassName('ltdr_discard');
-            const discardcontainer = document.getElementById('discardcontainer');
-            discardcontainer.addEventListener('click', () => {
+            const discardpile = $('discardpile');
+            discardpile.addEventListener('click', () => {
                 this.spread = this.spread ? false : true;
                 this.spreadCardsDiagonally(discarded, this.spread);
             });
-            discardcontainer.addEventListener('mouseenter', () => {
+            discardpile.addEventListener('mouseenter', () => {
                 this.spreadCardsDiagonally(discarded, true);
             });
-            discardcontainer.addEventListener('mouseleave', () => {
+            discardpile.addEventListener('mouseleave', () => {
                 this.spreadCardsDiagonally(discarded, false);
             });
         },
