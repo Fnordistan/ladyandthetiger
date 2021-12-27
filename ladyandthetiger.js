@@ -520,6 +520,15 @@ function (dojo, declare) {
                             args.card_type = this.spanRedBlue(args.card_type, 0);
                         }
                     }
+                    if (args.score) {
+                        let gems = parseInt(args.score);
+                        let gemshtml = " ";
+                        const gem = '&#128142;';
+                        for (let g = 0; g < gems; g++) {
+                            gemshtml += gem;
+                        }
+                        log += gemshtml;
+                    }
                 }
             } catch (e) {
                 console.error(log, args, "Exception thrown", e.stack);
